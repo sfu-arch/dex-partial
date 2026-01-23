@@ -1,4 +1,6 @@
 #include "Rdma.h"
+#include <errno.h>
+#include <string.h>
 
 bool createContext(RdmaContext *context, uint8_t port, int gidIndex,
                    uint8_t devIndex) {
@@ -132,7 +134,8 @@ ibv_mr *createMemoryRegion(uint64_t mm, uint64_t mmSize, RdmaContext *ctx) {
                       IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_REMOTE_ATOMIC);
 
   if (!mr) {
-    Debug::notifyError("Memory registration failed");
+    Debug::notifyError("Memory registration failed: addr=%p, size=%lu MB, errno=%d (%s)", 
+                       (void*)mm, mmSize / (1024*1024), errno, strerror(errno));
   }
 
   return mr;
