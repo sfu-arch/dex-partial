@@ -1,599 +1,715 @@
-# DEX vs CHIME: Disaggregated Memory B+-Tree Comparison
+# DEX vs CHIME: Disaggregated Memory B+-Tree Systems
 
-This repository contains modified versions of **DEX** and **CHIME** for comparative evaluation of disaggregated memory index structures.
+This repository contains modified versions of **DEX** and **CHIME** - two disaggregated memory B+-tree implementations that use RDMA for remote memory access.
 
 ---
 
 ## 📋 Table of Contents
 
-1. [Overview](#overview)
-2. [Architecture Comparison](#architecture-comparison)
-3. [Changes Made](#changes-made)
-4. [System Requirements](#system-requirements)
-5. [Build Instructions](#build-instructions)
-6. [Running Experiments](#running-experiments)
-7. [Configuration Reference](#configuration-reference)
+1. [What is RDMA and Disaggregated Memory?](#what-is-rdma-and-disaggregated-memory)
+2. [How DEX Works](#how-dex-works)
+3. [How CHIME Works](#how-chime-works)
+4. [The RDMA Compatibility Problem](#the-rdma-compatibility-problem)
+5. [My RDMA Wrapper Solution](#my-rdma-wrapper-solution)
+6. [All Implementation Changes](#all-implementation-changes)
+7. [Build and Run Instructions](#build-and-run-instructions)
 8. [Troubleshooting](#troubleshooting)
 
 ---
 
-## 🔍 Overview
+## 🔌 What is RDMA and Disaggregated Memory?
 
-### What is Disaggregated Memory?
+### RDMA (Remote Direct Memory Access)
+
+RDMA allows one computer to directly read/write memory on another computer **without involving the remote CPU**. This is extremely fast because:
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    DISAGGREGATED MEMORY ARCHITECTURE                │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   ┌─────────────┐         RDMA Network         ┌─────────────┐     │
-│   │   Compute   │◄──────────────────────────►  │   Memory    │     │
-│   │    Node     │      (InfiniBand/RoCE)       │    Node     │     │
-│   │             │                              │             │     │
-│   │  ┌───────┐  │                              │  ┌───────┐  │     │
-│   │  │ CPU   │  │   One-sided RDMA Read/Write  │  │ B+Tree│  │     │
-│   │  │ Cache │  │◄────────────────────────────►│  │ Data  │  │     │
-│   │  └───────┘  │      (No remote CPU)         │  └───────┘  │     │
-│   └─────────────┘                              └─────────────┘     │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    TRADITIONAL NETWORK vs RDMA                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   TRADITIONAL (TCP/IP):                                                     │
+│   ┌──────────┐         ┌──────────┐         ┌──────────┐                   │
+│   │  App     │ ──────► │  Kernel  │ ──────► │   NIC    │ ─────────┐        │
+│   │  (CPU)   │         │  (CPU)   │         │          │          │        │
+│   └──────────┘         └──────────┘         └──────────┘          │        │
+│                                                                    │        │
+│                                             Network                │        │
+│                                                                    ▼        │
+│   ┌──────────┐         ┌──────────┐         ┌──────────┐                   │
+│   │  App     │ ◄────── │  Kernel  │ ◄────── │   NIC    │                   │
+│   │  (CPU)   │         │  (CPU)   │         │          │                   │
+│   └──────────┘         └──────────┘         └──────────┘                   │
+│   ❌ Multiple CPU copies, high latency (~100μs)                            │
+│                                                                             │
+│   RDMA (ONE-SIDED):                                                         │
+│   ┌──────────┐                              ┌──────────┐                   │
+│   │  App     │ ─────────────────────────────│   NIC    │ ─────────┐        │
+│   │  Posts   │      (bypass kernel)         │          │          │        │
+│   │  WR      │                              └──────────┘          │        │
+│   └──────────┘                                                    │        │
+│                                             Network                │        │
+│                                                                    ▼        │
+│   ┌──────────┐                              ┌──────────┐                   │
+│   │  Memory  │ ◄────────────────────────────│   NIC    │                   │
+│   │  (Data)  │    (CPU not involved!)       │          │                   │
+│   └──────────┘                              └──────────┘                   │
+│   ✅ Zero CPU copies, low latency (~1-2μs)                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### DEX (Scalable Range Indexing)
-- **Paper**: "DEX: Scalable Range Indexing on Disaggregated Memory"
-- **Key Innovation**: Path-aware RadixCache with unswizzling
-- **Cache Strategy**: Prefix-based caching
+### Key RDMA Operations
 
-### CHIME (Disaggregated B+-Tree)
-- **Paper**: "CHIME: A Cache-Efficient and High-Performance Hybrid Index on Disaggregated Memory"
-- **Key Innovation**: Hopscotch hashing leaves, bitmap locks, speculative reads
-- **Cache Strategy**: Range-based TreeCache
+| Operation | What it does | CPU Involvement |
+|-----------|--------------|-----------------|
+| `RDMA READ` | Read remote memory into local buffer | Only local CPU |
+| `RDMA WRITE` | Write local buffer to remote memory | Only local CPU |
+| `RDMA CAS` | Atomic Compare-And-Swap on remote memory | Only local CPU |
+| `RDMA FAA` | Atomic Fetch-And-Add on remote memory | Only local CPU |
+
+### Disaggregated Memory Architecture
+
+In disaggregated memory, **compute nodes** (CPUs) are separated from **memory nodes** (RAM). They communicate via RDMA:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    DISAGGREGATED MEMORY ARCHITECTURE                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   COMPUTE NODE (runs queries)           MEMORY NODE (stores B+-tree)       │
+│   ┌───────────────────────┐            ┌───────────────────────┐           │
+│   │                       │            │                       │           │
+│   │  ┌─────────────────┐  │   RDMA     │  ┌─────────────────┐  │           │
+│   │  │  Application    │  │   READ     │  │   Root Node     │  │           │
+│   │  │  Thread         │──┼───────────►│  │   [keys|ptrs]   │  │           │
+│   │  └─────────────────┘  │            │  └────────┬────────┘  │           │
+│   │          │            │            │           │           │           │
+│   │  ┌───────▼─────────┐  │            │  ┌────────▼────────┐  │           │
+│   │  │  Local Cache    │  │   RDMA     │  │ Internal Nodes  │  │           │
+│   │  │  (hot nodes)    │  │   READ     │  │   [keys|ptrs]   │  │           │
+│   │  └─────────────────┘  │◄───────────│  └────────┬────────┘  │           │
+│   │          │            │            │           │           │           │
+│   │  ┌───────▼─────────┐  │            │  ┌────────▼────────┐  │           │
+│   │  │  RDMA Buffer    │  │   RDMA     │  │  Leaf Nodes     │  │           │
+│   │  │  (registered)   │  │   WRITE    │  │  [key|value]... │  │           │
+│   │  └─────────────────┘  │───────────►│  └─────────────────┘  │           │
+│   │                       │            │                       │           │
+│   └───────────────────────┘            └───────────────────────┘           │
+│                                                                             │
+│   Memory Pool: 8 GB (registered with RDMA NIC)                             │
+│   RDMA Buffer: 1 GB (for read/write operations)                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 🏗️ Architecture Comparison
+## 🔷 How DEX Works
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         DEX ARCHITECTURE                            │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   Compute Node                         Memory Node                  │
-│   ┌─────────────────────┐              ┌─────────────────────┐     │
-│   │                     │              │                     │     │
-│   │  ┌───────────────┐  │    RDMA      │  ┌───────────────┐  │     │
-│   │  │  RadixCache   │  │◄────────────►│  │   B+-Tree     │  │     │
-│   │  │  (Prefix-     │  │              │  │   (Standard   │  │     │
-│   │  │   based)      │  │              │  │    Leaves)    │  │     │
-│   │  └───────────────┘  │              │  └───────────────┘  │     │
-│   │         │           │              │                     │     │
-│   │  ┌──────▼────────┐  │              │                     │     │
-│   │  │  Unswizzling  │  │              │                     │     │
-│   │  │  (Pointer     │  │              │                     │     │
-│   │  │   Translation)│  │              │                     │     │
-│   │  └───────────────┘  │              │                     │     │
-│   │                     │              │                     │     │
-│   └─────────────────────┘              └─────────────────────┘     │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+### DEX Overview
 
-┌─────────────────────────────────────────────────────────────────────┐
-│                        CHIME ARCHITECTURE                           │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   Compute Node                         Memory Node                  │
-│   ┌─────────────────────┐              ┌─────────────────────┐     │
-│   │                     │              │                     │     │
-│   │  ┌───────────────┐  │    RDMA      │  ┌───────────────┐  │     │
-│   │  │  TreeCache    │  │◄────────────►│  │   B+-Tree     │  │     │
-│   │  │  (Range-      │  │              │  │   (Hopscotch  │  │     │
-│   │  │   based)      │  │              │  │    Leaves)    │  │     │
-│   │  └───────────────┘  │              │  └───────────────┘  │     │
-│   │         │           │              │         │           │     │
-│   │  ┌──────▼────────┐  │              │  ┌──────▼────────┐  │     │
-│   │  │  IdxCache     │  │              │  │  Bitmap Locks │  │     │
-│   │  │  (Speculative │  │              │  │  (Vacancy-    │  │     │
-│   │  │   Read)       │  │              │  │   aware)      │  │     │
-│   │  └───────────────┘  │              │  └───────────────┘  │     │
-│   │         │           │              │                     │     │
-│   │  ┌──────▼────────┐  │              │                     │     │
-│   │  │Write Combining│  │              │                     │     │
-│   │  │Read Delegation│  │              │                     │     │
-│   │  └───────────────┘  │              │                     │     │
-│   │                     │              │                     │     │
-│   └─────────────────────┘              └─────────────────────┘     │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+DEX is a disaggregated B+-tree that uses **standard RDMA verbs** (`ibv_*` functions from `libibverbs`).
+
+### DEX RDMA Implementation
+
+DEX uses the standard RDMA API directly. Here's what happens in `dex/src/rdma/`:
+
+```cpp
+// dex/include/Rdma.h - Standard RDMA includes
+#include <infiniband/verbs.h>  // Standard libibverbs
+
+// dex/src/rdma/Resource.cpp - Memory Registration
+ibv_mr *createMemoryRegion(uint64_t mm, uint64_t mmSize, RdmaContext *ctx) {
+    // Register memory with RDMA NIC so it can be accessed remotely
+    return ibv_reg_mr(ctx->pd, (void *)mm, mmSize,
+                      IBV_ACCESS_LOCAL_WRITE |      // Local CPU can write
+                      IBV_ACCESS_REMOTE_READ |      // Remote can RDMA READ
+                      IBV_ACCESS_REMOTE_WRITE |     // Remote can RDMA WRITE
+                      IBV_ACCESS_REMOTE_ATOMIC);    // Remote can do CAS/FAA
+}
+
+// dex/src/rdma/Operation.cpp - RDMA Operations
+bool rdmaRead(ibv_qp *qp, uint64_t source, uint64_t dest, 
+              uint64_t size, uint32_t lkey, uint32_t remoteRKey) {
+    struct ibv_send_wr wr;
+    wr.opcode = IBV_WR_RDMA_READ;           // One-sided read
+    wr.wr.rdma.remote_addr = dest;          // Remote memory address
+    wr.wr.rdma.rkey = remoteRKey;           // Remote memory key
+    return ibv_post_send(qp, &wr, &wrBad);  // Post to queue
+}
 ```
 
-### Feature Comparison Table
+### DEX Data Flow
 
-| Feature | DEX | CHIME |
-|---------|-----|-------|
-| **Cache Type** | RadixCache (prefix-based) | TreeCache (range-based) |
-| **Leaf Structure** | Standard B+-tree | Hopscotch hashing |
-| **Lock Mechanism** | Standard RDMA locks | Bitmap with vacancy awareness |
-| **Pointer Handling** | Unswizzling | Direct addressing |
-| **Speculative Read** | ❌ | ✅ (IdxCache) |
-| **Write Combining** | ❌ | ✅ |
-| **Read Delegation** | ❌ | ✅ |
-| **RDMA Transport** | RC (Reliable Connection) | DC/RC (Dynamic/Reliable) |
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         DEX SEARCH OPERATION                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   Step 1: Check IndexCache (local)                                         │
+│   ┌─────────────────────────────────────────────────────────────────┐      │
+│   │  IndexCache (SkipList-based)                                    │      │
+│   │  ┌─────────┐   ┌─────────┐   ┌─────────┐                       │      │
+│   │  │[10,50)  │──►│[50,100) │──►│[100,200)│  (cached internal     │      │
+│   │  │ ptr=A   │   │ ptr=B   │   │ ptr=C   │   nodes by range)     │      │
+│   │  └─────────┘   └─────────┘   └─────────┘                       │      │
+│   └─────────────────────────────────────────────────────────────────┘      │
+│           │ Cache HIT: skip to leaf                                        │
+│           │ Cache MISS: traverse from root                                 │
+│           ▼                                                                │
+│   Step 2: RDMA READ remote node                                            │
+│   ┌─────────────────────────────────────────────────────────────────┐      │
+│   │  ibv_post_send(qp, RDMA_READ, remote_addr, size)                │      │
+│   │       │                                                          │      │
+│   │       ▼                                                          │      │
+│   │  NIC fetches data directly from remote memory                   │      │
+│   │       │                                                          │      │
+│   │       ▼                                                          │      │
+│   │  ibv_poll_cq() - wait for completion                            │      │
+│   └─────────────────────────────────────────────────────────────────┘      │
+│           │                                                                │
+│           ▼                                                                │
+│   Step 3: Process node, find next pointer, repeat until leaf               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### DEX Key Files
+
+| File | Purpose |
+|------|---------|
+| `dex/include/Rdma.h` | RDMA type definitions, function declarations |
+| `dex/src/rdma/Resource.cpp` | `createContext()`, `createMemoryRegion()`, `createQueuePair()` |
+| `dex/src/rdma/Operation.cpp` | `rdmaRead()`, `rdmaWrite()`, `rdmaCas()`, `rdmaFaa()` |
+| `dex/src/rdma/StateTrans.cpp` | QP state transitions (INIT→RTR→RTS) |
+| `dex/include/IndexCache.h` | SkipList cache for internal nodes |
 
 ---
 
-## 🔧 Changes Made
+## 🔶 How CHIME Works
 
-### 1. RDMA Compatibility Layer (CHIME)
+### CHIME Overview
 
-**Problem**: CHIME requires MLNX_OFED experimental verbs (`ibv_exp_*`) which are not available on all systems.
+CHIME is a more advanced disaggregated B+-tree that uses **Mellanox experimental RDMA verbs** (`ibv_exp_*` functions). These provide:
 
-**Solution**: Created `CHIME/include/RdmaCompat.h` - a compatibility layer that:
+1. **DC (Dynamically Connected) Transport** - More scalable than RC
+2. **Device Memory** - On-NIC memory for ultra-low latency
+3. **Masked Atomics** - Partial word atomic operations
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    RDMA COMPATIBILITY LAYER                         │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   ┌─────────────────┐                    ┌─────────────────┐       │
-│   │  Application    │                    │  Application    │       │
-│   │  (CHIME Code)   │                    │  (CHIME Code)   │       │
-│   └────────┬────────┘                    └────────┬────────┘       │
-│            │                                      │                 │
-│            ▼                                      ▼                 │
-│   ┌─────────────────┐                    ┌─────────────────┐       │
-│   │ ibv_exp_* calls │                    │ ibv_exp_* calls │       │
-│   │ (experimental)  │                    │ (experimental)  │       │
-│   └────────┬────────┘                    └────────┬────────┘       │
-│            │                                      │                 │
-│            ▼                                      ▼                 │
-│   ┌─────────────────┐                    ┌─────────────────┐       │
-│   │   MLNX_OFED     │                    │  RdmaCompat.h   │       │
-│   │   (Required)    │                    │  (Wrapper)      │       │
-│   └────────┬────────┘                    └────────┬────────┘       │
-│            │                                      │                 │
-│            ▼                                      ▼                 │
-│   ┌─────────────────┐                    ┌─────────────────┐       │
-│   │  DC Transport   │                    │  RC Transport   │       │
-│   │  Device Memory  │                    │  Host Memory    │       │
-│   │  Masked Atomics │                    │  Std Atomics    │       │
-│   └─────────────────┘                    └─────────────────┘       │
-│                                                                     │
-│        WITH MLNX_OFED                      WITHOUT MLNX_OFED       │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+### CHIME's Original RDMA Requirements
+
+```cpp
+// CHIME originally required these MLNX_OFED experimental APIs:
+#include <infiniband/verbs_exp.h>  // Only in Mellanox OFED!
+
+// DC Transport (Dynamically Connected)
+ibv_exp_dct *dct;                           // DC Target
+ibv_exp_create_dct(ctx, &dct_attr);         // Create DCT
+qp_type = IBV_EXP_QPT_DC_INI;               // DC Initiator QP
+
+// Device Memory (on-chip NIC memory)
+ibv_exp_dm *dm = ibv_exp_alloc_dm(ctx, &dm_attr);
+ibv_exp_reg_mr(&mr_in);                     // Register DM
+
+// Masked Atomics (partial word CAS)
+wr.exp_opcode = IBV_EXP_WR_EXT_MASKED_ATOMIC_CMP_AND_SWP;
+wr.ext_op.masked_atomics.wr_data.inline_data.op.cmp_swap.compare_mask = 0xFF;
 ```
 
-**Files Changed**:
-- `CHIME/include/RdmaCompat.h` - NEW: Compatibility wrapper (500+ lines)
-- `CHIME/include/Rdma.h` - Added include for RdmaCompat.h
-- `CHIME/CMakeLists.txt` - Auto-detection of RDMA driver
-- `CHIME/src/rdma/StateTrans.cpp` - Wrapped DC-specific code with `#if USE_DC_TRANSPORT`
-
-### 2. Memory Configuration Reduction
-
-**Problem**: Servers have limited memlock (8MB - 48GB) and kernel keys limits (200).
-
-**Solution**: Reduced memory footprint for both systems.
+### CHIME Data Structures
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    MEMORY CONFIGURATION                             │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   ORIGINAL CONFIG:                      REDUCED CONFIG:             │
-│                                                                     │
-│   DEX:                                  DEX:                        │
-│   ├── dsmSize: 64 GB                    ├── dsmSize: 8 GB           │
-│   └── rdmaBufferSize: 2 GB              └── rdmaBufferSize: 1 GB    │
-│   Total: 66 GB                          Total: 9 GB                 │
-│                                                                     │
-│   CHIME:                                CHIME:                      │
-│   ├── dsmSize: 64 GB                    ├── dsmSize: 8 GB           │
-│   └── rdmaBufferSize: 4 GB              └── rdmaBufferSize: 1 GB    │
-│   Total: 68 GB                          Total: 9 GB                 │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CHIME LEAF NODE (Hopscotch Hashing)                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   Traditional B+-tree leaf:        CHIME Hopscotch leaf:                   │
+│   ┌───┬───┬───┬───┬───┐            ┌───┬───────┬───┬───────┐              │
+│   │K1 │K2 │K3 │K4 │K5 │            │K  │bitmap │K  │bitmap │              │
+│   ├───┼───┼───┼───┼───┤            ├───┼───────┼───┼───────┤              │
+│   │V1 │V2 │V3 │V4 │V5 │            │V  │       │V  │       │              │
+│   └───┴───┴───┴───┴───┘            └───┴───────┴───┴───────┘              │
+│   (sorted, binary search)          (hash-based, O(1) lookup)              │
+│                                                                             │
+│   LeafEntry structure (CHIME/include/LeafNode.h):                          │
+│   ┌─────────────────────────────────────────────────────────────────┐      │
+│   │  struct LeafEntry {                                             │      │
+│   │    PackedVersion h_version;    // Version for consistency       │      │
+│   │    uint16_t hop_bitmap;        // Hopscotch neighborhood bits   │      │
+│   │    Key key;                    // 8-byte key                    │      │
+│   │    Value value;                // 8-byte value                  │      │
+│   │  };                                                             │      │
+│   └─────────────────────────────────────────────────────────────────┘      │
+│                                                                             │
+│   hop_bitmap example (neighborhood size = 8):                              │
+│   Entry at slot 5 has bitmap = 10110000                                    │
+│   Meaning: keys hashing to slot 5 are at slots 5, 6, 8                     │
+│   (relative positions where bit=1)                                         │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Files Changed**:
-- `CHIME/include/Common.h`:
-  - `dsmSize`: 64 → 8 GB
-  - `rdmaBufferSize`: 4 → 1 GB
-  - `MAX_APP_THREAD`: 65 → 17 (to stay under kernel keys limit)
-- `dex/include/Common.h`:
-  - `dsmSize`: 64 → 8 GB
-  - `rdmaBufferSize`: 2 → 1 GB
-
-### 3. Huge Page Fallback
-
-**Problem**: Huge pages may not be available or properly configured.
-
-**Solution**: Added fallback to regular pages with detailed error reporting.
+### CHIME Cache System (TreeCache)
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    MEMORY ALLOCATION FLOW                           │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│                    hugePageAlloc(size)                              │
-│                           │                                         │
-│                           ▼                                         │
-│                  ┌────────────────┐                                │
-│                  │ Try MAP_HUGETLB │                                │
-│                  │ (2MB pages)     │                                │
-│                  └────────┬───────┘                                │
-│                           │                                         │
-│              ┌────────────┴────────────┐                           │
-│              │                         │                            │
-│         SUCCESS                    FAILED                          │
-│              │                         │                            │
-│              ▼                         ▼                            │
-│    ┌─────────────────┐      ┌─────────────────┐                    │
-│    │ Return huge     │      │ Try regular     │                    │
-│    │ page memory     │      │ pages + POPULATE│                    │
-│    └─────────────────┘      └────────┬────────┘                    │
-│                                      │                              │
-│                         ┌────────────┴────────────┐                │
-│                         │                         │                 │
-│                    SUCCESS                    FAILED               │
-│                         │                         │                 │
-│                         ▼                         ▼                 │
-│              ┌─────────────────┐      ┌─────────────────┐          │
-│              │ Return regular  │      │ Print error     │          │
-│              │ page memory     │      │ Return nullptr  │          │
-│              └─────────────────┘      └─────────────────┘          │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         CHIME CACHE ARCHITECTURE                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   TreeCache (range-based, CHIME/include/TreeCache.h):                      │
+│   ┌─────────────────────────────────────────────────────────────────┐      │
+│   │  InlineSkipList<TreeCacheEntry>                                 │      │
+│   │                                                                  │      │
+│   │  TreeCacheEntry {                                               │      │
+│   │    Key from, to;           // Key range [from, to)              │      │
+│   │    InternalNode* ptr;      // Cached node content               │      │
+│   │    uint64_t cache_entry_freq;  // Access frequency for eviction │      │
+│   │  }                                                              │      │
+│   │                                                                  │      │
+│   │  Operations:                                                    │      │
+│   │  - search_from_cache(key) → find entry covering key range       │      │
+│   │  - add_to_cache(node) → cache with [lowest, highest) range     │      │
+│   │  - invalidate(entry) → remove stale entry                      │      │
+│   └─────────────────────────────────────────────────────────────────┘      │
+│                                                                             │
+│   IdxCache (speculative read optimization):                                │
+│   ┌─────────────────────────────────────────────────────────────────┐      │
+│   │  Caches leaf location predictions                               │      │
+│   │  On search: speculatively read leaf while traversing            │      │
+│   │  If prediction correct: save one RDMA round trip                │      │
+│   └─────────────────────────────────────────────────────────────────┘      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
-
-**Files Changed**:
-- `CHIME/include/HugePageAlloc.h` - Added fallback + diagnostics
-- `dex/include/HugePageAlloc.h` - Added fallback + diagnostics
-
-### 4. Enhanced Error Reporting
-
-**Problem**: RDMA memory registration failures were silent.
-
-**Solution**: Added detailed error messages with errno interpretation.
-
-**Files Changed**:
-- `CHIME/src/rdma/Resource.cpp` - Added errno reporting for ibv_reg_mr failures
 
 ---
 
-## 💻 System Requirements
+## ⚠️ The RDMA Compatibility Problem
 
-### Hardware
-- InfiniBand or RoCE capable NICs (Mellanox ConnectX-5 recommended)
-- Minimum 16GB RAM per node (32GB+ recommended)
+### The Problem
 
-### Software
-- Linux Kernel 4.x+ (tested with 6.3.2)
-- RDMA drivers (rdma-core or MLNX_OFED)
-- GCC 9+ with C++17 support
-- CMake 3.10+
-- memcached (for node coordination)
-- Libraries: boost, cityhash, libnuma, libibverbs
+CHIME was written for **Mellanox OFED** (MLNX_OFED) which provides experimental RDMA extensions. Standard Linux systems only have **rdma-core** which doesn't include these:
 
-### System Limits
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    RDMA DRIVER COMPARISON                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   MLNX_OFED (Mellanox proprietary):    rdma-core (standard Linux):         │
+│   ┌─────────────────────────────┐      ┌─────────────────────────────┐     │
+│   │ #include <verbs.h>          │      │ #include <verbs.h>          │     │
+│   │ #include <verbs_exp.h>  ✓   │      │ // verbs_exp.h NOT FOUND ✗  │     │
+│   │                             │      │                             │     │
+│   │ ibv_create_qp()         ✓   │      │ ibv_create_qp()         ✓   │     │
+│   │ ibv_exp_create_qp()     ✓   │      │ ibv_exp_create_qp()     ✗   │     │
+│   │ ibv_exp_create_dct()    ✓   │      │ ibv_exp_create_dct()    ✗   │     │
+│   │ ibv_exp_alloc_dm()      ✓   │      │ ibv_exp_alloc_dm()      ✗   │     │
+│   │ IBV_EXP_QPT_DC_INI      ✓   │      │ IBV_EXP_QPT_DC_INI      ✗   │     │
+│   └─────────────────────────────┘      └─────────────────────────────┘     │
+│                                                                             │
+│   CHIME needs ibv_exp_* functions which don't exist in rdma-core!          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
-Check your limits before running:
+### Build Errors Without My Wrapper
+
+Without the compatibility layer, CHIME fails to compile:
+
+```
+error: 'ibv_exp_dct' was not declared in this scope
+error: 'IBV_EXP_QPT_DC_INI' was not declared in this scope
+error: 'ibv_exp_send_wr' was not declared in this scope
+error: 'ibv_exp_create_dct' was not declared in this scope
+error: 'ibv_exp_alloc_dm' was not declared in this scope
+```
+
+---
+
+## 🔧 My RDMA Wrapper Solution
+
+### What the Wrapper Does
+
+I created `CHIME/include/RdmaCompat.h` (570+ lines) that provides:
+
+1. **Stub structures** for experimental types (`ibv_exp_dct`, `ibv_exp_send_wr`, etc.)
+2. **Wrapper functions** that convert experimental API calls to standard ones
+3. **Automatic fallback** from DC transport to RC transport
+4. **Device memory emulation** using regular host memory
+
+### How the Wrapper Works
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    RDMACOMPAT.H WRAPPER ARCHITECTURE                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   Compile-Time Detection:                                                   │
+│   ┌─────────────────────────────────────────────────────────────────┐      │
+│   │  #if __has_include(<infiniband/verbs_exp.h>)                    │      │
+│   │    #define HAS_EXP_VERBS 1    // MLNX_OFED present              │      │
+│   │    #include <infiniband/verbs_exp.h>                            │      │
+│   │    #define USE_DC_TRANSPORT 1                                   │      │
+│   │    #define USE_DEVICE_MEMORY 1                                  │      │
+│   │  #else                                                          │      │
+│   │    #define HAS_EXP_VERBS 0    // rdma-core only                 │      │
+│   │    #define USE_DC_TRANSPORT 0                                   │      │
+│   │    #define USE_DEVICE_MEMORY 0                                  │      │
+│   │    // ... provide stub definitions ...                          │      │
+│   │  #endif                                                         │      │
+│   └─────────────────────────────────────────────────────────────────┘      │
+│                                                                             │
+│   When HAS_EXP_VERBS = 0, we provide:                                      │
+│                                                                             │
+│   1. STUB STRUCTURES:                                                       │
+│   ┌─────────────────────────────────────────────────────────────────┐      │
+│   │  struct ibv_exp_dct {           // DC Target stub               │      │
+│   │    uint32_t dct_num;            // Fake DCT number              │      │
+│   │    void* context;                                               │      │
+│   │  };                                                             │      │
+│   │                                                                  │      │
+│   │  struct ibv_exp_send_wr {       // Extended send WR stub        │      │
+│   │    uint64_t wr_id;                                              │      │
+│   │    struct ibv_exp_send_wr* next;                                │      │
+│   │    struct ibv_sge* sg_list;                                     │      │
+│   │    int num_sge;                                                 │      │
+│   │    enum ibv_wr_opcode exp_opcode;                               │      │
+│   │    int exp_send_flags;                                          │      │
+│   │    // ... extended fields for masked atomics, DC ...            │      │
+│   │  };                                                             │      │
+│   │                                                                  │      │
+│   │  struct ibv_exp_dm {            // Device memory stub           │      │
+│   │    void* dm_ptr;                // Points to regular malloc     │      │
+│   │    size_t length;                                               │      │
+│   │  };                                                             │      │
+│   └─────────────────────────────────────────────────────────────────┘      │
+│                                                                             │
+│   2. WRAPPER FUNCTIONS:                                                     │
+│   ┌─────────────────────────────────────────────────────────────────┐      │
+│   │  // DC QP creation → falls back to RC QP                        │      │
+│   │  struct ibv_qp* compat_create_qp(ctx, exp_attr) {               │      │
+│   │    struct ibv_qp_init_attr attr;                                │      │
+│   │    // Convert exp_attr to standard attr                         │      │
+│   │    if (attr.qp_type == IBV_EXP_QPT_DC_INI)                      │      │
+│   │      attr.qp_type = IBV_QPT_RC;  // Use RC instead of DC        │      │
+│   │    return ibv_create_qp(exp_attr->pd, &attr);                   │      │
+│   │  }                                                              │      │
+│   │                                                                  │      │
+│   │  // Device memory → falls back to malloc                        │      │
+│   │  struct ibv_exp_dm* compat_alloc_dm(ctx, attr) {                │      │
+│   │    dm->dm_ptr = aligned_alloc(64, attr->length);                │      │
+│   │    return dm;                                                   │      │
+│   │  }                                                              │      │
+│   │                                                                  │      │
+│   │  // Masked atomics → falls back to standard CAS/FAA             │      │
+│   │  int compat_exp_post_send(qp, wr, bad_wr) {                     │      │
+│   │    switch (wr->exp_opcode) {                                    │      │
+│   │      case IBV_EXP_WR_EXT_MASKED_ATOMIC_CMP_AND_SWP:             │      │
+│   │        std_wr.opcode = IBV_WR_ATOMIC_CMP_AND_SWP;               │      │
+│   │        // (ignores mask, uses full 64-bit CAS)                  │      │
+│   │        break;                                                   │      │
+│   │    }                                                            │      │
+│   │    return ibv_post_send(qp, &std_wr, &std_bad_wr);              │      │
+│   │  }                                                              │      │
+│   └─────────────────────────────────────────────────────────────────┘      │
+│                                                                             │
+│   3. MACRO MAPPINGS:                                                        │
+│   ┌─────────────────────────────────────────────────────────────────┐      │
+│   │  #define ibv_exp_create_qp(ctx, attr)  compat_create_qp(ctx, attr)    │
+│   │  #define ibv_exp_create_dct(ctx, attr) compat_create_dct(ctx, attr)   │
+│   │  #define ibv_exp_alloc_dm(ctx, attr)   compat_alloc_dm(ctx, attr)     │
+│   │  #define ibv_exp_post_send(qp, wr, b)  compat_exp_post_send(qp, wr, b)│
+│   │  #define IBV_EXP_QPT_DC_INI            IBV_QPT_RC  // DC→RC           │
+│   └─────────────────────────────────────────────────────────────────┘      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Transport Fallback: DC → RC
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    DC vs RC TRANSPORT                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   DC (Dynamically Connected) - Original CHIME:                             │
+│   ┌─────────────────┐                                                       │
+│   │  Compute Node   │                                                       │
+│   │  ┌───────────┐  │       One QP connects to ANY remote DCT              │
+│   │  │   QP      │──┼──────► Memory Node 1 (DCT)                           │
+│   │  │ (DC_INI)  │──┼──────► Memory Node 2 (DCT)                           │
+│   │  │           │──┼──────► Memory Node 3 (DCT)                           │
+│   │  └───────────┘  │       (fewer resources, more scalable)               │
+│   └─────────────────┘                                                       │
+│                                                                             │
+│   RC (Reliably Connected) - Fallback:                                      │
+│   ┌─────────────────┐                                                       │
+│   │  Compute Node   │                                                       │
+│   │  ┌───────────┐  │       Each QP connects to ONE remote QP              │
+│   │  │   QP 1    │──┼──────► Memory Node 1 (QP)                            │
+│   │  │   QP 2    │──┼──────► Memory Node 2 (QP)                            │
+│   │  │   QP 3    │──┼──────► Memory Node 3 (QP)                            │
+│   │  └───────────┘  │       (more resources, but works everywhere)         │
+│   └─────────────────┘                                                       │
+│                                                                             │
+│   My wrapper: When CHIME creates IBV_EXP_QPT_DC_INI, I substitute          │
+│   IBV_QPT_RC so it still works without MLNX_OFED                           │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📝 All Implementation Changes
+
+### Changes to CHIME
+
+#### 1. New File: `CHIME/include/RdmaCompat.h` (570 lines)
+
+**Purpose**: RDMA compatibility layer enabling CHIME to run without MLNX_OFED
+
+**Key Components**:
+
+```cpp
+// Feature Detection
+#if __has_include(<infiniband/verbs_exp.h>)
+  #define HAS_EXP_VERBS 1
+  #include <infiniband/verbs_exp.h>
+#else
+  #define HAS_EXP_VERBS 0
+  // Provide stub definitions...
+#endif
+
+// Stub Structures (when HAS_EXP_VERBS=0)
+struct ibv_exp_dct { ... };           // DC Target
+struct ibv_exp_qp_init_attr { ... };  // Extended QP attributes
+struct ibv_exp_send_wr { ... };       // Extended send work request
+struct ibv_exp_dm { ... };            // Device memory
+
+// Compatibility Functions
+compat_create_qp()     // ibv_exp_create_qp → ibv_create_qp (DC→RC)
+compat_create_dct()    // ibv_exp_create_dct → stub (returns fake DCT)
+compat_alloc_dm()      // ibv_exp_alloc_dm → malloc
+compat_exp_post_send() // ibv_exp_post_send → ibv_post_send (masked→std atomics)
+compat_exp_modify_qp() // ibv_exp_modify_qp → ibv_modify_qp
+
+// API Mappings
+#define ibv_exp_create_qp(ctx, attr) compat_create_qp(ctx, attr)
+#define ibv_exp_create_dct(ctx, attr) compat_create_dct(ctx, attr)
+// ... etc
+```
+
+#### 2. Modified: `CHIME/include/Rdma.h`
+
+**Change**: Added include for compatibility layer
+
+```cpp
+#include "RdmaCompat.h"  // RDMA compatibility layer for non-MLNX_OFED systems
+```
+
+#### 3. Modified: `CHIME/src/rdma/StateTrans.cpp`
+
+**Change**: Wrapped DC-specific code with preprocessor guards
+
+```cpp
+// Before (would fail without MLNX_OFED):
+case IBV_EXP_QPT_DC_INI:
+  // DC-specific state transition code
+
+// After (only compiles DC code when available):
+#if USE_DC_TRANSPORT
+case IBV_EXP_QPT_DC_INI:
+  // DC-specific state transition code
+#endif
+```
+
+#### 4. Modified: `CHIME/include/Common.h`
+
+**Changes**: Reduced memory configuration for limited server resources
+
+```cpp
+// Before:
+constexpr uint64_t dsmSize = 64;        // 64 GB
+constexpr uint64_t rdmaBufferSize = 4;  // 4 GB
+#define MAX_APP_THREAD 65
+
+// After:
+constexpr uint64_t dsmSize = 8;         // 8 GB
+constexpr uint64_t rdmaBufferSize = 1;  // 1 GB
+#define MAX_APP_THREAD 17               // Limited by kernel keys
+```
+
+#### 5. Modified: `CHIME/include/HugePageAlloc.h`
+
+**Change**: Added fallback when huge pages unavailable
+
+```cpp
+inline void *hugePageAlloc(size_t size) {
+  // Try huge pages first
+  void *res = mmap(NULL, size, PROT_READ | PROT_WRITE,
+                   MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
+  
+  if (res == MAP_FAILED) {
+    // Fallback to regular pages
+    printf("Huge pages failed, falling back to regular pages\n");
+    res = mmap(NULL, size, PROT_READ | PROT_WRITE,
+               MAP_PRIVATE | MAP_ANONYMOUS | MAP_POPULATE, -1, 0);
+  }
+  return res;
+}
+```
+
+#### 6. Modified: `CHIME/src/rdma/Resource.cpp`
+
+**Change**: Added detailed error reporting
+
+```cpp
+ibv_mr *createMemoryRegion(uint64_t mm, uint64_t mmSize, RdmaContext *ctx) {
+  ibv_mr *mr = ibv_reg_mr(ctx->pd, (void *)mm, mmSize, access_flags);
+  
+  if (!mr) {
+    // NEW: Detailed error message
+    Debug::notifyError("Memory registration failed: addr=%p, size=%lu MB, errno=%d (%s)",
+                       (void*)mm, mmSize/(1024*1024), errno, strerror(errno));
+  }
+  return mr;
+}
+```
+
+### Changes to DEX
+
+#### 1. Modified: `dex/include/Common.h`
+
+**Changes**: Reduced memory configuration
+
+```cpp
+// Before:
+constexpr uint64_t dsmSize = 64;        // 64 GB
+constexpr uint64_t rdmaBufferSize = 2;  // 2 GB
+
+// After:
+constexpr uint64_t dsmSize = 8;         // 8 GB
+constexpr uint64_t rdmaBufferSize = 1;  // 1 GB
+```
+
+#### 2. Modified: `dex/include/HugePageAlloc.h`
+
+**Change**: Added fallback when huge pages unavailable (same as CHIME)
+
+---
+
+## 📊 Summary Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    COMPLETE SYSTEM OVERVIEW                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   ┌─────────────────────────────┐    ┌─────────────────────────────┐       │
+│   │           DEX               │    │          CHIME              │       │
+│   │                             │    │                             │       │
+│   │  ┌───────────────────────┐  │    │  ┌───────────────────────┐  │       │
+│   │  │      Tree.cpp         │  │    │  │      Tree.cpp         │  │       │
+│   │  │  (B+-tree operations) │  │    │  │  (B+-tree operations) │  │       │
+│   │  └───────────┬───────────┘  │    │  └───────────┬───────────┘  │       │
+│   │              │              │    │              │              │       │
+│   │  ┌───────────▼───────────┐  │    │  ┌───────────▼───────────┐  │       │
+│   │  │    IndexCache.h       │  │    │  │    TreeCache.h        │  │       │
+│   │  │  (SkipList cache)     │  │    │  │  (SkipList + IdxCache)│  │       │
+│   │  └───────────┬───────────┘  │    │  └───────────┬───────────┘  │       │
+│   │              │              │    │              │              │       │
+│   │  ┌───────────▼───────────┐  │    │  ┌───────────▼───────────┐  │       │
+│   │  │     Rdma.h            │  │    │  │     Rdma.h            │  │       │
+│   │  │  (standard verbs)     │  │    │  │  + RdmaCompat.h ★     │  │       │
+│   │  └───────────┬───────────┘  │    │  │  (exp→std wrapper)    │  │       │
+│   │              │              │    │  └───────────┬───────────┘  │       │
+│   │              │              │    │              │              │       │
+│   │  ┌───────────▼───────────┐  │    │  ┌───────────▼───────────┐  │       │
+│   │  │   libibverbs          │  │    │  │   libibverbs          │  │       │
+│   │  │   (ibv_*)             │  │    │  │   (ibv_* via wrapper) │  │       │
+│   │  └───────────┬───────────┘  │    │  └───────────┬───────────┘  │       │
+│   │              │              │    │              │              │       │
+│   └──────────────┼──────────────┘    └──────────────┼──────────────┘       │
+│                  │                                  │                       │
+│                  └──────────────┬───────────────────┘                       │
+│                                 │                                           │
+│                  ┌──────────────▼───────────────┐                           │
+│                  │         RDMA NIC             │                           │
+│                  │  (InfiniBand/RoCE)           │                           │
+│                  └──────────────┬───────────────┘                           │
+│                                 │                                           │
+│                  ┌──────────────▼───────────────┐                           │
+│                  │      Remote Memory Node      │                           │
+│                  │      (B+-tree data)          │                           │
+│                  └──────────────────────────────┘                           │
+│                                                                             │
+│   ★ = New file I created                                                   │
+│   Configuration changes: Both systems now use 8GB + 1GB memory             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔨 Build and Run Instructions
+
+### Build Both Systems
 
 ```bash
-# Memory lock limit (need at least 10GB = 10485760 KB)
-ulimit -l
-
-# Kernel keys limit (need at least 200)
-cat /proc/sys/kernel/keys/maxkeys
-
-# Huge pages (optional but recommended)
-cat /proc/meminfo | grep HugePages_Free
-```
-
-**Minimum Requirements**:
-| Resource | Minimum | Recommended |
-|----------|---------|-------------|
-| memlock | 10 GB | unlimited |
-| maxkeys | 200 | 10000 |
-| Huge Pages | 0 (fallback available) | 5000 pages (10GB) |
-
----
-
-## 🔨 Build Instructions
-
-### Clone Repository
-
-```bash
+# Clone repository
 git clone https://github.com/sfu-arch/dex-partial.git
 cd dex-partial
-```
 
-### Build CHIME
-
-```bash
+# Build CHIME
 cd CHIME
 mkdir -p build && cd build
-
-# Basic build (with RDMA compatibility layer)
 cmake -DENABLE_CACHE=on ..
-
-# Optional: Enable CHIME-specific features
-cmake -DENABLE_CACHE=on \
-      -DHOPSCOTCH_LEAF_NODE=on \
-      -DSPECULATIVE_READ=on \
-      -DVACANCY_AWARE_LOCK=on ..
-
 make -j8
-```
+cd ../..
 
-**CMake Options for CHIME**:
-| Option | Description | Default |
-|--------|-------------|---------|
-| `ENABLE_CACHE` | Enable TreeCache | OFF |
-| `HOPSCOTCH_LEAF_NODE` | Use Hopscotch hashing in leaves | OFF |
-| `SPECULATIVE_READ` | Enable speculative point queries | OFF |
-| `VACANCY_AWARE_LOCK` | Enable bitmap locks | OFF |
-| `FORCE_STD_VERBS` | Force standard RDMA verbs (no MLNX_OFED) | AUTO |
-
-### Build DEX
-
-```bash
+# Build DEX
 cd dex
 mkdir -p build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j8
 ```
 
----
+### Start memcached (required for coordination)
 
-## 🚀 Running Experiments
-
-### Prerequisites
-
-1. **Start memcached** (on one node):
 ```bash
-memcached -u $USER -l 0.0.0.0 -p 11211 -c 10000 -d
+memcached -u $USER -l 127.0.0.1 -p 11211 -c 10000 -d
 ```
 
-2. **Configure memcached.conf** (on all nodes):
+### Configure memcached.conf
+
 ```bash
-# Create config file pointing to memcached server
-echo -e "MEMCACHED_IP\n11211" > memcached.conf
-# Example for localhost:
-echo -e "127.0.0.1\n11211" > ~/dex-partial/CHIME/memcached.conf
-echo -e "127.0.0.1\n11211" > ~/dex-partial/dex/memcached.conf
+# In both CHIME/ and dex/ directories:
+echo -e "127.0.0.1\n11211" > memcached.conf
 ```
 
-### Single-Node Testing
+### Run Single-Node Tests
 
 ```bash
-# CHIME single-node test
+# CHIME
 cd ~/dex-partial/CHIME/build
 ./ycsb_test 1 8 8 randint a
-# Args: kNodeCount kThreadCount kCoroCnt keyType workload
 
-# DEX single-node test
+# DEX
 cd ~/dex-partial/dex/build
 ./newbench 1 100 0 0 0 0 8 4 256 0 0.99 50 10 50 0 1 1 0 1 0.1 0 8
-```
-
-### Multi-Node Testing (2 nodes)
-
-**Node Assignment**:
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                      2-NODE DEPLOYMENT                              │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   Node 0 (Memory Node)              Node 1 (Compute Node)          │
-│   ┌─────────────────────┐          ┌─────────────────────┐         │
-│   │ - Stores B+-tree    │          │ - Runs client       │         │
-│   │ - Starts FIRST      │◄────────►│   threads           │         │
-│   │ - Also runs compute │   RDMA   │ - Starts SECOND     │         │
-│   │   threads           │          │                     │         │
-│   └─────────────────────┘          └─────────────────────┘         │
-│                                                                     │
-│   # Start first:                    # Start second:                │
-│   ./ycsb_test 2 8 8 randint a      ./ycsb_test 2 8 8 randint a    │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-**On Memory Node (start FIRST)**:
-```bash
-cd ~/dex-partial/CHIME/build
-./ycsb_test 2 8 8 randint a
-```
-
-**On Compute Node (start SECOND)**:
-```bash
-cd ~/dex-partial/CHIME/build
-./ycsb_test 2 8 8 randint a
-```
-
-### YCSB Workloads
-
-| Workload | Read % | Update % | Insert % | Scan % | Description |
-|----------|--------|----------|----------|--------|-------------|
-| a | 50 | 50 | 0 | 0 | Update heavy |
-| b | 95 | 5 | 0 | 0 | Read mostly |
-| c | 100 | 0 | 0 | 0 | Read only |
-| d | 95 | 0 | 5 | 0 | Read latest |
-| e | 0 | 0 | 5 | 95 | Short ranges |
-
----
-
-## ⚙️ Configuration Reference
-
-### CHIME Configuration (`CHIME/include/Common.h`)
-
-```cpp
-// Memory Configuration
-constexpr uint64_t dsmSize = 8;           // GB - Shared memory pool
-constexpr uint64_t rdmaBufferSize = 1;    // GB - RDMA buffer per node
-
-// Thread Configuration
-#define MAX_APP_THREAD 17                  // Max application threads
-#define MAX_CORO_NUM 8                     // Coroutines per thread
-
-// Node Configuration
-#define MEMORY_NODE_NUM 1                  // Number of memory nodes
-#define MAX_MACHINE 20                     // Max cluster size
-```
-
-### DEX Configuration (`dex/include/Common.h`)
-
-```cpp
-// Memory Configuration
-constexpr uint64_t dsmSize = 8;           // GB - Shared memory pool
-constexpr uint64_t rdmaBufferSize = 1;    // GB - RDMA buffer per node
-
-// Thread Configuration
-#define MAX_APP_THREAD 36                  // Max application threads
-#define MAX_CORO_NUM 8                     // Coroutines per thread
-```
-
-### RDMA Compatibility (`CHIME/include/RdmaCompat.h`)
-
-```cpp
-// Auto-detected at compile time:
-#define USE_DC_TRANSPORT 0/1    // Dynamic Connected transport
-#define USE_DEVICE_MEMORY 0/1   // On-chip memory
-#define USE_MASKED_ATOMICS 0/1  // Extended atomic operations
 ```
 
 ---
 
 ## 🔧 Troubleshooting
 
-### Error: "Memory registration failed: errno=12"
-
-**Cause**: memlock limit too low
-
-**Solution**:
-```bash
-# Check current limit
-ulimit -l
-
-# Ask admin to increase (in /etc/security/limits.conf):
-# username soft memlock unlimited
-# username hard memlock unlimited
-```
-
-### Error: "Cannot allocate memory" with huge pages
-
-**Cause**: Insufficient huge pages
-
-**Solution**:
-```bash
-# Check available huge pages
-cat /proc/meminfo | grep HugePages_Free
-
-# Allocate more (requires sudo)
-sudo sh -c 'echo 5000 > /proc/sys/vm/nr_hugepages'
-```
-
-### Error: "Kernel keys limit exceeded"
-
-**Cause**: Too many threads registering RDMA memory
-
-**Solution**: Reduce `MAX_APP_THREAD` or ask admin to increase limits:
-```bash
-# Check limit
-cat /proc/sys/kernel/keys/maxkeys
-
-# Increase (requires sudo)
-sudo sysctl -w kernel.keys.maxkeys=10000
-```
-
-### Error: "SERVER HAS FAILED AND IS DISABLED"
-
-**Cause**: memcached not running
-
-**Solution**:
-```bash
-# Start memcached
-memcached -u $USER -l 0.0.0.0 -p 11211 -c 10000 -d
-
-# Verify
-ps aux | grep memcached
-```
-
-### Build Error: "ibv_exp_* not declared"
-
-**Cause**: MLNX_OFED not installed
-
-**Solution**: The RdmaCompat.h layer should handle this automatically. If still failing:
-```bash
-# Force standard verbs
-cmake -DFORCE_STD_VERBS=ON ..
-```
-
----
-
-## 📁 Repository Structure
-
-```
-dex-partial/
-├── README.md                    # This file
-├── CHIME/
-│   ├── include/
-│   │   ├── RdmaCompat.h        # NEW: RDMA compatibility layer
-│   │   ├── Common.h            # MODIFIED: Reduced memory config
-│   │   ├── HugePageAlloc.h     # MODIFIED: Fallback to regular pages
-│   │   └── ...
-│   ├── src/
-│   │   └── rdma/
-│   │       ├── Resource.cpp    # MODIFIED: Better error messages
-│   │       └── StateTrans.cpp  # MODIFIED: DC transport guards
-│   ├── test/
-│   │   └── ycsb_test.cpp       # Main benchmark
-│   └── CMakeLists.txt          # MODIFIED: RDMA detection
-│
-├── dex/
-│   ├── include/
-│   │   ├── Common.h            # MODIFIED: Reduced memory config
-│   │   ├── HugePageAlloc.h     # MODIFIED: Fallback to regular pages
-│   │   └── ...
-│   └── test/
-│       └── newbench.cpp        # Main benchmark
-│
-└── experiments/
-    └── qw1_zipfian_skew/
-        ├── run_experiment.py   # NEW: Unified experiment runner
-        └── README.md           # Experiment documentation
-```
-
----
-
-## 📊 Expected Output
-
-### Successful CHIME Run
-```
-kNodeCount 1, kThreadCount 8, kCoroCnt 8
-ycsb_load: ../ycsb/workloads/load_randint_workloada
-ycsb_trans: ../ycsb/workloads/txn_randint_workloada
-Memlock limit: soft=48003 MB, hard=48003 MB, requested=8192 MB
-Using NUMA node 1 (max available: 1)
-Huge pages allocated at 0x7xxx, size=8192 MB
-shared memory size: 8GB, 0x7xxx
-rdma cache size: 1GB
-Machine NR: 1
-Memory registration succeeded: lkey=xxx, rkey=xxx
-...
-[Throughput results]
-```
-
-### Successful DEX Run
-```
-Compute node count = 1
-kNodeCount 1, kReadRatio 100, ...
-shared memory size: 8GB, 0x7xxx
-cache size: 1GB
-Machine NR: 1
-...
-[Throughput results]
-```
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `Memory registration failed: errno=12` | memlock limit too low | `ulimit -l` check; need admin to increase in `/etc/security/limits.conf` |
+| `mmap failed` | Huge pages unavailable | OK - will fallback to regular pages automatically |
+| `ibv_exp_* not declared` | MLNX_OFED not installed | Should not happen - RdmaCompat.h handles this |
+| `SERVER HAS FAILED` | memcached not running | Start memcached first |
 
 ---
 
@@ -605,11 +721,4 @@ Machine NR: 1
 
 ---
 
-## 👤 Author
-
-Modified by: apa222  
-Repository: https://github.com/sfu-arch/dex-partial
-
----
-
-*Last updated: January 22, 2026*
+*Modified by: apa222 | Repository: https://github.com/sfu-arch/dex-partial | Last updated: January 22, 2026*
