@@ -31,7 +31,6 @@ bool modifyQPtoInit(struct ibv_qp *qp, RdmaContext *context) {
         default:
             Debug::notifyError("implement me:)");
     }
-    }
 
     if (ibv_modify_qp(qp, &attr, IBV_QP_STATE | IBV_QP_PKEY_INDEX |
                                      IBV_QP_PORT | IBV_QP_ACCESS_FLAGS)) {
