@@ -6,6 +6,44 @@ project(CHIME)
 set(CMAKE_C_FLAGS "-Wall -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-but-set-variable -Wsign-compare -O3")  # -O3
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++17")
 
+# ============================================================================
+# RDMA Driver Detection
+# ============================================================================
+# Detect if MLNX_OFED experimental verbs are available
+include(CheckIncludeFileCXX)
+check_include_file_cxx("infiniband/verbs_exp.h" HAS_VERBS_EXP)
+
+option(FORCE_EXP_VERBS "Force use of experimental verbs (requires MLNX_OFED)" OFF)
+option(FORCE_STD_VERBS "Force use of standard verbs only (RC transport)" OFF)
+
+if(FORCE_EXP_VERBS)
+    message(STATUS "RDMA: Forcing experimental verbs (MLNX_OFED required)")
+    add_definitions(-DFORCE_USE_EXP_VERBS)
+elseif(FORCE_STD_VERBS)
+    message(STATUS "RDMA: Forcing standard verbs (RC transport, no device memory)")
+    add_definitions(-DFORCE_NO_EXP_VERBS)
+elseif(HAS_VERBS_EXP)
+    message(STATUS "RDMA: Found experimental verbs (verbs_exp.h) - using DC transport")
+    add_definitions(-DFORCE_USE_EXP_VERBS)
+else()
+    message(STATUS "RDMA: Experimental verbs not found - using RC transport fallback")
+    add_definitions(-DFORCE_NO_EXP_VERBS)
+endif()
+
+# Print RDMA configuration summary
+message(STATUS "")
+message(STATUS "=== RDMA Configuration ===")
+if(FORCE_EXP_VERBS OR (HAS_VERBS_EXP AND NOT FORCE_STD_VERBS))
+    message(STATUS "  Transport:      DC (Dynamically Connected)")
+    message(STATUS "  Device Memory:  Enabled")
+    message(STATUS "  Masked Atomics: Enabled")
+else()
+    message(STATUS "  Transport:      RC (Reliably Connected) - FALLBACK")
+    message(STATUS "  Device Memory:  Emulated with host memory")
+    message(STATUS "  Masked Atomics: Standard atomics only")
+endif()
+message(STATUS "==========================")
+
 #Link Options
 set(LINKS_FLAGS "-lnuma -lcityhash -lboost_coroutine -lboost_context -lpthread -libverbs -lmemcached -ltbb")
 

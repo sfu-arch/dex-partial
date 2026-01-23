@@ -14,6 +14,7 @@
 #include <string>
 
 #include "Debug.h"
+#include "RdmaCompat.h"  // RDMA compatibility layer for non-MLNX_OFED systems
 
 #define DCT_ACCESS_KEY 3185
 #define UD_PKEY 0x11111111

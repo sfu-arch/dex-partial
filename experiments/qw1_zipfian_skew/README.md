@@ -3,6 +3,29 @@
 ## Research Question
 Under what key access distributions does system behavior change regime?
 
+## Systems Compared
+
+This experiment compares **DEX** and **CHIME** - two disaggregated B+-tree systems with different architectural approaches:
+
+### DEX (baotonglu/dex)
+| Feature | Implementation |
+|---------|----------------|
+| **Internal Node Cache** | RadixCache (prefix-based path-aware cache) |
+| **Leaf Structure** | Standard B+-tree leaves (sequential) |
+| **Pointer Handling** | Unswizzling (pointer conversion) |
+| **Concurrency** | Standard RDMA locks |
+| **Workload Generation** | Built-in Zipfian via `zipf.h` |
+
+### CHIME (dmemsys/CHIME)
+| Feature | Implementation |
+|---------|----------------|
+| **Internal Node Cache** | TreeCache (range-based, multi-level) |
+| **Leaf Structure** | Hopscotch hashing (locality-aware) |
+| **Bitmap** | Vacancy-aware lock with bitmap piggybacking |
+| **Concurrency** | Write combining + Read delegation |
+| **Speculative Read** | IdxCache for hot key position prediction |
+| **Workload Generation** | YCSB framework |
+
 ## Experiment Design
 
 ### Independent Variables (Knobs)
@@ -15,12 +38,14 @@ Under what key access distributions does system behavior change regime?
 
 | Metric | DEX | CHIME |
 |--------|-----|-------|
-| Tail latency | Not directly tracked | p50, p90, p99, p99.9 from us_lat/*.lat |
-| Remote bytes/query | `rdma_read_size + rdma_write_size` | Not directly tracked |
-| RDMA ops/query | `rdma_read_num + rdma_write_num + rdma_cas_num` | Not directly tracked |
-| Cache hit rate | Sherman baseline only | `cache_hit_rate` |
-| Index traversal | Not directly tracked | `try_read_leaf`, `read_leaf_retry` |
 | Throughput | `Final throughput` (Mops/s) | `cluster throughput` (Mops/s) |
+| Cache hit rate | `cache_hit` / total | `cache_hit_rate` |
+| RDMA ops/query | `rdma_read_num + rdma_write_num + rdma_cas_num` | Not directly tracked |
+| Remote bytes/query | `rdma_read_size + rdma_write_size` | Not directly tracked |
+| Write combining rate | N/A | `write_combining_rate` |
+| Read delegation rate | N/A | `read_delegation_rate` |
+| Speculative read accuracy | N/A | `correct_speculative_read / try_speculative_read` |
+| Tail latency | Not directly tracked | p50, p90, p99, p99.9 from us_lat/*.lat |
 
 ---
 
@@ -82,9 +107,26 @@ cd CHIME
 echo 36864 > /proc/sys/vm/nr_hugepages
 ulimit -l unlimited
 mkdir -p build && cd build
+
+# CHIME will auto-detect RDMA capabilities:
+# - With MLNX_OFED: Uses DC transport + device memory
+# - Without MLNX_OFED: Falls back to RC transport
 cmake -DENABLE_CACHE=on -DHOPSCOTCH_LEAF_NODE=on -DSPECULATIVE_READ=on ..
 make -j
+
+# To force standard verbs only (no experimental APIs):
+# cmake -DFORCE_STD_VERBS=on -DENABLE_CACHE=on ...
 ```
+
+### RDMA Compatibility Note
+
+CHIME now includes an RDMA compatibility layer (`include/RdmaCompat.h`) that allows it to build and run on systems without MLNX_OFED:
+
+| Feature | With MLNX_OFED | Without MLNX_OFED |
+|---------|---------------|-------------------|
+| Transport | DC (Dynamically Connected) | RC (Reliably Connected) |
+| Device Memory | On-chip NIC memory | Host memory emulation |
+| Masked Atomics | Hardware support | Standard atomics fallback |
 
 ### Step 2: Generate CHIME Workloads
 
