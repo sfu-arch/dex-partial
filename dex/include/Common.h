@@ -96,11 +96,11 @@ constexpr uint64_t GB = 1024ull * MB;
 constexpr uint16_t kCacheLineSize = 64;
 
 // for remote allocate
-constexpr uint64_t dsmSize = 64; // GB  [CONFIG]
+constexpr uint64_t dsmSize = 8; // GB  [CONFIG] 64 -> 8 for limited memlock
 constexpr uint64_t kChunkSize = 32 * MB;
 
 // RDMA buffer
-constexpr uint64_t rdmaBufferSize = 2; // GB  [CONFIG]
+constexpr uint64_t rdmaBufferSize = 1; // GB  [CONFIG] 2 -> 1 for limited memlock
 constexpr int64_t aligned_cache = ~((1ULL << 6) - 1);
 constexpr int64_t kPerThreadRdmaBuf =
     (rdmaBufferSize * define::GB / MAX_APP_THREAD) & aligned_cache;
