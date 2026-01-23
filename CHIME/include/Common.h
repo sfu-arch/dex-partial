@@ -99,11 +99,11 @@ constexpr uint64_t GB = 1024ull * MB;
 constexpr uint16_t kCacheLineSize = 64;
 
 // Remote Allocation
-constexpr uint64_t dsmSize           = 64;        // GB  [CONFIG] 64
+constexpr uint64_t dsmSize           = 8;         // GB  [CONFIG] 64 -> 8 for limited memlock
 constexpr uint64_t kChunkSize        = 16 * MB;   // B
 
 // Local Allocation
-constexpr uint64_t rdmaBufferSize     = 4;         // GB  [CONFIG] 4
+constexpr uint64_t rdmaBufferSize     = 1;         // GB  [CONFIG] 4 -> 1 for limited memlock
 
 // Cache (MB)
 constexpr int kIndexCacheSize  = 100;  // MB including kHotspotBufSize 
