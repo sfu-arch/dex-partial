@@ -50,54 +50,62 @@ echo "  Compute Nodes: $CN_NUM"
 echo "  Clients per node: $CLIENT_NUM"
 echo "  Coroutines: $CORO_NUM"
 echo "  Workload: YCSB-$WORKLOAD"
-echo ""
 
 # Setup hugepages
 echo ">>> Setting up hugepages..."
 echo 36864 | sudo tee /proc/sys/vm/nr_hugepages > /dev/null
 ulimit -l unlimited 2>/dev/null || true
 
-# Generate YCSB workloads if not present
+# Get memcached config
+MEMC_IP=$(head -1 ../memcached.conf)
+MEMC_PORT=$(sed -n '2p' ../memcached.conf)
+
+echo "  Memcached: $MEMC_IP:$MEMC_PORT"
+echo ""
+
+# Generate workloads using simple generator (no YCSB dependency)
 LOAD_FILE="$CHIME_DIR/ycsb/workloads/load_${KEY_TYPE}_workload${WORKLOAD}"
-if [ ! -f "$LOAD_FILE" ]; then
-    echo ">>> Generating YCSB workloads..."
-    
-    # Download YCSB if needed
-    if [ ! -d "$CHIME_DIR/ycsb/YCSB" ]; then
-        echo ">>> Downloading YCSB..."
-        cd "$CHIME_DIR/ycsb"
-        curl -O --location https://github.com/brianfrankcooper/YCSB/releases/download/0.11.0/ycsb-0.11.0.tar.gz
-        tar xfvz ycsb-0.11.0.tar.gz
-        mv ycsb-0.11.0 YCSB
-        
-        # Fix Python 2 to Python 3 compatibility in YCSB bin script
-        echo ">>> Patching YCSB for Python 3..."
-        sed -i 's/except subprocess.CalledProcessError, err:/except subprocess.CalledProcessError as err:/' YCSB/bin/ycsb
-        sed -i '1s|#!/usr/bin/env python|#!/usr/bin/env python3|' YCSB/bin/ycsb
-        
-        cd "$CHIME_BUILD_DIR"
-    fi
-    
-    # Generate workloads (small set for testing)
+if [ ! -f "$LOAD_FILE" ] || [ ! -s "$LOAD_FILE" ]; then
+    echo ">>> Generating workloads (using simple generator)..."
     cd "$CHIME_DIR/ycsb"
-    bash generate_small_workloads.sh
+    python3 generate_workloads_simple.py small
     cd "$CHIME_BUILD_DIR"
 fi
 
-# Restart memcached
-echo ">>> Restarting memcached..."
-bash ../script/restartMemc.sh || {
-    echo "WARNING: restartMemc.sh failed, trying manual start..."
-    MEMC_IP=$(head -1 ../memcached.conf)
-    MEMC_PORT=$(sed -n '2p' ../memcached.conf)
-    pkill memcached 2>/dev/null || true
-    sleep 1
-    memcached -u $USER -l $MEMC_IP -p $MEMC_PORT -c 10000 -d
-    sleep 1
-    echo -e "set serverNum 0 0 1\r\n0\r\nquit\r" | nc $MEMC_IP $MEMC_PORT
-    echo -e "set clientNum 0 0 1\r\n0\r\nquit\r" | nc $MEMC_IP $MEMC_PORT
-}
-sleep 2
+# Verify workloads have content
+LOAD_LINES=$(wc -l < "$LOAD_FILE" 2>/dev/null || echo "0")
+if [ "$LOAD_LINES" -lt 1000 ]; then
+    echo ">>> Workload files are empty or too small ($LOAD_LINES lines), regenerating..."
+    cd "$CHIME_DIR/ycsb"
+    rm -rf workloads
+    python3 generate_workloads_simple.py small
+    cd "$CHIME_BUILD_DIR"
+fi
+
+echo ">>> Workload file has $(wc -l < "$LOAD_FILE") records"
+
+# Restart memcached with fresh state
+echo ">>> Restarting memcached on $MEMC_IP:$MEMC_PORT..."
+sudo pkill memcached 2>/dev/null || true
+sleep 1
+memcached -l 0.0.0.0 -p $MEMC_PORT -c 10000 -d
+sleep 1
+
+# Initialize memcached counters using printf (echo -e doesn't work reliably with nc)
+echo ">>> Initializing memcached counters..."
+printf "set serverNum 0 0 1\r\n0\r\n" | nc -q1 localhost $MEMC_PORT
+printf "set clientNum 0 0 1\r\n0\r\n" | nc -q1 localhost $MEMC_PORT
+
+# Verify counters are set
+echo ">>> Verifying memcached..."
+VERIFY=$(printf "get serverNum\r\n" | nc -q1 localhost $MEMC_PORT | head -1)
+if [[ "$VERIFY" != *"VALUE"* ]]; then
+    echo "ERROR: Failed to initialize memcached counters"
+    echo "Got: $VERIFY"
+    exit 1
+fi
+echo ">>> Memcached initialized OK"
+sleep 1
 
 # Split workloads for distributed execution
 echo ">>> Splitting workloads for $CN_NUM nodes, $CLIENT_NUM clients each..."

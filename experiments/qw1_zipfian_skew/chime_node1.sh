@@ -44,12 +44,17 @@ WORKLOAD="a"        # YCSB workload (a=50/50 read/update)
 # EXECUTION
 # ============================================
 
+# Get memcached config
+MEMC_IP=$(head -1 ../memcached.conf)
+MEMC_PORT=$(sed -n '2p' ../memcached.conf)
+
 echo ""
 echo "Configuration (must match Node 0!):"
 echo "  Compute Nodes: $CN_NUM"
 echo "  Clients per node: $CLIENT_NUM"
 echo "  Coroutines: $CORO_NUM"
 echo "  Workload: YCSB-$WORKLOAD"
+echo "  Memcached: $MEMC_IP:$MEMC_PORT"
 echo ""
 
 # Setup hugepages
@@ -57,42 +62,42 @@ echo ">>> Setting up hugepages..."
 echo 36864 | sudo tee /proc/sys/vm/nr_hugepages > /dev/null
 ulimit -l unlimited 2>/dev/null || true
 
-# Generate YCSB workloads if not present (each node needs local copy)
+# Generate workloads using simple generator (no YCSB dependency)
 LOAD_FILE="$CHIME_DIR/ycsb/workloads/load_${KEY_TYPE}_workload${WORKLOAD}"
-if [ ! -f "$LOAD_FILE" ]; then
-    echo ">>> Generating YCSB workloads..."
-    
-    # Download YCSB if needed
-    if [ ! -d "$CHIME_DIR/ycsb/YCSB" ]; then
-        echo ">>> Downloading YCSB..."
-        cd "$CHIME_DIR/ycsb"
-        curl -O --location https://github.com/brianfrankcooper/YCSB/releases/download/0.11.0/ycsb-0.11.0.tar.gz
-        tar xfvz ycsb-0.11.0.tar.gz
-        mv ycsb-0.11.0 YCSB
-        
-        # Fix Python 2 to Python 3 compatibility in YCSB bin script
-        echo ">>> Patching YCSB for Python 3..."
-        sed -i 's/except subprocess.CalledProcessError, err:/except subprocess.CalledProcessError as err:/' YCSB/bin/ycsb
-        sed -i '1s|#!/usr/bin/env python|#!/usr/bin/env python3|' YCSB/bin/ycsb
-        
-        cd "$CHIME_BUILD_DIR"
-    fi
-    
-    # Generate workloads (small set for testing)
+if [ ! -f "$LOAD_FILE" ] || [ ! -s "$LOAD_FILE" ]; then
+    echo ">>> Generating workloads (using simple generator)..."
     cd "$CHIME_DIR/ycsb"
-    bash generate_small_workloads.sh
+    python3 generate_workloads_simple.py small
     cd "$CHIME_BUILD_DIR"
 fi
 
+# Verify workloads have content
+LOAD_LINES=$(wc -l < "$LOAD_FILE" 2>/dev/null || echo "0")
+if [ "$LOAD_LINES" -lt 1000 ]; then
+    echo ">>> Workload files are empty or too small ($LOAD_LINES lines), regenerating..."
+    cd "$CHIME_DIR/ycsb"
+    rm -rf workloads
+    python3 generate_workloads_simple.py small
+    cd "$CHIME_BUILD_DIR"
+fi
+
+echo ">>> Workload file has $(wc -l < "$LOAD_FILE") records"
+
 # Check memcached connectivity
-MEMC_IP=$(head -1 ../memcached.conf)
-MEMC_PORT=$(sed -n '2p' ../memcached.conf)
 echo ">>> Checking memcached at $MEMC_IP:$MEMC_PORT..."
-nc -z $MEMC_IP $MEMC_PORT || {
+nc -zw3 $MEMC_IP $MEMC_PORT || {
     echo "ERROR: Cannot connect to memcached at $MEMC_IP:$MEMC_PORT"
     echo "Make sure Node 0 is running first!"
     exit 1
 }
+
+# Verify memcached is initialized
+VERIFY=$(printf "get serverNum\r\n" | nc -q1 $MEMC_IP $MEMC_PORT | head -1)
+if [[ "$VERIFY" != *"VALUE"* ]]; then
+    echo "ERROR: Memcached not initialized (serverNum not found)"
+    echo "Make sure Node 0 has started and initialized memcached!"
+    exit 1
+fi
 echo ">>> Memcached connection OK"
 
 # Split workloads for distributed execution
