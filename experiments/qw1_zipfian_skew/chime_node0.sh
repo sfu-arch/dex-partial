@@ -93,12 +93,12 @@ sleep 1
 
 # Initialize memcached counters using printf (echo -e doesn't work reliably with nc)
 echo ">>> Initializing memcached counters..."
-printf "set serverNum 0 0 1\r\n0\r\n" | nc -q1 localhost $MEMC_PORT
-printf "set clientNum 0 0 1\r\n0\r\n" | nc -q1 localhost $MEMC_PORT
+{ printf "set serverNum 0 0 1\r\n0\r\n"; sleep 0.1; } | nc -w1 localhost $MEMC_PORT
+{ printf "set clientNum 0 0 1\r\n0\r\n"; sleep 0.1; } | nc -w1 localhost $MEMC_PORT
 
 # Verify counters are set
 echo ">>> Verifying memcached..."
-VERIFY=$(printf "get serverNum\r\n" | nc -q1 localhost $MEMC_PORT | head -1)
+VERIFY=$({ printf "get serverNum\r\n"; sleep 0.1; } | nc -w1 localhost $MEMC_PORT | head -1)
 if [[ "$VERIFY" != *"VALUE"* ]]; then
     echo "ERROR: Failed to initialize memcached counters"
     echo "Got: $VERIFY"

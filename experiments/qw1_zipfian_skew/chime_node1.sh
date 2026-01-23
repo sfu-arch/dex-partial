@@ -85,14 +85,14 @@ echo ">>> Workload file has $(wc -l < "$LOAD_FILE") records"
 
 # Check memcached connectivity
 echo ">>> Checking memcached at $MEMC_IP:$MEMC_PORT..."
-nc -zw3 $MEMC_IP $MEMC_PORT || {
+nc -zw3 $MEMC_IP $MEMC_PORT 2>/dev/null || nc -z -w 3 $MEMC_IP $MEMC_PORT || {
     echo "ERROR: Cannot connect to memcached at $MEMC_IP:$MEMC_PORT"
     echo "Make sure Node 0 is running first!"
     exit 1
 }
 
 # Verify memcached is initialized
-VERIFY=$(printf "get serverNum\r\n" | nc -q1 $MEMC_IP $MEMC_PORT | head -1)
+VERIFY=$({ printf "get serverNum\r\n"; sleep 0.1; } | nc -w1 $MEMC_IP $MEMC_PORT | head -1)
 if [[ "$VERIFY" != *"VALUE"* ]]; then
     echo "ERROR: Memcached not initialized (serverNum not found)"
     echo "Make sure Node 0 has started and initialized memcached!"
