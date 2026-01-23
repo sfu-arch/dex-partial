@@ -17,10 +17,22 @@
 char *getIP();
 inline void *hugePageAlloc(size_t size) {
     numa_set_preferred(NUMA_NODE);
+    
+    // Try huge pages first
     void *res = mmap(NULL, size, PROT_READ | PROT_WRITE,
                      MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
+    
     if (res == MAP_FAILED) {
-        Debug::notifyError("%s mmap failed!\n", getIP());
+        // Fall back to regular pages if huge pages not available
+        Debug::notifyInfo("Huge pages not available, falling back to regular pages for %lu MB", size / (1024*1024));
+        res = mmap(NULL, size, PROT_READ | PROT_WRITE,
+                   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (res == MAP_FAILED) {
+            Debug::notifyError("%s mmap failed (both huge and regular pages)!\n", getIP());
+            return nullptr;
+        }
+        // Touch pages to ensure they're allocated
+        memset(res, 0, size);
     }
 
     return res;
