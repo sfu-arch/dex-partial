@@ -69,6 +69,12 @@ if [ ! -f "$LOAD_FILE" ]; then
         curl -O --location https://github.com/brianfrankcooper/YCSB/releases/download/0.11.0/ycsb-0.11.0.tar.gz
         tar xfvz ycsb-0.11.0.tar.gz
         mv ycsb-0.11.0 YCSB
+        
+        # Fix Python 2 to Python 3 compatibility in YCSB bin script
+        echo ">>> Patching YCSB for Python 3..."
+        sed -i 's/except subprocess.CalledProcessError, err:/except subprocess.CalledProcessError as err:/' YCSB/bin/ycsb
+        sed -i '1s|#!/usr/bin/env python|#!/usr/bin/env python3|' YCSB/bin/ycsb
+        
         cd "$CHIME_BUILD_DIR"
     fi
     
