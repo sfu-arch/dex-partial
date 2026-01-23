@@ -91,14 +91,14 @@ sleep 1
 memcached -l 0.0.0.0 -p $MEMC_PORT -c 10000 -d
 sleep 1
 
-# Initialize memcached counters using printf (echo -e doesn't work reliably with nc)
+# Initialize memcached counters
 echo ">>> Initializing memcached counters..."
-{ printf "set serverNum 0 0 1\r\n0\r\n"; sleep 0.1; } | nc -w1 localhost $MEMC_PORT
-{ printf "set clientNum 0 0 1\r\n0\r\n"; sleep 0.1; } | nc -w1 localhost $MEMC_PORT
+timeout 2 bash -c "printf 'set serverNum 0 0 1\r\n0\r\n' | nc localhost $MEMC_PORT" || true
+timeout 2 bash -c "printf 'set clientNum 0 0 1\r\n0\r\n' | nc localhost $MEMC_PORT" || true
 
 # Verify counters are set
 echo ">>> Verifying memcached..."
-VERIFY=$({ printf "get serverNum\r\n"; sleep 0.1; } | nc -w1 localhost $MEMC_PORT | head -1)
+VERIFY=$(timeout 2 bash -c "printf 'get serverNum\r\n' | nc localhost $MEMC_PORT" | head -1 || true)
 if [[ "$VERIFY" != *"VALUE"* ]]; then
     echo "ERROR: Failed to initialize memcached counters"
     echo "Got: $VERIFY"
