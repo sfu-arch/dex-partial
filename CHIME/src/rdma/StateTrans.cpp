@@ -1,20 +1,5 @@
 #include "Rdma.h"
-# On the server
-cd ~/dex-partial/dex
-
-# Set up huge pages (if not already done)
-./script/hugepage.sh
-
-# Create build directory
-mkdir -p build && cd build
-
-# Configure and build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j8
-
-# Copy run scripts
-cp ../script/restartMemc.sh .
-cp ../script/run*.sh .#include "RdmaCompat.h"
+#include "RdmaCompat.h"
 
 
 bool modifyQPtoInit(struct ibv_qp *qp, RdmaContext *context) {
