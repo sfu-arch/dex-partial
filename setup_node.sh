@@ -48,7 +48,7 @@ sudo apt install -y \
     libnuma-dev \
     libtbb-dev \
     libboost-all-dev \
-    netcat \
+    netcat-openbsd \
     curl \
     python3
 
