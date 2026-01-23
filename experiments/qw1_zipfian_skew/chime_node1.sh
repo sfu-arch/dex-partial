@@ -35,7 +35,7 @@ cd "$CHIME_BUILD_DIR"
 # CONFIGURATION - MUST MATCH NODE 0!
 # ============================================
 CN_NUM=2            # Number of compute nodes
-CLIENT_NUM=18       # Clients per compute node
+CLIENT_NUM=8        # Clients per compute node (should match LOADER_NUM=8 in code)
 CORO_NUM=2          # Coroutines per client
 KEY_TYPE="randint"  # Key type
 WORKLOAD="a"        # YCSB workload (a=50/50 read/update)
