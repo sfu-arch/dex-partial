@@ -178,11 +178,11 @@ struct ibv_exp_send_wr {
   } ext_op;
 };
 
-// Extended opcodes
-#define IBV_EXP_WR_EXT_MASKED_ATOMIC_CMP_AND_SWP  100
-#define IBV_EXP_WR_EXT_MASKED_ATOMIC_FETCH_AND_ADD 101
-#define IBV_EXP_WR_RDMA_READ  IBV_WR_RDMA_READ
-#define IBV_EXP_WR_RDMA_WRITE IBV_WR_RDMA_WRITE
+// Extended opcodes - cast to ibv_wr_opcode to avoid conversion errors
+#define IBV_EXP_WR_EXT_MASKED_ATOMIC_CMP_AND_SWP  ((ibv_wr_opcode)100)
+#define IBV_EXP_WR_EXT_MASKED_ATOMIC_FETCH_AND_ADD ((ibv_wr_opcode)101)
+#define IBV_EXP_WR_RDMA_READ  ((ibv_wr_opcode)IBV_WR_RDMA_READ)
+#define IBV_EXP_WR_RDMA_WRITE ((ibv_wr_opcode)IBV_WR_RDMA_WRITE)
 
 // Extended send flags
 #define IBV_EXP_SEND_SIGNALED       IBV_SEND_SIGNALED
