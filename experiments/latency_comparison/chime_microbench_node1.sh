@@ -44,25 +44,52 @@ if [ -f "${CHIME_DIR}/memcached.conf" ]; then
 fi
 
 # Build if needed
-if [ ! -f "${CHIME_DIR}/build/simple_bench" ]; then
-    echo "Building simple_bench..."
+if [ ! -f "${CHIME_DIR}/build/microbench_latency" ]; then
+    echo "Building microbench_latency..."
     cd ${CHIME_DIR}/build
     cmake ..
-    make simple_bench -j$(nproc)
+    make microbench_latency -j$(nproc)
 fi
 
 # Run from CHIME/build directory
 cd ${CHIME_DIR}/build
 echo "Working directory: $(pwd)"
 
+# ============================================
+# DEX-style benchmark parameters (same as node0)
+# ============================================
+READ_RATIO=100
+INSERT_RATIO=0
+UPDATE_RATIO=0
+DELETE_RATIO=0
+RANGE_RATIO=0
+MEM_THREAD_COUNT=4
+CACHE_SIZE_MB=256
+UNIFORM_WORKLOAD=0
+ZIPFIAN_THETA=0.99
+BULK_LOAD_M=10
+WARMUP_M=1
+OP_NUM_M=5
+CHECK_CORRECT=0
+TIME_BASED=0
+EARLY_STOP=0
+TREE_INDEX=0
+RPC_RATE=1.0
+ADMISSION_RATE=1.0
+AUTO_TUNE=0
+
 echo ""
-echo "Running CHIME simple_bench (memory node)..."
+echo "Running CHIME microbench_latency (memory node)..."
 echo "  Nodes: ${NODE_COUNT}"
 echo "  Threads: ${THREAD_COUNT}"
 echo ""
 
 # Run benchmark
-sudo ./simple_bench ${NODE_COUNT} ${THREAD_COUNT}
+sudo ./microbench_latency ${NODE_COUNT} ${READ_RATIO} ${INSERT_RATIO} ${UPDATE_RATIO} \
+    ${DELETE_RATIO} ${RANGE_RATIO} ${THREAD_COUNT} ${MEM_THREAD_COUNT} \
+    ${CACHE_SIZE_MB} ${UNIFORM_WORKLOAD} ${ZIPFIAN_THETA} ${BULK_LOAD_M} \
+    ${WARMUP_M} ${OP_NUM_M} ${CHECK_CORRECT} ${TIME_BASED} ${EARLY_STOP} \
+    ${TREE_INDEX} ${RPC_RATE} ${ADMISSION_RATE} ${AUTO_TUNE} ${THREAD_COUNT}
 
 echo ""
 echo "CHIME memory node complete!"

@@ -227,7 +227,7 @@ void thread_run(int id) {
     if (id == 0) {
         while (warmup_cnt.load() != kThreadCount);
         printf("Node %d: bulk load complete\n", dsm->getMyNodeID());
-        dsm->barrier("bulk_load_done");
+        dsm->barrier("load_finish");  // Matches ycsb_test
         warmup_cnt.store(0);
     }
     while (warmup_cnt.load() != 0 && id != 0);
@@ -263,7 +263,7 @@ void thread_run(int id) {
     if (id == 0) {
         while (warmup_cnt.load() != kThreadCount);
         printf("Node %d: warmup complete\n", dsm->getMyNodeID());
-        dsm->barrier("warmup_done");
+        dsm->barrier("warmup_finish");  // Matches ycsb_test
         ready.store(true);
         warmup_cnt.store(0);
     }
@@ -587,12 +587,12 @@ int main(int argc, char *argv[]) {
     
     // Only compute nodes (node_id < CNodeCount) run the benchmark
     if (node_id >= CNodeCount) {
-        printf("Node %d: Memory node, waiting...\n", node_id);
-        // Memory node must participate in all barriers
-        dsm->barrier("workload_ready");
-        dsm->barrier("bulk_load_done");
-        dsm->barrier("warmup_done");
-        dsm->barrier("benchmark_done");
+        printf("Node %d: Memory node, waiting at barriers...\n", node_id);
+        // Memory node must participate in all barriers matching compute node
+        dsm->barrier("benchmark");      // Initial sync
+        dsm->barrier("load_finish");    // After bulk load
+        dsm->barrier("warmup_finish");  // After warmup
+        dsm->barrier("fin");            // Final sync
         printf("Node %d: Memory node done\n", node_id);
         return 0;
     }
@@ -608,7 +608,7 @@ int main(int argc, char *argv[]) {
     // Generate workload
     generate_workload();
     
-    dsm->barrier("workload_ready");
+    dsm->barrier("benchmark");  // Initial sync - matches ycsb_test
     
     // Launch threads
     for (int i = 0; i < kThreadCount; ++i) {
@@ -642,7 +642,7 @@ int main(int argc, char *argv[]) {
         save_latency_histogram("chime_latency.dat");
     }
     
-    dsm->barrier("benchmark_done");
+    dsm->barrier("fin");  // Final sync - matches ycsb_test
     
     // Cleanup
     delete[] bulk_array;
