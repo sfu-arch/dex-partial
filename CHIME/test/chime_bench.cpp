@@ -133,23 +133,19 @@ void thread_run(int id) {
     // Clear latency histogram
     memset(latency_histogram[id], 0, sizeof(uint64_t) * LATENCY_BUCKETS);
     
-    // ========== BULK LOAD (only first 8 threads on node 0) ==========
-    if (dsm->getMyNodeID() == 0 && id < 8) {
-        uint64_t load_per_thread = bulk_load_num / 8;
-        uint64_t start_idx = id * load_per_thread;
-        uint64_t end_idx = (id == 7) ? bulk_load_num : start_idx + load_per_thread;
+    // ========== BULK LOAD (only thread 0 on node 0) ==========
+    if (dsm->getMyNodeID() == 0 && id == 0) {
+        printf("Thread %d loading %lu keys...\n", id, bulk_load_num);
         
-        printf("Thread %d loading keys %lu to %lu\n", id, start_idx, end_idx);
-        
-        for (uint64_t i = start_idx; i < end_idx; ++i) {
+        for (uint64_t i = 0; i < bulk_load_num; ++i) {
             Key k = int2key(i);
             tree->insert(k, i);
             
-            if ((i - start_idx) % 500000 == 0 && i > start_idx) {
-                printf("Thread %d: loaded %lu keys\n", id, i - start_idx);
+            if (i % 100000 == 0 && i > 0) {
+                printf("Thread %d: loaded %lu keys (%.1f%%)\n", id, i, (100.0 * i / bulk_load_num));
             }
         }
-        printf("Thread %d: bulk load complete\n", id);
+        printf("Thread %d: bulk load complete (%lu keys)\n", id, bulk_load_num);
     }
     
     warmup_cnt.fetch_add(1);
@@ -157,6 +153,7 @@ void thread_run(int id) {
     
     // Wait for bulk load to finish on all nodes
     if (id == 0) {
+        printf("Node %d: waiting at load_finish barrier...\n", dsm->getMyNodeID());
         dsm->barrier("load_finish");
         printf("Node %d: bulk load barrier passed\n", dsm->getMyNodeID());
     }
