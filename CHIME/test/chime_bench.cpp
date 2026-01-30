@@ -33,8 +33,7 @@
 // Configuration
 #define TEST_EPOCH 10
 #define TIME_INTERVAL 1.0
-#define LATENCY_BUCKETS 100000    // 0-100us with 1ns granularity
-#define LATENCY_NS_GRANULARITY 1  // 1 = 1ns per bucket
+#define LATENCY_BUCKETS 100000    // 0-100ms with 1us granularity
 
 // External variables from CHIME
 extern double cache_miss[MAX_APP_THREAD];
@@ -108,14 +107,14 @@ private:
 ZipfianGenerator *zipf_gen = nullptr;
 
 // ============================================
-// Record latency (nanosecond granularity)
+// Record latency (microsecond granularity)
 // ============================================
 inline void record_latency(int thread_id, uint64_t latency_ns) {
-    uint64_t bucket = latency_ns / LATENCY_NS_GRANULARITY;
-    if (bucket >= LATENCY_BUCKETS) {
-        bucket = LATENCY_BUCKETS - 1;
+    uint64_t latency_us = latency_ns / 1000;
+    if (latency_us >= LATENCY_BUCKETS) {
+        latency_us = LATENCY_BUCKETS - 1;
     }
-    latency_histogram[thread_id][bucket]++;
+    latency_histogram[thread_id][latency_us]++;
 }
 
 // ============================================
@@ -259,26 +258,24 @@ void save_latency_histogram(const std::string& filename) {
     
     printf("\n========== CHIME LATENCY STATISTICS ==========\n");
     printf("Total operations: %lu\n", total_ops);
-    printf("Average latency: %.2f ns\n", avg_latency * LATENCY_NS_GRANULARITY);
-    printf("P50: %lu ns, P90: %lu ns, P95: %lu ns, P99: %lu ns, P99.9: %lu ns\n",
-           p50 * LATENCY_NS_GRANULARITY, p90 * LATENCY_NS_GRANULARITY, 
-           p95 * LATENCY_NS_GRANULARITY, p99 * LATENCY_NS_GRANULARITY, 
-           p999 * LATENCY_NS_GRANULARITY);
+    printf("Average latency: %.2f us\n", avg_latency);
+    printf("P50: %lu us, P90: %lu us, P95: %lu us, P99: %lu us, P99.9: %lu us\n",
+           p50, p90, p95, p99, p999);
     printf("==============================================\n\n");
     
     std::ofstream out(filename);
     if (out.is_open()) {
-        out << "# CHIME Latency Histogram (nanoseconds)\n";
+        out << "# CHIME Latency Histogram\n";
         out << "# Total ops: " << total_ops << "\n";
-        out << "# Avg: " << avg_latency * LATENCY_NS_GRANULARITY << " ns\n";
-        out << "# P50: " << p50 * LATENCY_NS_GRANULARITY << " P90: " << p90 * LATENCY_NS_GRANULARITY 
-            << " P95: " << p95 * LATENCY_NS_GRANULARITY << " P99: " << p99 * LATENCY_NS_GRANULARITY 
-            << " P99.9: " << p999 * LATENCY_NS_GRANULARITY << " ns\n";
-        out << "# latency_ns\tcount\n";
+        out << "# Avg: " << avg_latency << " us\n";
+        out << "# P50: " << p50 << " us, P90: " << p90 
+            << " us, P95: " << p95 << " us, P99: " << p99 
+            << " us, P99.9: " << p999 << " us\n";
+        out << "# latency_us\tcount\n";
         
         for (int i = 0; i < LATENCY_BUCKETS; ++i) {
             if (total_histogram[i] > 0) {
-                out << (i * LATENCY_NS_GRANULARITY) << "\t" << total_histogram[i] << "\n";
+                out << i << "\t" << total_histogram[i] << "\n";
             }
         }
         out.close();
