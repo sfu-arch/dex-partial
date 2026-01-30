@@ -76,7 +76,10 @@ fi
 
 # Create experiment directory
 mkdir -p ${EXPERIMENT_DIR}
-cd ${EXPERIMENT_DIR}
+
+# Change to CHIME directory so memcached.conf can be found
+cd ${CHIME_DIR}
+echo "Working directory: $(pwd)"
 
 echo ""
 echo "Running CHIME microbenchmark (compute node)..."
@@ -100,9 +103,12 @@ sudo ${CHIME_DIR}/build/microbench_latency \
 
 # Copy results
 if [ -f "chime_latency.dat" ]; then
-    cp chime_latency.dat ${EXPERIMENT_DIR}/
+    mv chime_latency.dat ${EXPERIMENT_DIR}/
     echo ""
     echo "Results saved to ${EXPERIMENT_DIR}/chime_latency.dat"
+else
+    echo "Warning: chime_latency.dat not found in $(pwd)"
+    ls -la *.dat 2>/dev/null || true
 fi
 
 echo ""

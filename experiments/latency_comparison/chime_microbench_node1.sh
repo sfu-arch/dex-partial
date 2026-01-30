@@ -78,7 +78,10 @@ fi
 
 # Create experiment directory
 mkdir -p ${EXPERIMENT_DIR}
-cd ${EXPERIMENT_DIR}
+
+# Change to CHIME directory so memcached.conf can be found
+cd ${CHIME_DIR}
+echo "Working directory: $(pwd)"
 
 echo ""
 echo "Running CHIME microbenchmark (memory node)..."
