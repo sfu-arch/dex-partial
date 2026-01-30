@@ -14,7 +14,7 @@ CHIME_DIR="${REPO_DIR}/CHIME"
 # BENCHMARK PARAMETERS - Edit these!
 # ============================================
 NODE_COUNT=2
-THREAD_COUNT=16
+THREAD_COUNT=1
 READ_RATIO=100        # 100 = 100% reads
 ZIPFIAN=0.99          # Zipfian skew (0.99 = highly skewed)
 BULK_LOAD_M=10        # Bulk load 10M keys

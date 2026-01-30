@@ -15,7 +15,7 @@ MEMCACHED_IP="10.30.1.9"  # Compute node where memcached runs
 # BENCHMARK PARAMETERS - Must match node0!
 # ============================================
 NODE_COUNT=2
-THREAD_COUNT=16
+THREAD_COUNT=1
 READ_RATIO=100
 ZIPFIAN=0.99
 BULK_LOAD_M=10
