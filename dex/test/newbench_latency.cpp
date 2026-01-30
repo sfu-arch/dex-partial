@@ -30,9 +30,9 @@
 #define LATENCY_TRACKING 1
 #define GLOBAL_WORKLOAD 1
 
-// Latency buckets: 0-10000 microseconds with 1us granularity
+// Latency buckets: 0-100us with 1ns granularity
 #define LATENCY_BUCKETS 100000
-#define LATENCY_BUCKET_SIZE 1  // 1 microsecond per bucket
+#define LATENCY_NS_GRANULARITY 1  // 1 nanosecond per bucket
 
 namespace sherman {
 extern uint64_t cache_miss[MAX_APP_THREAD][8];
@@ -124,11 +124,11 @@ std::atomic_bool ready_to_report{false};
 
 // Record a latency sample (in nanoseconds)
 inline void record_latency(int thread_id, uint64_t latency_ns) {
-  uint64_t latency_us = latency_ns / 1000;  // Convert to microseconds
-  if (latency_us >= LATENCY_BUCKETS) {
-    latency_us = LATENCY_BUCKETS - 1;
+  uint64_t bucket = latency_ns / LATENCY_NS_GRANULARITY;
+  if (bucket >= LATENCY_BUCKETS) {
+    bucket = LATENCY_BUCKETS - 1;
   }
-  latency_histogram[thread_id][latency_us]++;
+  latency_histogram[thread_id][bucket]++;
   total_latency_samples.fetch_add(1);
 }
 
@@ -595,27 +595,28 @@ void save_latency_histogram(const std::string& filename) {
   // Print statistics
   printf("\n========== DEX LATENCY STATISTICS ==========\n");
   printf("Total operations: %lu\n", total_ops);
-  printf("Average latency: %.2f us\n", avg_latency);
-  printf("P50 latency: %lu us\n", p50);
-  printf("P90 latency: %lu us\n", p90);
-  printf("P95 latency: %lu us\n", p95);
-  printf("P99 latency: %lu us\n", p99);
-  printf("P99.9 latency: %lu us\n", p999);
+  printf("Average latency: %.2f ns\n", avg_latency * LATENCY_NS_GRANULARITY);
+  printf("P50 latency: %lu ns\n", p50 * LATENCY_NS_GRANULARITY);
+  printf("P90 latency: %lu ns\n", p90 * LATENCY_NS_GRANULARITY);
+  printf("P95 latency: %lu ns\n", p95 * LATENCY_NS_GRANULARITY);
+  printf("P99 latency: %lu ns\n", p99 * LATENCY_NS_GRANULARITY);
+  printf("P99.9 latency: %lu ns\n", p999 * LATENCY_NS_GRANULARITY);
   printf("=============================================\n\n");
   
   // Save to file
   std::ofstream out(filename);
   if (out.is_open()) {
-    out << "# DEX Latency Histogram\n";
+    out << "# DEX Latency Histogram (nanoseconds)\n";
     out << "# Total ops: " << total_ops << "\n";
-    out << "# Avg: " << avg_latency << " us\n";
-    out << "# P50: " << p50 << " us, P90: " << p90 << " us, P95: " << p95 
-        << " us, P99: " << p99 << " us, P99.9: " << p999 << " us\n";
-    out << "# latency_us\tcount\n";
+    out << "# Avg: " << avg_latency * LATENCY_NS_GRANULARITY << " ns\n";
+    out << "# P50: " << p50 * LATENCY_NS_GRANULARITY << " ns, P90: " << p90 * LATENCY_NS_GRANULARITY 
+        << " ns, P95: " << p95 * LATENCY_NS_GRANULARITY << " ns, P99: " << p99 * LATENCY_NS_GRANULARITY 
+        << " ns, P99.9: " << p999 * LATENCY_NS_GRANULARITY << " ns\n";
+    out << "# latency_ns\tcount\n";
     
     for (int i = 0; i < LATENCY_BUCKETS; ++i) {
       if (total_histogram[i] > 0) {
-        out << i << "\t" << total_histogram[i] << "\n";
+        out << (i * LATENCY_NS_GRANULARITY) << "\t" << total_histogram[i] << "\n";
       }
     }
     out.close();

@@ -34,13 +34,15 @@ def parse_latency_file(filepath):
     Parse a latency histogram data file.
     
     Returns:
-        latencies: numpy array of latency values (in microseconds)
+        latencies: numpy array of latency values (in nanoseconds or microseconds)
         counts: numpy array of occurrence counts
         stats: dictionary with statistics from header
+        unit: 'ns' or 'us' depending on file format
     """
     latencies = []
     counts = []
     stats = {}
+    unit = 'us'  # default to microseconds
     
     with open(filepath, 'r') as f:
         for line in f:
@@ -50,26 +52,30 @@ def parse_latency_file(filepath):
             
             # Parse header comments for statistics
             if line.startswith('#'):
+                # Detect unit from header
+                if 'nanoseconds' in line.lower() or 'latency_ns' in line.lower():
+                    unit = 'ns'
                 if 'Total ops:' in line:
                     stats['total_ops'] = int(line.split(':')[1].strip())
                 elif 'Avg:' in line:
                     parts = line.split(',')
                     for part in parts:
+                        part = part.replace('ns', '').replace('us', '')
                         if 'Avg:' in part:
-                            stats['avg'] = float(part.split(':')[1].replace('us', '').strip())
+                            stats['avg'] = float(part.split(':')[1].strip())
                         elif 'P50:' in part:
-                            stats['p50'] = int(part.split(':')[1].replace('us', '').strip())
+                            stats['p50'] = int(float(part.split(':')[1].strip()))
                         elif 'P90:' in part:
-                            stats['p90'] = int(part.split(':')[1].replace('us', '').strip())
+                            stats['p90'] = int(float(part.split(':')[1].strip()))
                         elif 'P95:' in part:
-                            stats['p95'] = int(part.split(':')[1].replace('us', '').strip())
+                            stats['p95'] = int(float(part.split(':')[1].strip()))
                         elif 'P99:' in part:
-                            stats['p99'] = int(part.split(':')[1].replace('us', '').strip())
+                            stats['p99'] = int(float(part.split(':')[1].strip()))
                         elif 'P99.9:' in part:
-                            stats['p999'] = int(part.split(':')[1].replace('us', '').strip())
+                            stats['p999'] = int(float(part.split(':')[1].strip()))
                 continue
             
-            # Parse data lines (latency_us \t count)
+            # Parse data lines (latency \t count)
             parts = line.split()
             if len(parts) >= 2:
                 try:
@@ -80,6 +86,7 @@ def parse_latency_file(filepath):
                 except ValueError:
                     continue
     
+    stats['unit'] = unit
     return np.array(latencies), np.array(counts), stats
 
 
