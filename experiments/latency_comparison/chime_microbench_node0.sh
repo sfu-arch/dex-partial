@@ -8,10 +8,12 @@
 
 set -e
 
-# Configuration
-CHIME_DIR="/home/users/aroraabh/DEX-CHIME/CHIME"
+# Configuration - UPDATE THESE PATHS FOR YOUR SYSTEM
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+CHIME_DIR="${REPO_DIR}/CHIME"
 MEMCACHED_IP="10.30.1.9"  # Usually the compute node IP
-EXPERIMENT_DIR="/home/users/aroraabh/DEX-CHIME/experiments/latency_comparison"
+EXPERIMENT_DIR="${SCRIPT_DIR}"
 
 # Benchmark Parameters (matching DEX for fair comparison)
 NODE_COUNT=2              # 1 compute + 1 memory
@@ -56,16 +58,11 @@ echo "Hugepages allocated: $actual_hugepages"
 # Set unlimited memlock
 ulimit -l unlimited 2>/dev/null || true
 
-# Initialize memcached keys
+# Initialize memcached keys using echo/nc or telnet
 echo "Initializing memcached keys..."
-python3 - << 'EOF'
-import memcache
-import time
-mc = memcache.Client(['127.0.0.1:11211'])
-mc.set('serverNum', '0')
-mc.set('clientNum', '0')
-print(f"Memcached initialized: serverNum={mc.get('serverNum')}, clientNum={mc.get('clientNum')}")
-EOF
+(echo "set serverNum 0 0 1"; echo "0"; echo "set clientNum 0 0 1"; echo "0"; sleep 0.5) | nc -q1 127.0.0.1 11211 2>/dev/null || \
+(echo "set serverNum 0 0 1"; echo "0"; echo "set clientNum 0 0 1"; echo "0"; sleep 0.5) | telnet 127.0.0.1 11211 2>/dev/null || \
+echo "Warning: Could not initialize memcached keys (nc/telnet not available). Continuing anyway..."
 
 # Build if needed
 if [ ! -f "${CHIME_DIR}/build/microbench_latency" ]; then

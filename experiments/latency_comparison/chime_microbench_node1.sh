@@ -8,10 +8,12 @@
 
 set -e
 
-# Configuration
-CHIME_DIR="/home/users/aroraabh/DEX-CHIME/CHIME"
+# Configuration - UPDATE THESE PATHS FOR YOUR SYSTEM
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+CHIME_DIR="${REPO_DIR}/CHIME"
 MEMCACHED_IP="10.30.1.9"  # Compute node IP where memcached runs
-EXPERIMENT_DIR="/home/users/aroraabh/DEX-CHIME/experiments/latency_comparison"
+EXPERIMENT_DIR="${SCRIPT_DIR}"
 
 # Benchmark Parameters (must match compute node)
 NODE_COUNT=2              # 1 compute + 1 memory
@@ -58,9 +60,12 @@ ulimit -l unlimited 2>/dev/null || true
 
 # Configure memcached IP
 echo "Configuring memcached IP..."
-cd ${CHIME_DIR}
-sed -i "s/--SERVER=.*/--SERVER=${MEMCACHED_IP}/" memcached.conf
-cat memcached.conf
+if [ -f "${CHIME_DIR}/memcached.conf" ]; then
+    sed -i "s/--SERVER=.*/--SERVER=${MEMCACHED_IP}/" ${CHIME_DIR}/memcached.conf
+    cat ${CHIME_DIR}/memcached.conf
+else
+    echo "Warning: memcached.conf not found at ${CHIME_DIR}"
+fi
 
 # Build if needed
 if [ ! -f "${CHIME_DIR}/build/microbench_latency" ]; then
