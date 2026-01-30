@@ -1,0 +1,47 @@
+#!/bin/bash
+# DEX Latency Benchmark - Node 1+ (Worker)
+# Run this on worker compute nodes AFTER node 0 is started
+# Wait ~5 seconds after starting node 0
+
+set -e
+
+# Parameters - MUST MATCH node 0
+NODE_COUNT=2          # Total nodes (compute + memory)
+READ_RATIO=100        # 100% reads
+INSERT_RATIO=0
+UPDATE_RATIO=0
+DELETE_RATIO=0
+RANGE_RATIO=0
+TOTAL_THREADS=16      # Total threads across all compute nodes
+MEM_THREADS=4         # Memory threads per node
+CACHE_MB=256          # Cache size in MB
+UNIFORM=0             # 0=Zipfian, 1=Uniform
+ZIPF_THETA=0.99       # Zipfian skew
+BULK_LOAD_M=10        # Bulk load (millions)
+WARMUP_M=1            # Warmup ops (millions)
+RUN_M=5               # Run ops (millions)
+CHECK=0               # Check correctness
+TIME_BASED=0          # 0=op-based, 1=time-based
+EARLY_STOP=0          # Disable early stop for latency measurement
+INDEX=0               # 0=DEX
+RPC_RATE=1.0          # RPC rate
+ADMIT_RATE=1.0        # Admission rate
+AUTO_TUNE=0           # Auto-tune disabled
+MAX_THREAD=16         # Max threads per node
+
+echo "=========================================="
+echo "DEX Latency Benchmark - Worker Node"
+echo "100% Reads Workload"
+echo "=========================================="
+
+# Run the benchmark
+echo "Running DEX latency benchmark (worker)..."
+./newbench_latency ${NODE_COUNT} ${READ_RATIO} ${INSERT_RATIO} ${UPDATE_RATIO} \
+    ${DELETE_RATIO} ${RANGE_RATIO} ${TOTAL_THREADS} ${MEM_THREADS} \
+    ${CACHE_MB} ${UNIFORM} ${ZIPF_THETA} ${BULK_LOAD_M} ${WARMUP_M} ${RUN_M} \
+    ${CHECK} ${TIME_BASED} ${EARLY_STOP} ${INDEX} ${RPC_RATE} ${ADMIT_RATE} \
+    ${AUTO_TUNE} ${MAX_THREAD}
+
+echo "=========================================="
+echo "Worker node complete!"
+echo "=========================================="

@@ -1,0 +1,213 @@
+$ cd /home/apa222/dex-partial
+git pull
+bash experiments/qw1_zipfian_skew/chime_$ node1.shAlready up to date.
+$ 
+==============================================
+  CHIME Benchmark - COMPUTE NODE 1+ (Worker)
+==============================================
+
+Configuration (must match Node 0!):
+  Compute Nodes: 2
+  Clients per node: 1
+  Coroutines: 1
+  Workload: YCSB-a
+  Memcached: 10.30.1.9:11211
+
+>>> Setting up hugepages...
+>>> Workload file has 60000 records
+>>> Memcached server: 10.30.1.9:11211
+>>> (Connectivity will be verified when benchmark starts)
+>>> Splitting workloads for 2 nodes, 1 clients each...
+workload = a
+key type = randint
+CN num = 2
+client-num/CN = 1
+loader_num = 8
+spliting:  /home/apa222/dex-partial/CHIME/ycsb/workloads/load_randint_workloada
+0 30000
+30000 60000
+spliting:  /home/apa222/dex-partial/CHIME/ycsb/workloads/txn_randint_workloada
+0 30000
+30000 60000
+
+>>> Running CHIME benchmark (Worker Node)...
+>>> Joining cluster...
+
+kNodeCount 2, kThreadCount 1, kCoroCnt 1
+ycsb_load: ../ycsb/workloads/load_randint_workloada
+ycsb_trans: ../ycsb/workloads/txn_randint_workloada
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=1024 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c80b6c00000, size=1024 MB
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=8192 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb6c00000, size=8192 MB
+shared memory size: 8GB, 0x7c7eb6c00000
+rdma cache size: 1GB
+Machine NR: 2
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb6600000, size=0 MB
+Registering memory: addr=0x7c7eb6600000, size=0 MB, pd=0x63650aaac5b0
+Memory registration succeeded: lkey=1387571, rkey=1387571
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650aaac5b0
+Memory registration succeeded: lkey=1528884, rkey=1528884
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb5a00000, size=0 MB
+Registering memory: addr=0x7c7eb5a00000, size=0 MB, pd=0x63650aaf38a0
+Memory registration succeeded: lkey=1386798, rkey=1386798
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650aaf38a0
+Memory registration succeeded: lkey=1528370, rkey=1528370
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb5000000, size=0 MB
+Registering memory: addr=0x7c7eb5000000, size=0 MB, pd=0x63650aaf6390
+Memory registration succeeded: lkey=1384996, rkey=1384996
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650aaf6390
+Memory registration succeeded: lkey=1527856, rkey=1527856
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb4400000, size=0 MB
+Registering memory: addr=0x7c7eb4400000, size=0 MB, pd=0x63650ab3cfa0
+Memory registration succeeded: lkey=1390873, rkey=1390873
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650ab3cfa0
+Memory registration succeeded: lkey=1518893, rkey=1518893
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb3a00000, size=0 MB
+Registering memory: addr=0x7c7eb3a00000, size=0 MB, pd=0x63650ab652a0
+Memory registration succeeded: lkey=1380104, rkey=1380104
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650ab652a0
+Memory registration succeeded: lkey=1518379, rkey=1518379
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb2e00000, size=0 MB
+Registering memory: addr=0x7c7eb2e00000, size=0 MB, pd=0x63650ab8c2a0
+Memory registration succeeded: lkey=1383676, rkey=1383676
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650ab8c2a0
+Memory registration succeeded: lkey=1517351, rkey=1517351
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb2400000, size=0 MB
+Registering memory: addr=0x7c7eb2400000, size=0 MB, pd=0x63650abb32a0
+Memory registration succeeded: lkey=1381107, rkey=1381107
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650abb32a0
+Memory registration succeeded: lkey=1516323, rkey=1516323
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb1800000, size=0 MB
+Registering memory: addr=0x7c7eb1800000, size=0 MB, pd=0x63650abd8a70
+Memory registration succeeded: lkey=1370347, rkey=1370347
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650abd8a70
+Memory registration succeeded: lkey=1515809, rkey=1515809
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb0e00000, size=0 MB
+Registering memory: addr=0x7c7eb0e00000, size=0 MB, pd=0x63650abfff60
+Memory registration succeeded: lkey=1368287, rkey=1368287
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650abfff60
+Memory registration succeeded: lkey=1522973, rkey=1522973
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eb0200000, size=0 MB
+Registering memory: addr=0x7c7eb0200000, size=0 MB, pd=0x63650ac26b20
+Memory registration succeeded: lkey=1373140, rkey=1373140
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650ac26b20
+Memory registration succeeded: lkey=1521945, rkey=1521945
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eaf800000, size=0 MB
+Registering memory: addr=0x7c7eaf800000, size=0 MB, pd=0x63650ac4f710
+Memory registration succeeded: lkey=1362120, rkey=1362120
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650ac4f710
+Memory registration succeeded: lkey=1520917, rkey=1520917
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eaec00000, size=0 MB
+Registering memory: addr=0x7c7eaec00000, size=0 MB, pd=0x63650ac76340
+Memory registration succeeded: lkey=1367230, rkey=1367230
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650ac76340
+Memory registration succeeded: lkey=1520146, rkey=1520146
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eae200000, size=0 MB
+Registering memory: addr=0x7c7eae200000, size=0 MB, pd=0x63650ac9bdd0
+Memory registration succeeded: lkey=1364914, rkey=1364914
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650ac9bdd0
+Memory registration succeeded: lkey=1510926, rkey=1510926
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7ead600000, size=0 MB
+Registering memory: addr=0x7c7ead600000, size=0 MB, pd=0x63650acc29b0
+Memory registration succeeded: lkey=1353638, rkey=1353638
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650acc29b0
+Memory registration succeeded: lkey=1510155, rkey=1510155
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eaca00000, size=0 MB
+Registering memory: addr=0x7c7eaca00000, size=0 MB, pd=0x63650acc4550
+Memory registration succeeded: lkey=1358748, rkey=1358748
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650acc4550
+Memory registration succeeded: lkey=1508870, rkey=1508870
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eac000000, size=0 MB
+Registering memory: addr=0x7c7eac000000, size=0 MB, pd=0x63650ad12340
+Memory registration succeeded: lkey=1355921, rkey=1355921
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650ad12340
+Memory registration succeeded: lkey=1507842, rkey=1507842
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eab400000, size=0 MB
+Registering memory: addr=0x7c7eab400000, size=0 MB, pd=0x63650ad37ce0
+Memory registration succeeded: lkey=1344902, rkey=1344902
+Registering memory: addr=0x7c80b6c00000, size=1024 MB, pd=0x63650ad37ce0
+Memory registration succeeded: lkey=1514748, rkey=1514748
+Memlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB
+Using NUMA node 1 (max available: 1)
+Huge pages allocated at 0x7c7eaaa00000, size=0 MB
+Registering memory: addr=0x7c7eaaa00000, size=0 MB, pd=0x63650aceb830
+Memory registration succeeded: lkey=1350523, rkey=1350523
+Registering memory: addr=0x7c7eb6c00000, size=8192 MB, pd=0x63650aceb830
+Memory registration succeeded: lkey=1518122, rkey=1518122
+Compute server 1 start up [252.127.0.0]
+
+I connect server 0
+I am 1
+I am loader 1
+[INFO] new root level 2
+loader 1 load finish
+node 1 finish
+warmup time 0s
+total 30002,  retry1 973,  retry2 27,  retry3 1006
+1, throughput 0.0339
+total 29082,  retry1 0,  retry2 0,  retry3 108
+1, throughput 0.1569
+total 19661,  retry1 0,  retry2 0,  retry3 0
+1, throughput 0.1699
+total 19394,  retry1 0,  retry2 0,  retry3 0
+1, throughput 0.1684
+total 19383,  retry1 0,  retry2 0,  retry3 0
+1, throughput 0.1682
+total 19400,  retry1 0,  retry2 0,  retry3 0
+1, throughput 0.1684
+total 19360,  retry1 0,  retry2 0,  retry3 0
+1, throughput 0.1680
+total 19434,  retry1 0,  retry2 0,  retry3 0
+1, throughput 0.1686
+total 19499,  retry1 0,  retry2 0,  retry3 0
+1, throughput 0.1682
+total 19462,  retry1 0,  retry2 0,  retry3 0
+1, throughput 0.1683
+Thread 0 joined.
+ ----- [TreeCache]:  cache size=70 MB free_size=69.964 MB skiplist_node_cnt=86 -----
+consumed cache size = 0.036 MB
+ ----- [IdxCache]:  cache size=30 MB free_size=29.640 MB ----
+consumed hotspot buffer size = 0.360474 MB
+
+[END]
+
+==============================================
+  CHIME Benchmark Complete (Worker Node)
+==============================================
