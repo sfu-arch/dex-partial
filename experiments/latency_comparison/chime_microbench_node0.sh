@@ -1,7 +1,8 @@
 #!/bin/bash
 #
-# CHIME Node 0 (Compute Node) - Simple Benchmark
-# Run this AFTER starting node 1 (memory node)
+# CHIME Node 0 (Compute Node) - Microbenchmark with Latency
+# 
+# IMPORTANT: Run chime_setup_memcached.sh FIRST, then node1, then this script
 #
 
 set -e
@@ -15,7 +16,7 @@ NODE_COUNT=2
 THREAD_COUNT=16
 
 echo "=========================================="
-echo " CHIME Node 0 (Compute) - Simple Benchmark"
+echo " CHIME Node 0 (Compute) - Microbenchmark"
 echo "=========================================="
 
 # Clean up any previous runs
@@ -35,23 +36,7 @@ echo "Hugepages allocated: $(cat /proc/sys/vm/nr_hugepages)"
 # Set unlimited memlock
 ulimit -l unlimited 2>/dev/null || true
 
-# Flush memcached to clear stale data from previous runs
-echo "Flushing memcached..."
-echo "flush_all" | nc -q1 127.0.0.1 11211 2>/dev/null || \
-echo "flush_all" | nc 127.0.0.1 11211 2>/dev/null || \
-echo "Warning: Could not flush memcached"
-sleep 1
-
-# Initialize memcached keys
-echo "Initializing memcached keys..."
-(printf "set serverNum 0 0 1\r\n0\r\n"; printf "set clientNum 0 0 1\r\n0\r\n"; sleep 0.5) | nc -q1 127.0.0.1 11211 2>/dev/null || \
-(printf "set serverNum 0 0 1\r\n0\r\n"; printf "set clientNum 0 0 1\r\n0\r\n"; sleep 0.5) | nc 127.0.0.1 11211 2>/dev/null || \
-echo "Warning: Could not initialize memcached keys"
-
-# Verify memcached keys
-echo "Verifying memcached keys..."
-echo "get serverNum" | nc -q1 127.0.0.1 11211 2>/dev/null || true
-echo "get clientNum" | nc -q1 127.0.0.1 11211 2>/dev/null || true
+# DON'T flush memcached here - use chime_setup_memcached.sh first!
 
 # Build if needed
 if [ ! -f "${CHIME_DIR}/build/microbench_latency" ]; then
