@@ -33,7 +33,8 @@
 // Configuration
 #define TEST_EPOCH 10
 #define TIME_INTERVAL 1.0
-#define LATENCY_BUCKETS 100000    // 0-100ms with 1us granularity
+#define LATENCY_BUCKETS 200000    // 0-100ms with 500ns granularity
+#define LATENCY_NS_PER_BUCKET 500 // 500ns per bucket
 
 // External variables from CHIME
 extern double cache_miss[MAX_APP_THREAD];
@@ -107,14 +108,14 @@ private:
 ZipfianGenerator *zipf_gen = nullptr;
 
 // ============================================
-// Record latency (microsecond granularity)
+// Record latency (500ns granularity)
 // ============================================
 inline void record_latency(int thread_id, uint64_t latency_ns) {
-    uint64_t latency_us = latency_ns / 1000;
-    if (latency_us >= LATENCY_BUCKETS) {
-        latency_us = LATENCY_BUCKETS - 1;
+    uint64_t bucket = latency_ns / LATENCY_NS_PER_BUCKET;
+    if (bucket >= LATENCY_BUCKETS) {
+        bucket = LATENCY_BUCKETS - 1;
     }
-    latency_histogram[thread_id][latency_us]++;
+    latency_histogram[thread_id][bucket]++;
 }
 
 // ============================================
@@ -147,15 +148,18 @@ void thread_run(int id) {
         printf("Thread %d: bulk load complete (%lu keys)\n", id, bulk_load_num);
     }
     
+    // LOCAL barrier: wait for all local threads to reach here
     warmup_cnt.fetch_add(1);
     while (warmup_cnt.load() < kThreadCount);
     
-    // Wait for bulk load to finish on all nodes
+    // GLOBAL barrier: only main thread (id 0) does the cross-node sync
     if (id == 0) {
         printf("Node %d: waiting at load_finish barrier...\n", dsm->getMyNodeID());
         dsm->barrier("load_finish");
         printf("Node %d: bulk load barrier passed\n", dsm->getMyNodeID());
+        ready.store(true);  // Signal other local threads
     }
+    while (!ready.load());
     
     // Simple warmup - all threads do some reads
     if (zipf_gen == nullptr) {
@@ -171,15 +175,20 @@ void thread_run(int id) {
         tree->search(k, v);
     }
     
+    // LOCAL barrier: wait for all local threads to finish warmup
     warmup_cnt.fetch_add(1);
     while (warmup_cnt.load() < kThreadCount * 2);
     
+    // GLOBAL barrier for warmup_finish
     if (id == 0) {
+        printf("Node %d: waiting at warmup_finish barrier...\n", dsm->getMyNodeID());
         dsm->barrier("warmup_finish");
-        printf("Node %d: warmup barrier passed\n", dsm->getMyNodeID());
-        ready.store(true);
+        printf("Node %d: warmup barrier passed, starting benchmark\n", dsm->getMyNodeID());
     }
-    while (!ready.load());
+    
+    // LOCAL barrier before starting benchmark
+    warmup_cnt.fetch_add(1);
+    while (warmup_cnt.load() < kThreadCount * 3);
     
     // ========== MAIN BENCHMARK ==========
     Timer timer;
@@ -223,7 +232,7 @@ void thread_run(int id) {
 }
 
 // ============================================
-// Save latency histogram
+// Save latency histogram (500ns granularity)
 // ============================================
 void save_latency_histogram(const std::string& filename) {
     uint64_t total_histogram[LATENCY_BUCKETS];
@@ -239,43 +248,52 @@ void save_latency_histogram(const std::string& filename) {
     uint64_t sum_latency = 0;
     for (int i = 0; i < LATENCY_BUCKETS; ++i) {
         total_ops += total_histogram[i];
-        sum_latency += total_histogram[i] * i;
+        sum_latency += total_histogram[i] * i;  // in buckets
     }
     
-    double avg_latency = (total_ops > 0) ? (double)sum_latency / total_ops : 0;
+    // Convert to microseconds for display (bucket * 500ns / 1000 = bucket * 0.5us)
+    double avg_latency_us = (total_ops > 0) ? (double)sum_latency * LATENCY_NS_PER_BUCKET / 1000.0 / total_ops : 0;
     
     uint64_t cumulative = 0;
-    uint64_t p50 = 0, p90 = 0, p95 = 0, p99 = 0, p999 = 0;
+    uint64_t p50_bucket = 0, p90_bucket = 0, p95_bucket = 0, p99_bucket = 0, p999_bucket = 0;
     
     for (int i = 0; i < LATENCY_BUCKETS; ++i) {
         cumulative += total_histogram[i];
-        if (p50 == 0 && cumulative >= total_ops * 0.50) p50 = i;
-        if (p90 == 0 && cumulative >= total_ops * 0.90) p90 = i;
-        if (p95 == 0 && cumulative >= total_ops * 0.95) p95 = i;
-        if (p99 == 0 && cumulative >= total_ops * 0.99) p99 = i;
-        if (p999 == 0 && cumulative >= total_ops * 0.999) p999 = i;
+        if (p50_bucket == 0 && cumulative >= total_ops * 0.50) p50_bucket = i;
+        if (p90_bucket == 0 && cumulative >= total_ops * 0.90) p90_bucket = i;
+        if (p95_bucket == 0 && cumulative >= total_ops * 0.95) p95_bucket = i;
+        if (p99_bucket == 0 && cumulative >= total_ops * 0.99) p99_bucket = i;
+        if (p999_bucket == 0 && cumulative >= total_ops * 0.999) p999_bucket = i;
     }
+    
+    // Convert buckets to microseconds
+    double p50_us = p50_bucket * LATENCY_NS_PER_BUCKET / 1000.0;
+    double p90_us = p90_bucket * LATENCY_NS_PER_BUCKET / 1000.0;
+    double p95_us = p95_bucket * LATENCY_NS_PER_BUCKET / 1000.0;
+    double p99_us = p99_bucket * LATENCY_NS_PER_BUCKET / 1000.0;
+    double p999_us = p999_bucket * LATENCY_NS_PER_BUCKET / 1000.0;
     
     printf("\n========== CHIME LATENCY STATISTICS ==========\n");
     printf("Total operations: %lu\n", total_ops);
-    printf("Average latency: %.2f us\n", avg_latency);
-    printf("P50: %lu us, P90: %lu us, P95: %lu us, P99: %lu us, P99.9: %lu us\n",
-           p50, p90, p95, p99, p999);
+    printf("Average latency: %.2f us\n", avg_latency_us);
+    printf("P50: %.1f us, P90: %.1f us, P95: %.1f us, P99: %.1f us, P99.9: %.1f us\n",
+           p50_us, p90_us, p95_us, p99_us, p999_us);
     printf("==============================================\n\n");
     
     std::ofstream out(filename);
     if (out.is_open()) {
-        out << "# CHIME Latency Histogram\n";
+        out << "# CHIME Latency Histogram (500ns granularity)\n";
         out << "# Total ops: " << total_ops << "\n";
-        out << "# Avg: " << avg_latency << " us\n";
-        out << "# P50: " << p50 << " us, P90: " << p90 
-            << " us, P95: " << p95 << " us, P99: " << p99 
-            << " us, P99.9: " << p999 << " us\n";
-        out << "# latency_us\tcount\n";
+        out << "# Avg: " << avg_latency_us << " us\n";
+        out << "# P50: " << p50_us << " us, P90: " << p90_us 
+            << " us, P95: " << p95_us << " us, P99: " << p99_us 
+            << " us, P99.9: " << p999_us << " us\n";
+        out << "# latency_ns\tcount\n";
         
         for (int i = 0; i < LATENCY_BUCKETS; ++i) {
             if (total_histogram[i] > 0) {
-                out << i << "\t" << total_histogram[i] << "\n";
+                // Output actual nanoseconds (bucket * 500ns)
+                out << (i * LATENCY_NS_PER_BUCKET) << "\t" << total_histogram[i] << "\n";
             }
         }
         out.close();
