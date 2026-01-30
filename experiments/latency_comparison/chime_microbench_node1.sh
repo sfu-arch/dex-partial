@@ -11,6 +11,12 @@ REPO_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 CHIME_DIR="${REPO_DIR}/CHIME"
 MEMCACHED_IP="10.30.1.9"  # Compute node where memcached runs
 
+# Pull latest code
+echo "Pulling latest code..."
+cd ${REPO_DIR}
+git fetch origin && git reset --hard origin/main
+echo "Code updated."
+
 # ============================================
 # BENCHMARK PARAMETERS - Must match node0!
 # ============================================
@@ -47,14 +53,12 @@ if [ -f "${CHIME_DIR}/memcached.conf" ]; then
     cat ${CHIME_DIR}/memcached.conf
 fi
 
-# Build
-if [ ! -f "${CHIME_DIR}/build/chime_bench" ]; then
-    echo "Building chime_bench..."
-    mkdir -p ${CHIME_DIR}/build
-    cd ${CHIME_DIR}/build
-    cmake ..
-    make chime_bench -j$(nproc)
-fi
+# Build (always rebuild to pick up changes)
+echo "Building chime_bench..."
+mkdir -p ${CHIME_DIR}/build
+cd ${CHIME_DIR}/build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make chime_bench -j$(nproc)
 
 # Run from build directory
 cd ${CHIME_DIR}/build

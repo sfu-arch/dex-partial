@@ -10,6 +10,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 CHIME_DIR="${REPO_DIR}/CHIME"
 
+# Pull latest code
+echo "Pulling latest code..."
+cd ${REPO_DIR}
+git fetch origin && git reset --hard origin/main
+echo "Code updated."
+
 # ============================================
 # BENCHMARK PARAMETERS - Edit these!
 # ============================================
@@ -48,14 +54,12 @@ printf "set serverNum 0 0 1\r\n0\r\n" | nc -w1 localhost 11211 2>/dev/null || pr
 printf "set clientNum 0 0 1\r\n0\r\n" | nc -w1 localhost 11211 2>/dev/null || printf "set clientNum 0 0 1\r\n0\r\n" | timeout 1 nc localhost 11211 2>/dev/null || true
 echo "Memcached ready."
 
-# Build
-if [ ! -f "${CHIME_DIR}/build/chime_bench" ]; then
-    echo "Building chime_bench..."
-    mkdir -p ${CHIME_DIR}/build
-    cd ${CHIME_DIR}/build
-    cmake ..
-    make chime_bench -j$(nproc)
-fi
+# Build (always rebuild to pick up changes)
+echo "Building chime_bench..."
+mkdir -p ${CHIME_DIR}/build
+cd ${CHIME_DIR}/build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make chime_bench -j$(nproc)
 
 # Run from build directory (so it finds ../memcached.conf)
 cd ${CHIME_DIR}/build
