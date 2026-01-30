@@ -39,6 +39,15 @@ echo "Hugepages: $(cat /proc/sys/vm/nr_hugepages)"
 
 ulimit -l unlimited 2>/dev/null || true
 
+# Flush memcached and reset counters (compute node runs memcached)
+echo "Flushing memcached..."
+echo "flush_all" | nc -w1 localhost 11211 2>/dev/null || echo "flush_all" | timeout 1 nc localhost 11211 2>/dev/null || true
+sleep 1
+echo "Resetting memcached counters..."
+printf "set serverNum 0 0 1\r\n0\r\n" | nc -w1 localhost 11211 2>/dev/null || printf "set serverNum 0 0 1\r\n0\r\n" | timeout 1 nc localhost 11211 2>/dev/null || true
+printf "set clientNum 0 0 1\r\n0\r\n" | nc -w1 localhost 11211 2>/dev/null || printf "set clientNum 0 0 1\r\n0\r\n" | timeout 1 nc localhost 11211 2>/dev/null || true
+echo "Memcached ready."
+
 # Build
 if [ ! -f "${CHIME_DIR}/build/chime_bench" ]; then
     echo "Building chime_bench..."
