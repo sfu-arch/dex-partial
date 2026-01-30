@@ -18,8 +18,8 @@ NODE_COUNT=2
 THREAD_COUNT=1
 READ_RATIO=100
 ZIPFIAN=0.99
-BULK_LOAD_M=10
-OP_NUM_M=5
+BULK_LOAD_M=1         # Must match node0
+OP_NUM_M=1            # Must match node0
 # ============================================
 
 echo "=========================================="

@@ -17,8 +17,8 @@ NODE_COUNT=2
 THREAD_COUNT=1
 READ_RATIO=100        # 100 = 100% reads
 ZIPFIAN=0.99          # Zipfian skew (0.99 = highly skewed)
-BULK_LOAD_M=10        # Bulk load 10M keys
-OP_NUM_M=5            # Run 5M operations
+BULK_LOAD_M=1         # Bulk load 1M keys (reduced for testing)
+OP_NUM_M=1            # Run 1M operations
 # ============================================
 
 echo "=========================================="
