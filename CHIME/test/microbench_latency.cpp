@@ -161,7 +161,9 @@ std::mt19937_64 uniform_gen;
 // Key Generation
 // ============================================
 inline Key to_key(uint64_t k) {
-    return (CityHash64((char *)&k, sizeof(k)) + 1) % kKeySpace;
+    // Hash the key and convert to CHIME's Key type (array<uint8_t, 8>)
+    uint64_t hashed = (CityHash64((char *)&k, sizeof(k)) + 1) % kKeySpace;
+    return int2key(hashed);
 }
 
 inline uint64_t generate_key() {
