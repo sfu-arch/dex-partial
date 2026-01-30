@@ -1,100 +1,67 @@
 #!/bin/bash
 #
-# CHIME Node 0 (Compute Node) - Microbenchmark with Latency
-# 
-# IMPORTANT: Run chime_setup_memcached.sh FIRST, then node1, then this script
+# CHIME Benchmark - Compute Node (10.30.1.9)
+# Run this AFTER starting the memory node
 #
 
 set -e
 
-# Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 CHIME_DIR="${REPO_DIR}/CHIME"
 
+# ============================================
+# BENCHMARK PARAMETERS - Edit these!
+# ============================================
 NODE_COUNT=2
 THREAD_COUNT=16
+READ_RATIO=100        # 100 = 100% reads
+ZIPFIAN=0.99          # Zipfian skew (0.99 = highly skewed)
+BULK_LOAD_M=10        # Bulk load 10M keys
+OP_NUM_M=5            # Run 5M operations
+# ============================================
 
 echo "=========================================="
-echo " CHIME Node 0 (Compute) - Microbenchmark"
+echo " CHIME Benchmark - Compute Node"
 echo "=========================================="
 
-# Clean up any previous runs
-echo "Cleaning up previous processes..."
+# Clean up
+echo "Cleaning up..."
+sudo pkill -9 chime_bench 2>/dev/null || true
 sudo pkill -9 simple_bench 2>/dev/null || true
 sudo pkill -9 microbench_latency 2>/dev/null || true
-sudo pkill -9 ycsb_test 2>/dev/null || true
-sudo pkill -9 ycsb_test_latency 2>/dev/null || true
 sleep 2
 
-# Setup hugepages
+# Hugepages
 echo "Setting up hugepages..."
 sudo bash -c "echo 36864 > /proc/sys/vm/nr_hugepages"
-sleep 1
-echo "Hugepages allocated: $(cat /proc/sys/vm/nr_hugepages)"
+echo "Hugepages: $(cat /proc/sys/vm/nr_hugepages)"
 
-# Set unlimited memlock
 ulimit -l unlimited 2>/dev/null || true
 
-# DON'T flush memcached here - use chime_setup_memcached.sh first!
-
-# Build if needed
-if [ ! -f "${CHIME_DIR}/build/microbench_latency" ]; then
-    echo "Building microbench_latency..."
+# Build
+if [ ! -f "${CHIME_DIR}/build/chime_bench" ]; then
+    echo "Building chime_bench..."
+    mkdir -p ${CHIME_DIR}/build
     cd ${CHIME_DIR}/build
     cmake ..
-    make microbench_latency -j$(nproc)
+    make chime_bench -j$(nproc)
 fi
 
-# Run from CHIME/build directory
+# Run from build directory (so it finds ../memcached.conf)
 cd ${CHIME_DIR}/build
-echo "Working directory: $(pwd)"
-
-# ============================================
-# DEX-style benchmark parameters
-# ============================================
-# Usage: ./microbench_latency kNodeCount kReadRatio kInsertRatio kUpdateRatio 
-#        kDeleteRatio kRangeRatio totalThreadCount memThreadCount
-#        cacheSize(MB) uniform_workload zipfian_theta bulk_load_num(M)
-#        warmup_num(M) op_num(M) check_correctness time_based early_stop
-#        index rpc_rate admission_rate auto_tune kMaxThread
-
-READ_RATIO=100        # 100% reads
-INSERT_RATIO=0
-UPDATE_RATIO=0
-DELETE_RATIO=0
-RANGE_RATIO=0
-MEM_THREAD_COUNT=4    # Memory threads
-CACHE_SIZE_MB=256     # Cache size in MB
-UNIFORM_WORKLOAD=0    # 0=Zipfian, 1=Uniform
-ZIPFIAN_THETA=0.99    # Zipfian skew
-BULK_LOAD_M=10        # 10M keys bulk loaded
-WARMUP_M=1            # 1M warmup ops
-OP_NUM_M=5            # 5M benchmark ops
-CHECK_CORRECT=0
-TIME_BASED=0
-EARLY_STOP=0
-TREE_INDEX=0
-RPC_RATE=1.0
-ADMISSION_RATE=1.0
-AUTO_TUNE=0
 
 echo ""
-echo "Running CHIME microbench_latency (compute node)..."
+echo "Parameters:"
 echo "  Nodes: ${NODE_COUNT}"
 echo "  Threads: ${THREAD_COUNT}"
-echo "  Read/Insert/Update/Delete/Range: ${READ_RATIO}/${INSERT_RATIO}/${UPDATE_RATIO}/${DELETE_RATIO}/${RANGE_RATIO}"
-echo "  Zipfian theta: ${ZIPFIAN_THETA} (uniform=${UNIFORM_WORKLOAD})"
-echo "  Bulk load: ${BULK_LOAD_M}M, Warmup: ${WARMUP_M}M, Ops: ${OP_NUM_M}M"
+echo "  Read ratio: ${READ_RATIO}%"
+echo "  Zipfian: ${ZIPFIAN}"
+echo "  Bulk load: ${BULK_LOAD_M}M keys"
+echo "  Operations: ${OP_NUM_M}M"
 echo ""
 
-# Run benchmark
-sudo ./microbench_latency ${NODE_COUNT} ${READ_RATIO} ${INSERT_RATIO} ${UPDATE_RATIO} \
-    ${DELETE_RATIO} ${RANGE_RATIO} ${THREAD_COUNT} ${MEM_THREAD_COUNT} \
-    ${CACHE_SIZE_MB} ${UNIFORM_WORKLOAD} ${ZIPFIAN_THETA} ${BULK_LOAD_M} \
-    ${WARMUP_M} ${OP_NUM_M} ${CHECK_CORRECT} ${TIME_BASED} ${EARLY_STOP} \
-    ${TREE_INDEX} ${RPC_RATE} ${ADMISSION_RATE} ${AUTO_TUNE} ${THREAD_COUNT}
+sudo ./chime_bench ${NODE_COUNT} ${THREAD_COUNT} ${READ_RATIO} ${ZIPFIAN} ${BULK_LOAD_M} ${OP_NUM_M}
 
 echo ""
-echo "CHIME benchmark complete!"
-echo "Results in: $(pwd)/chime_latency.dat"
+echo "Done! Latency saved to: ${CHIME_DIR}/build/chime_latency.dat"
