@@ -588,7 +588,12 @@ int main(int argc, char *argv[]) {
     // Only compute nodes (node_id < CNodeCount) run the benchmark
     if (node_id >= CNodeCount) {
         printf("Node %d: Memory node, waiting...\n", node_id);
+        // Memory node must participate in all barriers
+        dsm->barrier("workload_ready");
+        dsm->barrier("bulk_load_done");
+        dsm->barrier("warmup_done");
         dsm->barrier("benchmark_done");
+        printf("Node %d: Memory node done\n", node_id);
         return 0;
     }
     
