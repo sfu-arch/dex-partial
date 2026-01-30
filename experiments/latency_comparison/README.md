@@ -10,10 +10,10 @@ The experiment captures per-operation latency histograms from both systems and g
 
 | File | Description |
 |------|-------------|
-| `dex_node0.sh` | DEX benchmark script for primary compute node |
-| `dex_node1.sh` | DEX benchmark script for worker compute nodes |
-| `chime_node0.sh` | CHIME benchmark script for primary compute node |
-| `chime_node1.sh` | CHIME benchmark script for worker compute nodes |
+| `dex_node0.sh` | DEX benchmark script for compute node |
+| `dex_node1.sh` | DEX benchmark script for memory node |
+| `chime_microbench_node0.sh` | CHIME microbenchmark for compute node |
+| `chime_microbench_node1.sh` | CHIME microbenchmark for memory node |
 | `plot_latency_comparison.py` | Python script to generate comparison plots |
 
 ## Prerequisites
@@ -22,23 +22,18 @@ The experiment captures per-operation latency histograms from both systems and g
 
 **DEX:**
 ```bash
-cd dex/build
+cd dex
+mkdir -p build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j newbench_latency
 ```
 
-**CHIME:**
+**CHIME (new microbenchmark - no YCSB needed!):**
 ```bash
-cd CHIME/build
+cd CHIME
+mkdir -p build && cd build
 cmake ..
-make -j ycsb_test_latency
-```
-
-### Generate workload files (for CHIME)
-
-```bash
-cd CHIME/ycsb
-bash generate_full_workloads.sh
+make -j microbench_latency
 ```
 
 ### Python dependencies for plotting
@@ -49,47 +44,54 @@ pip install numpy matplotlib
 
 ## Running the Experiment
 
-### Step 1: Configure memcached IP
+### Cluster Setup
 
-Edit `dex/memcached.conf` and `CHIME/memcached.conf` on ALL nodes:
-```
-<IP_OF_COMPUTE_NODE_0>
-11211
-```
+- **Compute Node**: 10.30.1.9 (runs memcached + benchmark)
+- **Memory Node**: 10.30.1.6 (RDMA memory server)
 
-### Step 2: Run DEX Benchmark
+### Step 1: Start memcached on compute node
 
-**On Compute Node 0 (Primary):**
 ```bash
-cd dex/build
-bash ../../experiments/latency_comparison/dex_node0.sh
+# On compute node (10.30.1.9)
+memcached -d -m 2048 -p 11211
 ```
 
-**On Compute Node 1+ (Wait ~5s after Node 0):**
+### Step 2: Configure memcached IP
+
+Edit `dex/memcached.conf` and `CHIME/memcached.conf` on BOTH nodes:
+```
+--SERVER=10.30.1.9
+```
+
+### Step 3: Run DEX Benchmark
+
+**On Memory Node (10.30.1.6) - start FIRST:**
 ```bash
-cd dex/build
-bash ../../experiments/latency_comparison/dex_node1.sh
+bash /path/to/experiments/latency_comparison/dex_node1.sh
 ```
 
-Wait for completion. The `dex_latency.dat` file will be created in the build directory.
-
-### Step 3: Run CHIME Benchmark
-
-**On Compute Node 0 (Primary):**
+**On Compute Node (10.30.1.9) - wait 3-5 seconds, then:**
 ```bash
-cd CHIME/build
-bash ../../experiments/latency_comparison/chime_node0.sh
+bash /path/to/experiments/latency_comparison/dex_node0.sh
 ```
 
-**On Compute Node 1+ (Wait ~5s after Node 0):**
+Wait for completion. The `dex_latency.dat` file will be created.
+
+### Step 4: Run CHIME Benchmark
+
+**On Memory Node (10.30.1.6) - start FIRST:**
 ```bash
-cd CHIME/build
-bash ../../experiments/latency_comparison/chime_node1.sh
+bash /path/to/experiments/latency_comparison/chime_microbench_node1.sh
 ```
 
-Wait for completion. The `chime_latency.dat` file will be created in the build directory.
+**On Compute Node (10.30.1.9) - wait 3-5 seconds, then:**
+```bash
+bash /path/to/experiments/latency_comparison/chime_microbench_node0.sh
+```
 
-### Step 4: Generate Comparison Plots
+Wait for completion. The `chime_latency.dat` file will be created.
+
+### Step 5: Generate Comparison Plots
 
 Copy both `.dat` files to the same directory, then:
 
