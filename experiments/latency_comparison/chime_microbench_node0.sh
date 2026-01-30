@@ -77,8 +77,8 @@ fi
 # Create experiment directory
 mkdir -p ${EXPERIMENT_DIR}
 
-# Change to CHIME directory so memcached.conf can be found
-cd ${CHIME_DIR}
+# Change to CHIME/build directory so ../memcached.conf can be found
+cd ${CHIME_DIR}/build
 echo "Working directory: $(pwd)"
 
 echo ""
@@ -91,7 +91,7 @@ echo "  Distribution: $([ $UNIFORM -eq 1 ] && echo 'Uniform' || echo 'Zipfian')$
 echo ""
 
 # Run benchmark
-sudo ${CHIME_DIR}/build/microbench_latency \
+sudo ./microbench_latency \
     ${NODE_COUNT} \
     ${READ_RATIO} ${INSERT_RATIO} ${UPDATE_RATIO} ${DELETE_RATIO} ${RANGE_RATIO} \
     ${TOTAL_THREADS} ${MEM_THREADS} \
