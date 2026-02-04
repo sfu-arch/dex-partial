@@ -62,6 +62,11 @@ cleanup_all() {
     echo "flush_all" | nc -q 1 "$MEMORY_NODE_IP" "$MEMCACHED_PORT" 2>/dev/null || true
     sleep 1
     
+    # Initialize serverNum to 0 (required for memcached_increment to work)
+    log "Initializing serverNum to 0..."
+    echo -e "set serverNum 0 0 1\r\n0\r" | nc -q 1 "$MEMORY_NODE_IP" "$MEMCACHED_PORT" 2>/dev/null || true
+    sleep 1
+    
     # Verify memcached is running
     if pgrep memcached > /dev/null; then
         log "memcached is running and flushed"
