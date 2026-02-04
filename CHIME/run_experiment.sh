@@ -35,23 +35,27 @@ log() {
 cleanup_all() {
     log "=== FULL CLEANUP ==="
     
-    # Kill any running CHIME processes
+    # Kill any running CHIME processes (with sudo)
     log "Killing CHIME processes..."
-    pkill -9 latency_bench 2>/dev/null || true
-    pkill -9 ycsb_test 2>/dev/null || true
-    pkill -9 simple_bench 2>/dev/null || true
+    sudo pkill -9 latency_bench 2>/dev/null || true
+    sudo pkill -9 ycsb_test 2>/dev/null || true
+    sudo pkill -9 simple_bench 2>/dev/null || true
     
-    # Kill memcached
+    # Kill memcached (with sudo)
     log "Killing memcached..."
-    pkill -9 memcached 2>/dev/null || true
+    sudo pkill -9 memcached 2>/dev/null || true
     
     # Wait for processes to die
     sleep 3
     
-    # Start fresh memcached
+    # Start fresh memcached (with sudo)
     log "Starting fresh memcached..."
-    memcached -u root -l "$MEMORY_NODE_IP" -p "$MEMCACHED_PORT" -c 10000 -d
+    sudo memcached -u root -l "$MEMORY_NODE_IP" -p "$MEMCACHED_PORT" -c 10000 -d
     sleep 2
+    
+    # Delete the serverNum key (this is what assigns node IDs)
+    log "Deleting serverNum key..."
+    echo "delete serverNum" | nc -q 1 "$MEMORY_NODE_IP" "$MEMCACHED_PORT" 2>/dev/null || true
     
     # Flush all memcached data
     log "Flushing memcached data..."
@@ -125,11 +129,11 @@ run_node1() {
     log "Running on Node 1 (Compute Node)"
     log "=========================================="
     
-    # Just kill local processes, don't touch memcached
+    # Just kill local processes, don't touch memcached (with sudo)
     log "Killing local CHIME processes..."
-    pkill -9 latency_bench 2>/dev/null || true
-    pkill -9 ycsb_test 2>/dev/null || true
-    pkill -9 simple_bench 2>/dev/null || true
+    sudo pkill -9 latency_bench 2>/dev/null || true
+    sudo pkill -9 ycsb_test 2>/dev/null || true
+    sudo pkill -9 simple_bench 2>/dev/null || true
     sleep 2
     
     setup_hugepages
