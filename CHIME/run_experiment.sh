@@ -32,6 +32,27 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
+cleanup() {
+    log "Cleaning up previous processes..."
+    
+    # Kill any running CHIME processes
+    pkill -9 latency_bench 2>/dev/null || true
+    pkill -9 ycsb_test 2>/dev/null || true
+    pkill -9 simple_bench 2>/dev/null || true
+    
+    # Kill memcached
+    pkill -9 memcached 2>/dev/null || true
+    
+    # Clear memcached data by restarting
+    sleep 2
+    
+    # Flush any stale RDMA connections (optional, may need root)
+    # sudo rmmod rdma_ucm 2>/dev/null || true
+    # sudo modprobe rdma_ucm 2>/dev/null || true
+    
+    log "Cleanup complete"
+}
+
 setup_hugepages() {
     log "Setting up hugepages..."
     echo 36864 | sudo tee /proc/sys/vm/nr_hugepages > /dev/null
@@ -82,6 +103,7 @@ run_node0() {
     log "Running on Node 0 (Memory Node)"
     log "=========================================="
     
+    cleanup
     setup_hugepages
     start_memcached
     build_chime
@@ -104,6 +126,7 @@ run_node1() {
     log "Running on Node 1 (Compute Node)"
     log "=========================================="
     
+    cleanup
     setup_hugepages
     build_chime
     
