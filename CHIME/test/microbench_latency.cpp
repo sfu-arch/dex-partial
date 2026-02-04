@@ -596,8 +596,17 @@ int main(int argc, char *argv[]) {
     // In CHIME: Node 0 is MEMORY server, Nodes 1+ are COMPUTE nodes
     // (opposite of DEX where node 0 is compute)
     if (node_id < MEMORY_NODE_NUM) {
-        printf("Node %d: Memory node, waiting at barriers...\n", node_id);
-        // Memory node must participate in all barriers matching compute node
+        printf("Node %d: Memory node\n", node_id);
+        
+        // Memory node needs to register and create tree for root initialization
+        bindCore(0);
+        dsm->registerThread();
+        
+        // Create tree with root initialization (only memory node does this)
+        Tree* mem_tree = new Tree(dsm, 0, true);
+        printf("Node %d: Tree root initialized\n", node_id);
+        
+        // Memory node participates in barriers matching compute node
         dsm->barrier("benchmark");      // Initial sync
         dsm->barrier("load_finish");    // After bulk load
         dsm->barrier("warmup_finish");  // After warmup
@@ -613,8 +622,9 @@ int main(int argc, char *argv[]) {
     bindCore((kThreadCount * 2 + 1) % num_cpus);
     dsm->registerThread();
     
-    // Create tree
-    tree = new Tree(dsm);
+    // Create tree - init_root=false for compute nodes since root is on memory node
+    // In CHIME, node 0 is memory server, so compute nodes should not init root
+    tree = new Tree(dsm, 0, false);
     
     // Generate workload
     generate_workload();
