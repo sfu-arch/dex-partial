@@ -72,9 +72,9 @@ echo ""
 
 # Kill any existing processes
 echo ">>> Cleaning up previous processes..."
-pkill -9 newbench_latency 2>/dev/null || true
-pkill -9 newbench 2>/dev/null || true
-pkill -9 memcached 2>/dev/null || true
+sudo pkill -9 newbench_latency 2>/dev/null || true
+sudo pkill -9 newbench 2>/dev/null || true
+sudo pkill -9 memcached 2>/dev/null || true
 sleep 2
 
 # Setup hugepages (36864 = ~72GB with 2MB pages)
@@ -88,13 +88,13 @@ echo ">>> HugePages_Free: $HP_FREE"
 
 # Start fresh memcached
 echo ">>> Starting fresh memcached..."
-memcached -u root -l 0.0.0.0 -p 11211 -c 10000 -d
+sudo memcached -u root -l 0.0.0.0 -p 11211 -c 10000 -d
 sleep 2
 
 # Initialize memcached keys
 echo ">>> Initializing memcached keys..."
-printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc localhost 11211
-printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc localhost 11211
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc localhost 11211 || true
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc localhost 11211 || true
 sleep 1
 
 # ============================================

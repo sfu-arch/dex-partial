@@ -65,8 +65,8 @@ echo ""
 
 # Kill any existing processes
 echo ">>> Cleaning up previous processes..."
-pkill -9 newbench_latency 2>/dev/null || true
-pkill -9 newbench 2>/dev/null || true
+sudo pkill -9 newbench_latency 2>/dev/null || true
+sudo pkill -9 newbench 2>/dev/null || true
 sleep 1
 
 # Setup hugepages (36864 = ~72GB with 2MB pages)
