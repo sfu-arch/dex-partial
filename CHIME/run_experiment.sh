@@ -20,13 +20,13 @@ MEMORY_NODE_IP="10.30.1.9"
 MEMCACHED_PORT="11211"
 CHIME_DIR="/home/apa222/dex-partial/CHIME"
 
-# Benchmark parameters
-NODE_COUNT=2           # 1 memory + 1 compute
-THREAD_COUNT=1         # Threads per compute node
-READ_RATIO=70          # 70% point reads
-RANGE_RATIO=30         # 30% range scans  
-TOTAL_OPS=5000000      # 5 million operations (same as DEX)
-RANGE_SIZE=50          # Range scan size
+# Benchmark parameters - MATCHED TO DEX
+NODE_COUNT=2           # 1 memory + 1 compute (same as DEX)
+THREAD_COUNT=16        # Threads per compute node (same as DEX TOTAL_THREADS=16)
+READ_RATIO=70          # 70% point reads (same as DEX)
+RANGE_RATIO=30         # 30% range scans (same as DEX)
+TOTAL_OPS=5000000      # 5 million operations (same as DEX RUN_M=5)
+RANGE_SIZE=100         # Range scan size (DEX default)
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
