@@ -31,14 +31,14 @@ INSERT_RATIO=0
 UPDATE_RATIO=0
 DELETE_RATIO=0
 RANGE_RATIO=30        # 30% range scans
-TOTAL_THREADS=16      # Total threads
-MEM_THREADS=4         # Memory threads per node
+TOTAL_THREADS=1       # Single thread for simplicity
+MEM_THREADS=1         # Memory threads per node
 CACHE_MB=256          # Cache size in MB
 UNIFORM=0             # 0=Zipfian, 1=Uniform
 ZIPF_THETA=0.99       # Zipfian skew
-BULK_LOAD_M=10        # Bulk load (millions)
-WARMUP_M=1            # Warmup ops (millions)
-RUN_M=5               # Run ops (millions) - SAME AS DEX
+BULK_LOAD_M=1         # Bulk load (millions) - reduced for single thread
+WARMUP_M=0            # Skip warmup for faster testing
+RUN_M=1               # Run ops (millions) - reduced for single thread
 CHECK=0               # Check correctness
 TIME_BASED=0          # 0=op-based, 1=time-based
 EARLY_STOP=0          # Disable early stop for latency measurement
@@ -46,7 +46,7 @@ INDEX=0               # Not used for CHIME
 RPC_RATE=0.0          # Not applicable for CHIME
 ADMIT_RATE=1.0        # Not applicable for CHIME
 AUTO_TUNE=0           # Auto-tune disabled
-MAX_THREAD=16         # Max threads per node
+MAX_THREAD=1          # Max threads per node - single thread
 
 echo "=========================================="
 echo "CHIME Range+Lookup Benchmark - Node 0 (MEMORY SERVER)"
