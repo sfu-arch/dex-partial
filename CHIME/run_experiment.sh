@@ -50,22 +50,18 @@ cleanup_all() {
     
     # Start fresh memcached (with sudo)
     log "Starting fresh memcached..."
-    sudo memcached -u root -l "$MEMORY_NODE_IP" -p "$MEMCACHED_PORT" -c 10000 -d
-    sleep 2
+    sudo memcached -u root -l "$MEMORY_NODE_IP" -p "$MEMCACHED_PORT" -c 10000 -d -P /tmp/memcached.pid
+    sleep 3
     
-    # Delete the serverNum key (this is what assigns node IDs)
-    log "Deleting serverNum key..."
-    echo "delete serverNum" | nc -q 1 "$MEMORY_NODE_IP" "$MEMCACHED_PORT" 2>/dev/null || true
-    
-    # Flush all memcached data
-    log "Flushing memcached data..."
-    echo "flush_all" | nc -q 1 "$MEMORY_NODE_IP" "$MEMCACHED_PORT" 2>/dev/null || true
+    # Initialize serverNum and clientNum to 0 (required for memcached_increment to work)
+    log "Initializing memcached keys..."
+    echo -e "set serverNum 0 0 1\r\n0\r\nquit\r" | nc "$MEMORY_NODE_IP" "$MEMCACHED_PORT"
+    echo -e "set clientNum 0 0 1\r\n0\r\nquit\r" | nc "$MEMORY_NODE_IP" "$MEMCACHED_PORT"
     sleep 1
     
-    # Initialize serverNum to 0 (required for memcached_increment to work)
-    log "Initializing serverNum to 0..."
-    echo -e "set serverNum 0 0 1\r\n0\r" | nc -q 1 "$MEMORY_NODE_IP" "$MEMCACHED_PORT" 2>/dev/null || true
-    sleep 1
+    # Verify the key exists
+    log "Verifying serverNum key..."
+    echo -e "get serverNum\r\nquit\r" | nc "$MEMORY_NODE_IP" "$MEMCACHED_PORT"
     
     # Verify memcached is running
     if pgrep memcached > /dev/null; then
