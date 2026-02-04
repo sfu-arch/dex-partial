@@ -25,7 +25,7 @@ NODE_COUNT=2           # 1 memory + 1 compute
 THREAD_COUNT=1         # Threads per compute node
 READ_RATIO=70          # 70% point reads
 RANGE_RATIO=30         # 30% range scans  
-TOTAL_OPS=1000000      # 1 million operations
+TOTAL_OPS=5000000      # 5 million operations (same as DEX)
 RANGE_SIZE=50          # Range scan size
 
 log() {
@@ -160,10 +160,8 @@ run_node1() {
     
     log ""
     log "Results saved to:"
-    log "  - chime_read_latency.dat"
-    log "  - chime_range_latency.dat"
-    log ""
-    log "To view: cat chime_read_latency.dat"
+    log "  - chime_read_latency.csv"
+    log "  - chime_range_latency.csv"
 }
 
 case "$1" in
