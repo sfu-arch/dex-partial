@@ -48,6 +48,7 @@ extern volatile bool need_stop;
 int kNodeCount;
 int kThreadCount;
 uint32_t kReadRatio = 100;
+uint32_t kRangeRatio = 0;  // Percentage of range queries
 double zipfian_theta = 0.99;
 uint64_t bulk_load_num = 10000000;
 uint64_t op_num = 5000000;
@@ -212,6 +213,10 @@ void thread_run(int id) {
             // Read
             Value v;
             tree->search(k, v);
+        } else if (r < kReadRatio + kRangeRatio) {
+            // Range query
+            std::map<Key, Value> results;
+            tree->range_query(k, k + 100, results);
         } else {
             // Update
             tree->update(k, key_idx + 1);
@@ -317,12 +322,14 @@ int main(int argc, char *argv[]) {
     if (argc > 4) zipfian_theta = atof(argv[4]);
     if (argc > 5) bulk_load_num = atoi(argv[5]) * 1000000ULL;
     if (argc > 6) op_num = atoi(argv[6]) * 1000000ULL;
+    if (argc > 7) kRangeRatio = atoi(argv[7]);
     
     kKeySpace = bulk_load_num + 1000;
     
     printf("\n========== CHIME BENCHMARK ==========\n");
     printf("Nodes: %d, Threads: %d\n", kNodeCount, kThreadCount);
-    printf("Read ratio: %d%%, Zipfian: %.2f\n", kReadRatio, zipfian_theta);
+    printf("Read: %d%%, Range: %d%%, Update: %d%%, Zipfian: %.2f\n", 
+           kReadRatio, kRangeRatio, 100 - kReadRatio - kRangeRatio, zipfian_theta);
     printf("Bulk load: %luM, Operations: %luM\n", bulk_load_num/1000000, op_num/1000000);
     printf("=====================================\n\n");
     

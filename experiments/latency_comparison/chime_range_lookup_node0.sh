@@ -3,9 +3,7 @@
 # In CHIME: Node 0 = Memory Server, Node 1 = Compute Node
 # Run this on the MEMORY node FIRST!
 #
-# This script runs range scan + lookup combination workload with:
-# - 500ns latency buckets
-# - Same operation count as DEX
+# Uses chime_bench.cpp which is simpler and more reliable
 
 set -e
 
@@ -14,55 +12,40 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CHIME_BUILD_DIR="$SCRIPT_DIR/../../CHIME/build"
 
 # Check if benchmark exists
-if [ ! -f "$CHIME_BUILD_DIR/microbench_latency" ]; then
-    echo "ERROR: microbench_latency not found at $CHIME_BUILD_DIR/microbench_latency"
-    echo "Please build CHIME first: cd CHIME/build && cmake .. && make -j microbench_latency"
+if [ ! -f "$CHIME_BUILD_DIR/chime_bench" ]; then
+    echo "ERROR: chime_bench not found at $CHIME_BUILD_DIR/chime_bench"
+    echo "Please build CHIME first: cd CHIME/build && cmake .. && make -j chime_bench"
     exit 1
 fi
 
 cd "$CHIME_BUILD_DIR"
 
 # ============================================
-# CONFIGURATION - Range + Lookup Mix (SAME AS DEX)
+# CONFIGURATION - 70% Lookup + 30% Range
 # ============================================
-NODE_COUNT=2          # Total nodes (compute + memory)
-READ_RATIO=70         # 70% reads/lookups
-INSERT_RATIO=0
-UPDATE_RATIO=0
-DELETE_RATIO=0
-RANGE_RATIO=30        # 30% range scans
-TOTAL_THREADS=1       # Single thread for simplicity
-MEM_THREADS=1         # Memory threads per node
-CACHE_MB=256          # Cache size in MB
-UNIFORM=0             # 0=Zipfian, 1=Uniform
+NODE_COUNT=2          # Total nodes
+THREAD_COUNT=16       # Threads per node
+READ_RATIO=70         # 70% lookups
 ZIPF_THETA=0.99       # Zipfian skew
-BULK_LOAD_M=1         # Bulk load (millions) - reduced for single thread
-WARMUP_M=0            # Skip warmup for faster testing
-RUN_M=1               # Run ops (millions) - reduced for single thread
-CHECK=0               # Check correctness
-TIME_BASED=0          # 0=op-based, 1=time-based
-EARLY_STOP=0          # Disable early stop for latency measurement
-INDEX=0               # Not used for CHIME
-RPC_RATE=0.0          # Not applicable for CHIME
-ADMIT_RATE=1.0        # Not applicable for CHIME
-AUTO_TUNE=0           # Auto-tune disabled
-MAX_THREAD=1          # Max threads per node - single thread
+BULK_LOAD_M=10        # Bulk load (millions)
+OPS_M=5               # Operations (millions)
+RANGE_RATIO=30        # 30% range scans
 
 echo "=========================================="
 echo "CHIME Range+Lookup Benchmark - Node 0 (MEMORY SERVER)"
 echo "In CHIME: Node 0 = Memory, Node 1 = Compute"
 echo "70% Lookups + 30% Range Scans"
-echo "500ns Latency Buckets"
+echo "500ns Latency Buckets (built into chime_bench)"
 echo "=========================================="
 
 echo ""
 echo "Configuration:"
 echo "  Nodes: $NODE_COUNT"
-echo "  Threads: $TOTAL_THREADS"
-echo "  Cache: ${CACHE_MB}MB"
+echo "  Threads: $THREAD_COUNT"
 echo "  Workload: ${READ_RATIO}% lookup + ${RANGE_RATIO}% range"
-echo "  Distribution: $([ $UNIFORM -eq 0 ] && echo "Zipfian (theta=$ZIPF_THETA)" || echo "Uniform")"
-echo "  Operations: ${RUN_M}M (same as DEX)"
+echo "  Distribution: Zipfian (theta=$ZIPF_THETA)"
+echo "  Bulk load: ${BULK_LOAD_M}M keys"
+echo "  Operations: ${OPS_M}M"
 echo ""
 
 # ============================================
@@ -71,10 +54,9 @@ echo ""
 
 # Kill any existing processes
 echo ">>> Cleaning up previous processes..."
+pkill -9 chime_bench 2>/dev/null || true
 pkill -9 microbench_latency 2>/dev/null || true
-pkill -9 ycsb_test 2>/dev/null || true
-pkill -9 ycsb_test_latency 2>/dev/null || true
-sudo pkill -9 microbench_latency 2>/dev/null || true
+sudo pkill -9 chime_bench 2>/dev/null || true
 sleep 1
 
 # Kill and restart memcached to clear all state
@@ -125,11 +107,9 @@ echo ">>> Running CHIME range+lookup benchmark..."
 echo ">>> Waiting for worker node to connect..."
 echo ""
 
-sudo ./microbench_latency ${NODE_COUNT} ${READ_RATIO} ${INSERT_RATIO} ${UPDATE_RATIO} \
-    ${DELETE_RATIO} ${RANGE_RATIO} ${TOTAL_THREADS} ${MEM_THREADS} \
-    ${CACHE_MB} ${UNIFORM} ${ZIPF_THETA} ${BULK_LOAD_M} ${WARMUP_M} ${RUN_M} \
-    ${CHECK} ${TIME_BASED} ${EARLY_STOP} ${INDEX} ${RPC_RATE} ${ADMIT_RATE} \
-    ${AUTO_TUNE} ${MAX_THREAD}
+# chime_bench args: <nodes> <threads> [read_ratio] [zipfian] [bulk_M] [ops_M] [range_ratio]
+sudo ./chime_bench ${NODE_COUNT} ${THREAD_COUNT} ${READ_RATIO} ${ZIPF_THETA} \
+    ${BULK_LOAD_M} ${OPS_M} ${RANGE_RATIO}
 
 echo ""
 echo "=========================================="
