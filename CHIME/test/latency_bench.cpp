@@ -63,17 +63,6 @@ DSM *dsm;
 // Zipfian generator (from zipf.h)
 struct zipf_gen_state zipf_state;
 
-inline Key int2key(uint64_t k) {
-    Key key;
-    key.fill(0);
-    *(uint64_t*)key.data() = __builtin_bswap64(k);
-    return key;
-}
-
-inline uint64_t key2int(const Key& k) {
-    return __builtin_bswap64(*(uint64_t*)k.data());
-}
-
 /**
  * Record latency in appropriate histogram bucket
  */
