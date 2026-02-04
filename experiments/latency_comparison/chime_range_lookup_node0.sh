@@ -110,6 +110,13 @@ echo ">>> Verifying memcached state..."
 echo "serverNum: $(printf 'get serverNum\r\nquit\r\n' | nc localhost 11211 | grep -A1 VALUE | tail -1)"
 echo "clientNum: $(printf 'get clientNum\r\nquit\r\n' | nc localhost 11211 | grep -A1 VALUE | tail -1)"
 
+# Configure memcached.conf for CHIME (memory server IP)
+echo ">>> Configuring memcached.conf..."
+MEMC_SERVER_IP="10.30.1.9"
+MEMC_PORT="11211"
+echo -e "${MEMC_SERVER_IP}\n${MEMC_PORT}" > ../memcached.conf
+echo ">>> memcached.conf set to ${MEMC_SERVER_IP}:${MEMC_PORT}"
+
 # ============================================
 # RUN BENCHMARK
 # ============================================

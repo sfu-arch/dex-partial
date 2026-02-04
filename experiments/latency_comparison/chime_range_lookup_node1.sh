@@ -80,12 +80,17 @@ ulimit -l unlimited 2>/dev/null || true
 HP_FREE=$(cat /proc/meminfo | grep HugePages_Free | awk '{print $2}')
 echo ">>> HugePages_Free: $HP_FREE"
 
+# Configure memcached.conf to connect to memory server
+echo ">>> Configuring memcached.conf..."
+MEMC_SERVER_IP="10.30.1.9"
+MEMC_PORT="11211"
+echo -e "${MEMC_SERVER_IP}\n${MEMC_PORT}" > ../memcached.conf
+echo ">>> memcached.conf set to ${MEMC_SERVER_IP}:${MEMC_PORT}"
+
 # Check memcached connectivity
-MEMC_IP=$(head -1 ../memcached.conf)
-MEMC_PORT=$(sed -n '2p' ../memcached.conf)
-echo ">>> Checking memcached at $MEMC_IP:$MEMC_PORT..."
-nc -z -w 5 $MEMC_IP $MEMC_PORT || {
-    echo "ERROR: Cannot connect to memcached at $MEMC_IP:$MEMC_PORT"
+echo ">>> Checking memcached at $MEMC_SERVER_IP:$MEMC_PORT..."
+nc -z -w 5 $MEMC_SERVER_IP $MEMC_PORT || {
+    echo "ERROR: Cannot connect to memcached at $MEMC_SERVER_IP:$MEMC_PORT"
     echo "Make sure Node 0 is running first!"
     exit 1
 }
