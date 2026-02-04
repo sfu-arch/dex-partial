@@ -160,8 +160,10 @@ run_node1() {
     
     log ""
     log "Results saved to:"
-    log "  - chime_read_latency.csv"
-    log "  - chime_range_latency.csv"
+    log "  - chime_read_latency.dat"
+    log "  - chime_range_latency.dat"
+    log ""
+    log "To view: cat chime_read_latency.dat"
 }
 
 case "$1" in

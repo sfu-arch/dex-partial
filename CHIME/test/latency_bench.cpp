@@ -176,18 +176,12 @@ void save_latency_histogram(const char* filename, uint64_t histogram[][LATENCY_B
     }
     
     std::ofstream file(filename);
-    file << "# CHIME Latency Histogram - " << op_type << std::endl;
-    file << "# Bucket size: " << LATENCY_NS_GRANULARITY << " ns" << std::endl;
-    file << "# Total samples: " << total_samples << std::endl;
-    file << "# Format: latency_ns,count,cumulative_percent" << std::endl;
-    
-    uint64_t cumulative = 0;
+    // Simple .dat format: latency_ns count
+    // This is easy to read with cat and parse with scripts
     for (int b = 0; b < LATENCY_BUCKETS; b++) {
         if (total[b] > 0) {
-            cumulative += total[b];
-            double pct = 100.0 * cumulative / total_samples;
             uint64_t latency_ns = (uint64_t)b * LATENCY_NS_GRANULARITY;
-            file << latency_ns << "," << total[b] << "," << std::fixed << std::setprecision(6) << pct << std::endl;
+            file << latency_ns << "\t" << total[b] << std::endl;
         }
     }
     
@@ -197,7 +191,7 @@ void save_latency_histogram(const char* filename, uint64_t histogram[][LATENCY_B
     // Print percentiles
     printf("\n%s Latency Percentiles:\n", op_type);
     double percentiles[] = {50, 90, 95, 99, 99.9};
-    cumulative = 0;
+    uint64_t cumulative = 0;
     int pct_idx = 0;
     for (int b = 0; b < LATENCY_BUCKETS && pct_idx < 5; b++) {
         cumulative += total[b];
@@ -381,9 +375,9 @@ int main(int argc, char *argv[]) {
         }
         printf("===========================================\n");
         
-        // Save latency histograms
-        save_latency_histogram("chime_read_latency.csv", read_latency, 1, "Read");
-        save_latency_histogram("chime_range_latency.csv", range_latency, 1, "Range");
+        // Save latency histograms as .dat files
+        save_latency_histogram("chime_read_latency.dat", read_latency, 1, "Read");
+        save_latency_histogram("chime_range_latency.dat", range_latency, 1, "Range");
     }
     
     dsm->barrier("done");
