@@ -1,6 +1,7 @@
 #!/bin/bash
-# CHIME Range + Lookup Latency Benchmark - Node 0 (Primary Compute Node)
-# Run this on the primary compute node first
+# CHIME Range + Lookup Latency Benchmark - Node 0 (MEMORY Server)
+# In CHIME: Node 0 = Memory Server, Node 1 = Compute Node
+# Run this on the MEMORY node FIRST!
 #
 # This script runs range scan + lookup combination workload with:
 # - 500ns latency buckets
@@ -48,7 +49,8 @@ AUTO_TUNE=0           # Auto-tune disabled
 MAX_THREAD=16         # Max threads per node
 
 echo "=========================================="
-echo "CHIME Range+Lookup Benchmark - Node 0 (Primary)"
+echo "CHIME Range+Lookup Benchmark - Node 0 (MEMORY SERVER)"
+echo "In CHIME: Node 0 = Memory, Node 1 = Compute"
 echo "70% Lookups + 30% Range Scans"
 echo "500ns Latency Buckets"
 echo "=========================================="

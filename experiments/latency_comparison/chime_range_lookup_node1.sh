@@ -1,6 +1,7 @@
 #!/bin/bash
-# CHIME Range + Lookup Latency Benchmark - Node 1+ (Worker/Memory Node)
-# Run this on worker nodes AFTER node 0 is started
+# CHIME Range + Lookup Latency Benchmark - Node 1 (COMPUTE Node)
+# In CHIME: Node 0 = Memory Server, Node 1 = Compute Node
+# Run this on the COMPUTE node AFTER Node 0 (memory) is started!
 # Wait ~5 seconds after starting node 0
 
 set -e
@@ -45,7 +46,8 @@ AUTO_TUNE=0           # Auto-tune disabled
 MAX_THREAD=16         # Max threads per node
 
 echo "=========================================="
-echo "CHIME Range+Lookup Benchmark - Worker Node"
+echo "CHIME Range+Lookup Benchmark - Node 1 (COMPUTE NODE)"
+echo "In CHIME: Node 0 = Memory, Node 1 = Compute"
 echo "70% Lookups + 30% Range Scans"
 echo "=========================================="
 

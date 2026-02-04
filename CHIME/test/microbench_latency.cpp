@@ -593,8 +593,9 @@ int main(int argc, char *argv[]) {
     node_id = dsm->getMyNodeID();
     kThreadCount = kMaxThread;
     
-    // Only compute nodes (node_id < CNodeCount) run the benchmark
-    if (node_id >= CNodeCount) {
+    // In CHIME: Node 0 is MEMORY server, Nodes 1+ are COMPUTE nodes
+    // (opposite of DEX where node 0 is compute)
+    if (node_id < MEMORY_NODE_NUM) {
         printf("Node %d: Memory node, waiting at barriers...\n", node_id);
         // Memory node must participate in all barriers matching compute node
         dsm->barrier("benchmark");      // Initial sync
