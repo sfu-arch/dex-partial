@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <thread>
 #include <time.h>
+#include <unistd.h>
 #include <vector>
 
 // Configuration
@@ -191,7 +192,11 @@ inline void record_latency(int thread_id, uint64_t latency_ns) {
 // Thread Functions
 // ============================================
 void thread_run(int id) {
-    bindCore(id * 2 + 1);
+    // Use modulo to handle systems with fewer cores
+    // Try to spread across available cores
+    int num_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    int core = (id % num_cpus);
+    bindCore(core);
     dsm->registerThread();
     
     tp[id][0] = 0;
@@ -228,10 +233,11 @@ void thread_run(int id) {
     if (id == 0) {
         while (warmup_cnt.load() != kThreadCount);
         printf("Node %d: bulk load complete\n", dsm->getMyNodeID());
-        dsm->barrier("load_finish");  // Matches ycsb_test
-        warmup_cnt.store(0);
+        // Signal main thread that bulk load is done (barrier called from main)
+        warmup_cnt.store(-1);  // Special signal
     }
-    while (warmup_cnt.load() != 0 && id != 0);
+    // Wait for main thread to complete barrier
+    while (warmup_cnt.load() != 0);
     
     // ========== WARMUP PHASE ==========
     uint64_t *my_warmup = warmup_array + id * thread_warmup_num;
@@ -264,10 +270,10 @@ void thread_run(int id) {
     if (id == 0) {
         while (warmup_cnt.load() != kThreadCount);
         printf("Node %d: warmup complete\n", dsm->getMyNodeID());
-        dsm->barrier("warmup_finish");  // Matches ycsb_test
-        ready.store(true);
-        warmup_cnt.store(0);
+        // Signal main thread that warmup is done (barrier called from main)
+        warmup_cnt.store(-2);  // Special signal for warmup done
     }
+    // Wait for main thread to complete barrier and signal ready
     while (!ready.load());
     
     // ========== MAIN BENCHMARK WITH LATENCY TRACKING ==========
@@ -601,7 +607,9 @@ int main(int argc, char *argv[]) {
     
     printf("Node %d: Compute node, starting benchmark\n", node_id);
     
-    bindCore(kThreadCount * 2 + 1);
+    // Use modulo to handle systems with fewer cores
+    int num_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    bindCore((kThreadCount * 2 + 1) % num_cpus);
     dsm->registerThread();
     
     // Create tree
@@ -617,8 +625,24 @@ int main(int argc, char *argv[]) {
         th[i] = std::thread(thread_run, i);
     }
     
-    // Wait for all threads to be ready
-    while (worker.load() != (uint64_t)kThreadCount);
+    // Wait for bulk load to complete (signaled by warmup_cnt == -1)
+    while (warmup_cnt.load() != -1) {
+        usleep(1000);
+    }
+    dsm->barrier("load_finish");  // Sync after bulk load
+    warmup_cnt.store(0);  // Allow threads to proceed
+    
+    // Wait for warmup to complete (signaled by warmup_cnt == -2)
+    while (warmup_cnt.load() != -2) {
+        usleep(1000);
+    }
+    dsm->barrier("warmup_finish");  // Sync after warmup
+    ready.store(true);  // Signal threads to start measurement
+    
+    // Wait for all threads to be ready for measurement
+    while (worker.load() != (uint64_t)kThreadCount) {
+        usleep(100);
+    }
     
     printf("All threads ready, starting measurement...\n");
     ready_to_report.store(true);
