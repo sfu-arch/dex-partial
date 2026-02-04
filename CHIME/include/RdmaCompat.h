@@ -25,8 +25,12 @@
 // Feature Detection
 // ============================================================================
 
-// Check for MLNX_OFED experimental verbs at compile time
-#if defined(__has_include)
+// Build-time override takes priority (set by CMakeLists.txt)
+#ifdef FORCE_NO_EXP_VERBS
+  #define HAS_EXP_VERBS 0
+#elif defined(FORCE_USE_EXP_VERBS)
+  #define HAS_EXP_VERBS 1
+#elif defined(__has_include)
   #if __has_include(<infiniband/verbs_exp.h>)
     #define HAS_EXP_VERBS 1
   #else
@@ -34,17 +38,6 @@
   #endif
 #else
   // Assume not available if we can't check
-  #define HAS_EXP_VERBS 0
-#endif
-
-// Allow build-time override
-#ifdef FORCE_USE_EXP_VERBS
-  #undef HAS_EXP_VERBS
-  #define HAS_EXP_VERBS 1
-#endif
-
-#ifdef FORCE_NO_EXP_VERBS
-  #undef HAS_EXP_VERBS
   #define HAS_EXP_VERBS 0
 #endif
 
