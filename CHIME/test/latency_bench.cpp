@@ -31,11 +31,12 @@
 
 // ============================================================================
 // Configuration - 500ns latency buckets like DEX
+// MATCHED TO DEX: BULK_LOAD_M=10, WARMUP_M=1
 // ============================================================================
 #define LATENCY_NS_GRANULARITY 500    // 500 nanoseconds per bucket
 #define LATENCY_BUCKETS 100000        // Up to 50ms (100000 * 500ns)
-#define WARMUP_OPS 10000              // Warmup operations before measurement
-#define BULK_LOAD_COUNT 100000        // Keys to bulk load before benchmark
+#define WARMUP_OPS 1000000            // 1M warmup operations (DEX WARMUP_M=1)
+#define BULK_LOAD_COUNT 10000000      // 10M keys (DEX BULK_LOAD_M=10)
 #define ZIPF_THETA 0.99               // Zipfian skew factor
 
 // Per-thread latency histograms
@@ -54,7 +55,7 @@ int kThreadCount = 1;
 int kReadRatio = 70;
 int kRangeRatio = 30;
 uint64_t kTotalOps = 1000000;
-int kRangeSize = 50;
+int kRangeSize = 100;
 uint64_t kKeySpace = BULK_LOAD_COUNT;
 
 Tree *tree;
