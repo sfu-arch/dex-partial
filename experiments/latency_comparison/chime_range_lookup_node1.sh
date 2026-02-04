@@ -66,7 +66,10 @@ echo ""
 # Kill any existing processes
 echo ">>> Cleaning up previous processes..."
 pkill -9 microbench_latency 2>/dev/null || true
-sleep 1
+pkill -9 ycsb_test 2>/dev/null || true
+pkill -9 ycsb_test_latency 2>/dev/null || true
+sudo pkill -9 microbench_latency 2>/dev/null || true
+sleep 2
 
 # Setup hugepages
 echo ">>> Setting up hugepages..."

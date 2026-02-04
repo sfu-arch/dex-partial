@@ -72,7 +72,15 @@ echo ""
 # Kill any existing processes
 echo ">>> Cleaning up previous processes..."
 pkill -9 microbench_latency 2>/dev/null || true
+pkill -9 ycsb_test 2>/dev/null || true
+pkill -9 ycsb_test_latency 2>/dev/null || true
+sudo pkill -9 microbench_latency 2>/dev/null || true
+sleep 1
+
+# Kill and restart memcached to clear all state
+echo ">>> Stopping old memcached..."
 pkill -9 memcached 2>/dev/null || true
+sudo pkill -9 memcached 2>/dev/null || true
 sleep 2
 
 # Setup hugepages
@@ -89,11 +97,18 @@ echo ">>> Starting fresh memcached..."
 memcached -u root -l 0.0.0.0 -p 11211 -c 10000 -d
 sleep 2
 
-# Initialize memcached keys
-echo ">>> Initializing memcached keys..."
+# Flush all memcached data and reinitialize keys
+echo ">>> Flushing memcached and initializing keys..."
+printf "flush_all\r\nquit\r\n" | nc localhost 11211
+sleep 1
 printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc localhost 11211
 printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc localhost 11211
 sleep 1
+
+# Verify memcached state
+echo ">>> Verifying memcached state..."
+echo "serverNum: $(printf 'get serverNum\r\nquit\r\n' | nc localhost 11211 | grep -A1 VALUE | tail -1)"
+echo "clientNum: $(printf 'get clientNum\r\nquit\r\n' | nc localhost 11211 | grep -A1 VALUE | tail -1)"
 
 # ============================================
 # RUN BENCHMARK
