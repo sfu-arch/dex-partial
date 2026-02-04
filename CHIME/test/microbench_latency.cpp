@@ -207,8 +207,9 @@ void thread_run(int id) {
     
     auto thread_id = dsm->getMyThreadID();
     
-    // ========== BULK LOAD (only first 8 threads) ==========
-    if (id < 8) {
+    // ========== BULK LOAD (only node 0, first 8 threads) ==========
+    // In CHIME, only ONE node does bulk loading - others wait at barrier
+    if (dsm->getMyNodeID() == 0 && id < 8) {
         uint64_t load_per_thread = bulk_load_num / 8;
         uint64_t start_idx = id * load_per_thread;
         uint64_t end_idx = (id == 7) ? bulk_load_num : start_idx + load_per_thread;
@@ -225,6 +226,8 @@ void thread_run(int id) {
             }
         }
         printf("Thread %d: bulk load complete\n", id);
+    } else if (dsm->getMyNodeID() != 0) {
+        printf("Thread %d on node %d: skipping bulk load (only node 0 loads)\n", id, dsm->getMyNodeID());
     }
     
     warmup_cnt.fetch_add(1);
