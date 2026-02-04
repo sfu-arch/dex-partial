@@ -32,25 +32,40 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
-cleanup() {
-    log "Cleaning up previous processes..."
+cleanup_all() {
+    log "=== FULL CLEANUP ==="
     
     # Kill any running CHIME processes
+    log "Killing CHIME processes..."
     pkill -9 latency_bench 2>/dev/null || true
     pkill -9 ycsb_test 2>/dev/null || true
     pkill -9 simple_bench 2>/dev/null || true
     
     # Kill memcached
+    log "Killing memcached..."
     pkill -9 memcached 2>/dev/null || true
     
-    # Clear memcached data by restarting
+    # Wait for processes to die
+    sleep 3
+    
+    # Start fresh memcached
+    log "Starting fresh memcached..."
+    memcached -u root -l "$MEMORY_NODE_IP" -p "$MEMCACHED_PORT" -c 10000 -d
     sleep 2
     
-    # Flush any stale RDMA connections (optional, may need root)
-    # sudo rmmod rdma_ucm 2>/dev/null || true
-    # sudo modprobe rdma_ucm 2>/dev/null || true
+    # Flush all memcached data
+    log "Flushing memcached data..."
+    echo "flush_all" | nc -q 1 "$MEMORY_NODE_IP" "$MEMCACHED_PORT" 2>/dev/null || true
+    sleep 1
     
-    log "Cleanup complete"
+    # Verify memcached is running
+    if pgrep memcached > /dev/null; then
+        log "memcached is running and flushed"
+    else
+        log "WARNING: memcached may not be running"
+    fi
+    
+    log "=== CLEANUP COMPLETE ==="
 }
 
 setup_hugepages() {
@@ -60,30 +75,15 @@ setup_hugepages() {
     log "Hugepages: $(cat /proc/sys/vm/nr_hugepages)"
 }
 
-start_memcached() {
-    log "Starting memcached on $MEMORY_NODE_IP:$MEMCACHED_PORT..."
-    pkill -9 memcached 2>/dev/null || true
-    sleep 2
-    memcached -u root -l "$MEMORY_NODE_IP" -p "$MEMCACHED_PORT" -c 10000 -d
-    sleep 2
-    
-    if pgrep memcached > /dev/null; then
-        log "memcached is running"
-    else
-        log "ERROR: memcached failed to start!"
-        exit 1
-    fi
-}
-
 build_chime() {
     log "Building CHIME..."
     cd "$CHIME_DIR"
     
-    if [ ! -d "build" ]; then
-        mkdir build
-    fi
-    
+    # Clean build directory
+    rm -rf build
+    mkdir build
     cd build
+    
     cmake .. -DSHORT_TEST_EPOCH=ON
     make -j$(nproc)
     
@@ -103,9 +103,8 @@ run_node0() {
     log "Running on Node 0 (Memory Node)"
     log "=========================================="
     
-    cleanup
+    cleanup_all
     setup_hugepages
-    start_memcached
     build_chime
     
     cd "$CHIME_DIR/build"
@@ -126,7 +125,13 @@ run_node1() {
     log "Running on Node 1 (Compute Node)"
     log "=========================================="
     
-    cleanup
+    # Just kill local processes, don't touch memcached
+    log "Killing local CHIME processes..."
+    pkill -9 latency_bench 2>/dev/null || true
+    pkill -9 ycsb_test 2>/dev/null || true
+    pkill -9 simple_bench 2>/dev/null || true
+    sleep 2
+    
     setup_hugepages
     build_chime
     
@@ -161,6 +166,10 @@ case "$1" in
     node1)
         run_node1
         ;;
+    clean)
+        cleanup_all
+        log "Ready for fresh start"
+        ;;
     build)
         build_chime
         ;;
@@ -172,6 +181,7 @@ case "$1" in
         echo "Commands:"
         echo "  node0  - Run on memory node (10.30.1.9)"
         echo "  node1  - Run on compute node (10.30.1.6)"
+        echo "  clean  - Kill all processes and flush memcached"
         echo "  build  - Just build without running"
         echo ""
         echo "Order of execution:"
