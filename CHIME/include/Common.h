@@ -107,8 +107,8 @@ constexpr uint64_t kChunkSize        = 16 * MB;   // B
 // Local Allocation
 constexpr uint64_t rdmaBufferSize     = 1;         // GB  [CONFIG] 4 -> 1 for limited memlock
 
-// Cache (MB)
-constexpr int kIndexCacheSize  = 100;  // MB including kHotspotBufSize 
+// Cache (MB) - Match DEX CACHE_MB=256
+constexpr int kIndexCacheSize  = 256;  // MB - same as DEX
 constexpr int kHotspotBufSize  = 30;
 
 // KV

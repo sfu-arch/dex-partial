@@ -301,68 +301,80 @@ int main(int argc, char *argv[]) {
     dsm->barrier("bulk_load");
     printf("Node %d: All nodes synchronized after bulk load\n", my_node);
     
-    // Run benchmark on compute nodes (single-threaded for simplicity)
+    // Run benchmark on compute nodes with multiple threads
     if (my_node >= MEMORY_NODE_NUM) {
-        printf("Node %d: Starting benchmark (%lu ops)...\n", my_node, kTotalOps);
+        printf("Node %d: Starting benchmark (%lu ops, %d threads, range_size=%d)...\n", 
+               my_node, kTotalOps, kThreadCount, kRangeSize);
         
-        // Initialize Zipfian generator
-        struct zipf_gen_state local_zipf;
-        mehcached_zipf_init(&local_zipf, kKeySpace, ZIPF_THETA, 12345);
-        
-        std::mt19937 rng(54321);
-        std::uniform_int_distribution<int> op_dist(1, 100);
-        
-        Timer timer;
-        Value v;
-        int thread_id = 0;  // Main thread
-        
-        auto start_time = std::chrono::high_resolution_clock::now();
-        
-        // Warmup
-        printf("  Warmup: %d ops\n", WARMUP_OPS);
-        for (int i = 0; i < WARMUP_OPS; i++) {
-            uint64_t key_idx = mehcached_zipf_next(&local_zipf) % kKeySpace;
-            Key k = int2key(key_idx);
-            tree->search(k, v);
-        }
-        
-        // Reset histograms after warmup
+        // Reset histograms before measurement
         memset(read_latency, 0, sizeof(read_latency));
         memset(range_latency, 0, sizeof(range_latency));
         
-        // Measurement
-        printf("  Running %lu operations...\n", kTotalOps);
-        for (uint64_t i = 0; i < kTotalOps; i++) {
-            int op_choice = op_dist(rng);
-            uint64_t key_idx = mehcached_zipf_next(&local_zipf) % kKeySpace;
-            Key k = int2key(key_idx);
-            
-            if (op_choice <= kReadRatio) {
-                // Point read (lookup)
-                timer.begin();
-                tree->search(k, v);
-                uint64_t elapsed_ns = timer.end();
+        auto start_time = std::chrono::high_resolution_clock::now();
+        
+        // Calculate ops per thread
+        uint64_t ops_per_thread = kTotalOps / kThreadCount;
+        
+        // Launch worker threads
+        std::vector<std::thread> threads;
+        for (int t = 0; t < kThreadCount; t++) {
+            threads.emplace_back([t, ops_per_thread]() {
+                // Bind to core
+                bindCore(t);
+                dsm->registerThread();
                 
-                record_latency(read_latency[thread_id], elapsed_ns);
-                total_reads++;
-            } else {
-                // Range scan
-                Key to_key = int2key(key_idx + kRangeSize);
-                std::map<Key, Value> results;
+                // Initialize per-thread Zipfian generator
+                struct zipf_gen_state local_zipf;
+                mehcached_zipf_init(&local_zipf, kKeySpace, ZIPF_THETA, t * 12345 + 1);
                 
-                timer.begin();
-                tree->range_query(k, to_key, results);
-                uint64_t elapsed_ns = timer.end();
+                std::mt19937 rng(t * 54321 + 1);
+                std::uniform_int_distribution<int> op_dist(1, 100);
                 
-                record_latency(range_latency[thread_id], elapsed_ns);
-                total_ranges++;
-            }
-            
-            completed_ops++;
-            
-            if ((i + 1) % 100000 == 0) {
-                printf("  Progress: %lu / %lu ops\n", i + 1, kTotalOps);
-            }
+                Timer timer;
+                Value v;
+                
+                // Warmup
+                for (int i = 0; i < WARMUP_OPS / kThreadCount; i++) {
+                    uint64_t key_idx = mehcached_zipf_next(&local_zipf) % kKeySpace;
+                    Key k = int2key(key_idx);
+                    tree->search(k, v);
+                }
+                
+                // Measurement
+                for (uint64_t i = 0; i < ops_per_thread; i++) {
+                    int op_choice = op_dist(rng);
+                    uint64_t key_idx = mehcached_zipf_next(&local_zipf) % kKeySpace;
+                    Key k = int2key(key_idx);
+                    
+                    if (op_choice <= kReadRatio) {
+                        // Point read (lookup)
+                        timer.begin();
+                        tree->search(k, v);
+                        uint64_t elapsed_ns = timer.end();
+                        
+                        record_latency(read_latency[t], elapsed_ns);
+                        total_reads++;
+                    } else {
+                        // Range scan with kRangeSize
+                        Key to_key = int2key(key_idx + kRangeSize);
+                        std::map<Key, Value> results;
+                        
+                        timer.begin();
+                        tree->range_query(k, to_key, results);
+                        uint64_t elapsed_ns = timer.end();
+                        
+                        record_latency(range_latency[t], elapsed_ns);
+                        total_ranges++;
+                    }
+                    
+                    completed_ops++;
+                }
+            });
+        }
+        
+        // Wait for all threads to complete
+        for (auto& t : threads) {
+            t.join();
         }
         
         auto end_time = std::chrono::high_resolution_clock::now();
@@ -371,6 +383,8 @@ int main(int argc, char *argv[]) {
         printf("\n===========================================\n");
         printf("Benchmark Complete!\n");
         printf("===========================================\n");
+        printf("Threads:        %d\n", kThreadCount);
+        printf("Range size:     %d\n", kRangeSize);
         printf("Total time:     %ld ms\n", duration.count());
         printf("Total ops:      %lu\n", completed_ops.load());
         printf("Total reads:    %lu\n", total_reads.load());
@@ -381,9 +395,9 @@ int main(int argc, char *argv[]) {
         }
         printf("===========================================\n");
         
-        // Save latency histograms
-        save_latency_histogram("chime_read_latency.dat", read_latency, 1, "Read");
-        save_latency_histogram("chime_range_latency.dat", range_latency, 1, "Range");
+        // Save latency histograms (aggregate across all threads)
+        save_latency_histogram("chime_read_latency.dat", read_latency, kThreadCount, "Read");
+        save_latency_histogram("chime_range_latency.dat", range_latency, kThreadCount, "Range");
     }
     
     dsm->barrier("done");
