@@ -127,6 +127,7 @@ def expand_histogram(latencies, counts, max_samples=100000):
 def plot_histogram_comparison(dex_data, chime_data, output_path='latency_comparison.png'):
     """
     Create comprehensive latency comparison plots with operation counts.
+    Uses line plots for better visibility of the complete curve.
     """
     dex_lat, dex_cnt, dex_stats = dex_data
     chime_lat, chime_cnt, chime_stats = chime_data
@@ -150,6 +151,14 @@ def plot_histogram_comparison(dex_data, chime_data, output_path='latency_compari
     else:
         chime_lat_us = chime_lat.astype(float)
     
+    # Sort data by latency for proper line plotting
+    dex_sort_idx = np.argsort(dex_lat_us)
+    chime_sort_idx = np.argsort(chime_lat_us)
+    dex_lat_sorted = dex_lat_us[dex_sort_idx]
+    dex_cnt_sorted = dex_cnt[dex_sort_idx]
+    chime_lat_sorted = chime_lat_us[chime_sort_idx]
+    chime_cnt_sorted = chime_cnt[chime_sort_idx]
+    
     # Create figure with multiple subplots
     fig = plt.figure(figsize=(16, 14))
     
@@ -160,57 +169,62 @@ def plot_histogram_comparison(dex_data, chime_data, output_path='latency_compari
         fontsize=18, fontweight='bold', y=0.98
     )
     
-    # 1. Superimposed Histogram (main plot)
+    # 1. PDF Line Plot (main plot)
     ax1 = fig.add_subplot(2, 2, 1)
     
     # Determine reasonable x-axis range (up to P99.9)
     dex_p999 = dex_stats.get('p999', np.max(dex_lat_us))
     chime_p999 = chime_stats.get('p999', np.max(chime_lat_us))
-    max_lat = max(dex_p999, chime_p999) * 1.1
+    if dex_unit == 'ns':
+        dex_p999 /= 1000.0
+    if chime_unit == 'ns':
+        chime_p999 /= 1000.0
+    max_lat = max(dex_p999, chime_p999) * 1.2
+    if max_lat == 0:
+        max_lat = max(np.max(dex_lat_us), np.max(chime_lat_us)) * 1.1
     
     # Filter data for plotting
-    dex_mask = dex_lat_us <= max_lat
-    chime_mask = chime_lat_us <= max_lat
+    dex_mask = dex_lat_sorted <= max_lat
+    chime_mask = chime_lat_sorted <= max_lat
     
-    # Normalize to probability density
-    ax1.bar(dex_lat_us[dex_mask], dex_cnt[dex_mask] / dex_total * 100, 
-            width=0.5, alpha=0.6, label=f'DEX ({dex_total:,} ops)', color='#2ecc71', edgecolor='none')
-    ax1.bar(chime_lat_us[chime_mask], chime_cnt[chime_mask] / chime_total * 100, 
-            width=0.5, alpha=0.6, label=f'CHIME ({chime_total:,} ops)', color='#3498db', edgecolor='none')
+    # Normalize to probability density (percentage)
+    dex_pct = dex_cnt_sorted / dex_total * 100
+    chime_pct = chime_cnt_sorted / chime_total * 100
+    
+    # Line plots with filled area
+    ax1.fill_between(dex_lat_sorted[dex_mask], dex_pct[dex_mask], 
+                     alpha=0.3, color='#2ecc71')
+    ax1.plot(dex_lat_sorted[dex_mask], dex_pct[dex_mask], 
+             label=f'DEX ({dex_total:,} ops)', color='#2ecc71', linewidth=2)
+    
+    ax1.fill_between(chime_lat_sorted[chime_mask], chime_pct[chime_mask], 
+                     alpha=0.3, color='#3498db')
+    ax1.plot(chime_lat_sorted[chime_mask], chime_pct[chime_mask], 
+             label=f'CHIME ({chime_total:,} ops)', color='#3498db', linewidth=2)
     
     ax1.set_xlabel('Latency (μs)')
     ax1.set_ylabel('Percentage of Operations (%)')
-    ax1.set_title('Latency Distribution')
+    ax1.set_title('Latency Distribution (PDF)')
     ax1.legend(loc='upper right')
     ax1.set_xlim(0, max_lat)
-    
-    # Add percentile lines
-    for name, stats, color, ls in [('DEX', dex_stats, '#27ae60', '--'), ('CHIME', chime_stats, '#2980b9', ':')]:
-        p50 = stats.get('p50', 0)
-        p99 = stats.get('p99', 0)
-        if stats.get('unit', 'us') == 'ns':
-            p50 /= 1000.0
-            p99 /= 1000.0
-        if p50 > 0:
-            ax1.axvline(x=p50, color=color, linestyle=ls, alpha=0.7, linewidth=1.5, label=f'{name} P50')
-        if p99 > 0:
-            ax1.axvline(x=p99, color=color, linestyle=ls, alpha=0.5, linewidth=1.5)
+    ax1.grid(True, alpha=0.3)
     
     # 2. CDF Comparison
     ax2 = fig.add_subplot(2, 2, 2)
     
     # Calculate CDFs
-    dex_cdf = np.cumsum(dex_cnt) / dex_total * 100
-    chime_cdf = np.cumsum(chime_cnt) / chime_total * 100
+    dex_cdf = np.cumsum(dex_cnt_sorted) / dex_total * 100
+    chime_cdf = np.cumsum(chime_cnt_sorted) / chime_total * 100
     
-    ax2.plot(dex_lat_us[dex_mask], dex_cdf[dex_mask], 
-             label=f'DEX ({dex_total:,} ops)', color='#2ecc71', linewidth=2)
-    ax2.plot(chime_lat_us[chime_mask], chime_cdf[chime_mask], 
-             label=f'CHIME ({chime_total:,} ops)', color='#3498db', linewidth=2)
+    ax2.plot(dex_lat_sorted[dex_mask], dex_cdf[dex_mask], 
+             label=f'DEX ({dex_total:,} ops)', color='#2ecc71', linewidth=2.5)
+    ax2.plot(chime_lat_sorted[chime_mask], chime_cdf[chime_mask], 
+             label=f'CHIME ({chime_total:,} ops)', color='#3498db', linewidth=2.5)
     
     # Add horizontal lines for common percentiles
     for p in [50, 90, 95, 99, 99.9]:
         ax2.axhline(y=p, color='gray', linestyle='--', alpha=0.3, linewidth=0.5)
+        ax2.text(max_lat * 0.98, p + 0.5, f'P{p}', fontsize=8, color='gray', ha='right')
     
     ax2.set_xlabel('Latency (μs)')
     ax2.set_ylabel('Cumulative Percentage (%)')
@@ -220,18 +234,25 @@ def plot_histogram_comparison(dex_data, chime_data, output_path='latency_compari
     ax2.set_ylim(0, 100)
     ax2.grid(True, alpha=0.3)
     
-    # 3. Log-scale histogram for tail latency
+    # 3. Log-scale line plot for tail latency
     ax3 = fig.add_subplot(2, 2, 3)
     
-    ax3.bar(dex_lat_us, dex_cnt, width=0.5, alpha=0.6, label=f'DEX', color='#2ecc71', edgecolor='none')
-    ax3.bar(chime_lat_us, chime_cnt, width=0.5, alpha=0.6, label=f'CHIME', color='#3498db', edgecolor='none')
+    # Use wider range for tail view
+    tail_max = min(max(np.max(dex_lat_us), np.max(chime_lat_us)), 1000)
+    dex_tail_mask = dex_lat_sorted <= tail_max
+    chime_tail_mask = chime_lat_sorted <= tail_max
+    
+    ax3.semilogy(dex_lat_sorted[dex_tail_mask], dex_cnt_sorted[dex_tail_mask], 
+                 label='DEX', color='#2ecc71', linewidth=2, alpha=0.8)
+    ax3.semilogy(chime_lat_sorted[chime_tail_mask], chime_cnt_sorted[chime_tail_mask], 
+                 label='CHIME', color='#3498db', linewidth=2, alpha=0.8)
     
     ax3.set_xlabel('Latency (μs)')
     ax3.set_ylabel('Count (log scale)')
     ax3.set_title('Tail Latency Distribution (Log Scale)')
-    ax3.set_yscale('log')
     ax3.legend(loc='upper right')
-    ax3.set_xlim(0, min(max(np.max(dex_lat_us), np.max(chime_lat_us)), 10000))
+    ax3.set_xlim(0, tail_max)
+    ax3.grid(True, alpha=0.3)
     
     # 4. Statistics comparison bar chart
     ax4 = fig.add_subplot(2, 2, 4)
@@ -287,18 +308,27 @@ def plot_histogram_comparison(dex_data, chime_data, output_path='latency_compari
     # Also save individual plots
     base_name = output_path.rsplit('.', 1)[0]
     
-    # Save histogram only with operation counts
+    # Save PDF line plot with operation counts
     fig_hist, ax_hist = plt.subplots(figsize=(12, 7))
-    ax_hist.bar(dex_lat_us[dex_mask], dex_cnt[dex_mask] / dex_total * 100, 
-                width=0.5, alpha=0.7, label=f'DEX ({dex_total:,} ops)', color='#2ecc71', edgecolor='none')
-    ax_hist.bar(chime_lat_us[chime_mask], chime_cnt[chime_mask] / chime_total * 100, 
-                width=0.5, alpha=0.7, label=f'CHIME ({chime_total:,} ops)', color='#3498db', edgecolor='none')
+    
+    # Line plot with filled area for better visibility
+    ax_hist.fill_between(dex_lat_sorted[dex_mask], dex_pct[dex_mask], 
+                         alpha=0.3, color='#2ecc71')
+    ax_hist.plot(dex_lat_sorted[dex_mask], dex_pct[dex_mask], 
+                 label=f'DEX ({dex_total:,} ops)', color='#2ecc71', linewidth=2.5)
+    
+    ax_hist.fill_between(chime_lat_sorted[chime_mask], chime_pct[chime_mask], 
+                         alpha=0.3, color='#3498db')
+    ax_hist.plot(chime_lat_sorted[chime_mask], chime_pct[chime_mask], 
+                 label=f'CHIME ({chime_total:,} ops)', color='#3498db', linewidth=2.5)
+    
     ax_hist.set_xlabel('Latency (μs)', fontsize=14)
     ax_hist.set_ylabel('Percentage of Operations (%)', fontsize=14)
     ax_hist.set_title(f'Latency Distribution: DEX vs CHIME (100% Reads)\n'
                       f'DEX: {dex_total:,} ops | CHIME: {chime_total:,} ops', fontsize=16)
     ax_hist.legend(loc='upper right', fontsize=12)
     ax_hist.set_xlim(0, max_lat)
+    ax_hist.grid(True, alpha=0.3)
     
     # Add text box with summary stats
     dex_avg = dex_stats.get('avg', 0)

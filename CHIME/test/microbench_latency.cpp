@@ -576,7 +576,7 @@ void parse_args(int argc, char *argv[]) {
 }
 
 // ============================================
-// Main
+// Main - ALL nodes run same code (like ycsb_test.cpp)
 // ============================================
 int main(int argc, char *argv[]) {
     parse_args(argc, argv);
@@ -584,7 +584,7 @@ int main(int argc, char *argv[]) {
     // Initialize latency histograms
     memset(latency_histogram, 0, sizeof(latency_histogram));
     
-    // Initialize DSM
+    // Initialize DSM - same for all nodes
     DSMConfig config;
     config.machineNR = kNodeCount;
     config.threadNR = kMaxThread;
@@ -593,43 +593,24 @@ int main(int argc, char *argv[]) {
     node_id = dsm->getMyNodeID();
     kThreadCount = kMaxThread;
     
-    // In CHIME: Node 0 is MEMORY server, Nodes 1+ are COMPUTE nodes
-    // (opposite of DEX where node 0 is compute)
-    if (node_id < MEMORY_NODE_NUM) {
-        printf("Node %d: Memory node\n", node_id);
-        
-        // Memory node needs to register and create tree for root initialization
-        bindCore(0);
-        dsm->registerThread();
-        
-        // Create tree with root initialization (only memory node does this)
-        Tree* mem_tree = new Tree(dsm, 0, true);
-        printf("Node %d: Tree root initialized\n", node_id);
-        
-        // Memory node participates in barriers matching compute node
-        dsm->barrier("benchmark");      // Initial sync
-        dsm->barrier("load_finish");    // After bulk load
-        dsm->barrier("warmup_finish");  // After warmup
-        dsm->barrier("fin");            // Final sync
-        printf("Node %d: Memory node done\n", node_id);
-        return 0;
-    }
+    printf("Node %d starting (total nodes: %d)\n", node_id, kNodeCount);
     
-    printf("Node %d: Compute node, starting benchmark\n", node_id);
-    
-    // Use modulo to handle systems with fewer cores
+    // Bind core and register thread - same for all nodes
     int num_cpus = sysconf(_SC_NPROCESSORS_ONLN);
-    bindCore((kThreadCount * 2 + 1) % num_cpus);
+    int core_id = (kThreadCount * 2 + 1) % num_cpus;
+    bindCore(core_id);
     dsm->registerThread();
     
-    // Create tree - init_root=false for compute nodes since root is on memory node
-    // In CHIME, node 0 is memory server, so compute nodes should not init root
-    tree = new Tree(dsm, 0, false);
+    // Create tree - ALL nodes create tree, but only node 0 initializes root
+    tree = new Tree(dsm);
+    printf("Node %d: Tree created\n", node_id);
     
-    // Generate workload
+    // Generate workload - ALL nodes generate workload
     generate_workload();
     
-    dsm->barrier("benchmark");  // Initial sync - matches ycsb_test
+    // Initial barrier - ALL nodes must reach this
+    dsm->barrier("benchmark");
+    printf("Node %d: initial barrier passed\n", node_id);
     
     // Launch threads
     for (int i = 0; i < kThreadCount; ++i) {
@@ -641,6 +622,7 @@ int main(int argc, char *argv[]) {
         usleep(1000);
     }
     dsm->barrier("load_finish");  // Sync after bulk load
+    printf("Node %d: bulk load barrier passed\n", node_id);
     warmup_cnt.store(0);  // Allow threads to proceed
     
     // Wait for warmup to complete (signaled by warmup_cnt == -2)
@@ -648,6 +630,7 @@ int main(int argc, char *argv[]) {
         usleep(1000);
     }
     dsm->barrier("warmup_finish");  // Sync after warmup
+    printf("Node %d: warmup barrier passed\n", node_id);
     ready.store(true);  // Signal threads to start measurement
     
     // Wait for all threads to be ready for measurement
@@ -655,7 +638,7 @@ int main(int argc, char *argv[]) {
         usleep(100);
     }
     
-    printf("All threads ready, starting measurement...\n");
+    printf("Node %d: All threads ready, starting measurement...\n", node_id);
     ready_to_report.store(true);
     
     // Wait for completion
@@ -672,21 +655,20 @@ int main(int argc, char *argv[]) {
     printf("\n========== RESULTS ==========\n");
     printf("Node %d throughput: %.2f Mops/s\n", node_id, total_throughput / 1e6);
     
-    // Aggregate across cluster
-    uint64_t cluster_tp = dsm->sum((uint64_t)total_throughput);
-    if (node_id == 0) {
-        printf("Cluster throughput: %.2f Mops/s\n", cluster_tp / 1e6);
+    // Save latency on compute node only (node 1 in 2-node setup)
+    // Node 0 is memory server, node 1 is where we measure latency
+    if (node_id == 1) {
         save_latency_histogram("chime_latency.dat");
     }
     
-    dsm->barrier("fin");  // Final sync - matches ycsb_test
+    dsm->barrier("fin");  // Final sync
     
     // Cleanup
-    delete[] bulk_array;
-    delete[] warmup_array;
-    delete[] workload_array;
+    if (bulk_array) delete[] bulk_array;
+    if (warmup_array) delete[] warmup_array;
+    if (workload_array) delete[] workload_array;
     if (zipf_gen) delete zipf_gen;
     
-    printf("[END]\n");
+    printf("Node %d: [END]\n", node_id);
     return 0;
 }
