@@ -134,9 +134,11 @@ void thread_run(int id) {
     // Clear latency histogram
     memset(latency_histogram[id], 0, sizeof(uint64_t) * LATENCY_BUCKETS);
     
-    // ========== BULK LOAD (only thread 0 on node 0) ==========
-    if (dsm->getMyNodeID() == 0 && id == 0) {
-        printf("Thread %d loading %lu keys...\n", id, bulk_load_num);
+    // ========== BULK LOAD (only thread 0 on node 1 - the compute node) ==========
+    // Node 0 is memory server, Node 1 is compute node
+    // Loading from Node 1 to avoid potential loopback RDMA issues on Node 0
+    if (dsm->getMyNodeID() == 1 && id == 0) {
+        printf("Thread %d on Node 1 loading %lu keys...\n", id, bulk_load_num);
         
         for (uint64_t i = 0; i < bulk_load_num; ++i) {
             Key k = int2key(i);
