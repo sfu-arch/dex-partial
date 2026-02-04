@@ -30,9 +30,9 @@
 #define LATENCY_TRACKING 1
 #define GLOBAL_WORKLOAD 1
 
-// Latency buckets: 0-100us with 1ns granularity
+// Latency buckets: 0-50ms with 500ns granularity
 #define LATENCY_BUCKETS 100000
-#define LATENCY_NS_GRANULARITY 1  // 1 nanosecond per bucket
+#define LATENCY_NS_GRANULARITY 500  // 500 nanoseconds per bucket
 
 namespace sherman {
 extern uint64_t cache_miss[MAX_APP_THREAD][8];
