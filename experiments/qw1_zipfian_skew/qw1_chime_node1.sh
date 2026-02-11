@@ -134,7 +134,7 @@ for config in "${SKEW_CONFIGS[@]}"; do
     echo ">>> Config: ${READ_RATIO}% read + ${RANGE_RATIO}% range, ${TOTAL_OPS} ops, range_size=${RANGE_SIZE}"
     echo ""
     
-    ./latency_bench \
+    sudo ./latency_bench \
         ${NODE_COUNT} ${THREAD_COUNT} ${READ_RATIO} ${RANGE_RATIO} \
         ${TOTAL_OPS} ${RANGE_SIZE} ${ZIPF_THETA} ${UNIFORM} \
         2>&1 | tee "$RESULTS_DIR/chime_${LABEL}_stdout.log"

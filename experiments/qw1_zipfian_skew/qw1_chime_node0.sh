@@ -139,7 +139,7 @@ for config in "${SKEW_CONFIGS[@]}"; do
     echo ">>> Starting CHIME memory server for $LABEL ... waiting for Node 1."
     echo ""
     
-    ./latency_bench \
+    sudo ./latency_bench \
         ${NODE_COUNT} ${THREAD_COUNT} ${READ_RATIO} ${RANGE_RATIO} \
         ${TOTAL_OPS} ${RANGE_SIZE} ${ZIPF_THETA} ${UNIFORM} \
         2>&1 | tee "/tmp/chime_node0_${LABEL}_stdout.log"
