@@ -448,9 +448,6 @@ int main(int argc, char *argv[]) {
             t.join();
         }
         
-        auto end_time = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-        
         // Aggregate per-thread counters (no atomics needed — threads are joined)
         uint64_t total_reads_val = 0, total_ranges_val = 0;
         uint64_t total_throughput_val = 0;
