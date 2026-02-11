@@ -1,16 +1,16 @@
 DEX LATENCY BENCHMARK
 kNodeCount 2, kReadRatio 70, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 30
-totalThreadCount 16, memThreadCount 4, cache_size 256 MB
+totalThreadCount 30, memThreadCount 4, cache_size 256 MB
 uniform_workload 0, zipfian 0.990000
-bulk_load_num 10000000, warmup_num 1000000, op_num 5000000
+bulk_load_num 10000000, warmup_num 1000000, op_num 30000000
 KeySpace = 10001000
-[4mshared memory size: 8GB, 0x7f1d16a00000[0m
+[4mshared memory size: 8GB, 0x7f2a31800000[0m
 [4mcache size: 1GB[0m
 [4mMachine NR: 2[0m
 [4mMax_APP_THREAD: 36[0m
 [4mNR_DIRECTORY: 4[0m
 [4mStart Build the DSMKeeper[0m
-I am servers 0 [31.127.0.0]
+I am servers 0 [44.127.0.0]
 I connect server 1
 [4mdir 3 launch!
 [0m
@@ -23,7 +23,7 @@ I connect server 1
 Pushdown (RPC) Rate: 0
 Admission Rate: 1
 Cache size(MB) = 256
------Cache initial addr = 0x7f1cfd800000
+-----Cache initial addr = 0x7f2a18400000
 page num = 262144
 alloc_unit = 1024
 entry_num: 262144
@@ -58,50 +58,64 @@ Inner page size = 1024
 Leaf page size = 1024
 node 0 finish bulkload
 IMPORTANT: my root is 283674067075073
-I am 9
-I am 0
 I am 6
-I am 7
-Fetched new height = 5
-I am 13
-I am 10
-I am 15
-I am 5
-I am 3
-I am 4
-I am 8
-I am 14
-I am 1
-I am 2
 I am 11
+Fetched new height = 5
+I am 0
 I am 12
+I am 1
+I am 19
+I am 10
+I am 16
+I am 9
+I am 5
+I am 17
+I am 8
+I am 13
+I am 21
+I am 15
+I am 3
+I am 22
+I am 24
+I am 20
+I am 26
+I am 18
+I am 14
+I am 4
+I am 7
+I am 23
+I am 27
+I am 25
+I am 28
+I am 2
+I am 29
 entering dynamic phase
-Thread_op_num = 312500
+Thread_op_num = 1000000
 node 0 finish warmup
 RPC ratio = 0
 
 ========== DEX Read LATENCY STATISTICS ==========
-Total operations: 3499382
-Average latency: 692.61 ns
+Total operations: 20997987
+Average latency: 893.51 ns
 P50 latency: 500 ns
-P90 latency: 3000 ns
-P95 latency: 4000 ns
-P99 latency: 5000 ns
-P99.9 latency: 6000 ns
+P90 latency: 3500 ns
+P95 latency: 4500 ns
+P99 latency: 6500 ns
+P99.9 latency: 8000 ns
 =================================================
 
 Read latency histogram saved to: dex_read_latency.dat
 
 ========== DEX Range LATENCY STATISTICS ==========
-Total operations: 1500618
-Average latency: 4009.41 ns
-P50 latency: 2000 ns
-P90 latency: 10000 ns
-P95 latency: 12500 ns
-P99 latency: 17000 ns
-P99.9 latency: 21500 ns
+Total operations: 9002013
+Average latency: 4836.70 ns
+P50 latency: 3000 ns
+P90 latency: 12000 ns
+P95 latency: 15000 ns
+P99 latency: 20000 ns
+P99.9 latency: 25000 ns
 =================================================
 
 Range latency histogram saved to: dex_range_latency.dat
-Total reads: 3499382, Total ranges: 1500618
-Final cluster throughput: 7.678 Mops/s
+Total reads: 20997987, Total ranges: 9002013
+Final cluster throughput: 11.331 Mops/s
