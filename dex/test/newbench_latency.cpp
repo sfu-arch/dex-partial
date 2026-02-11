@@ -44,9 +44,12 @@ std::thread th[MAX_APP_THREAD];
 uint64_t tp[MAX_APP_THREAD][8];
 uint64_t total_tp[MAX_APP_THREAD];
 
-// Latency histogram storage - per thread to avoid contention
-uint64_t latency_histogram[MAX_APP_THREAD][LATENCY_BUCKETS];
-std::atomic<uint64_t> total_latency_samples{0};
+// Per-operation latency histograms - per thread to avoid contention
+uint64_t read_latency_histogram[MAX_APP_THREAD][LATENCY_BUCKETS];
+uint64_t range_latency_histogram[MAX_APP_THREAD][LATENCY_BUCKETS];
+// Per-thread counters (no atomics — aggregated after join)
+uint64_t thread_read_count[MAX_APP_THREAD];
+uint64_t thread_range_count[MAX_APP_THREAD];
 
 std::mutex mtx;
 std::condition_variable cv;
@@ -122,14 +125,19 @@ std::atomic_bool ready{false};
 std::atomic_bool one_finish{false};
 std::atomic_bool ready_to_report{false};
 
-// Record a latency sample (in nanoseconds)
-inline void record_latency(int thread_id, uint64_t latency_ns) {
+// Record a latency sample (in nanoseconds) — no atomics in hot path
+inline void record_read_latency(int thread_id, uint64_t latency_ns) {
   uint64_t bucket = latency_ns / LATENCY_NS_GRANULARITY;
-  if (bucket >= LATENCY_BUCKETS) {
-    bucket = LATENCY_BUCKETS - 1;
-  }
-  latency_histogram[thread_id][bucket]++;
-  total_latency_samples.fetch_add(1);
+  if (bucket >= LATENCY_BUCKETS) bucket = LATENCY_BUCKETS - 1;
+  read_latency_histogram[thread_id][bucket]++;
+  thread_read_count[thread_id]++;
+}
+
+inline void record_range_latency(int thread_id, uint64_t latency_ns) {
+  uint64_t bucket = latency_ns / LATENCY_NS_GRANULARITY;
+  if (bucket >= LATENCY_BUCKETS) bucket = LATENCY_BUCKETS - 1;
+  range_latency_histogram[thread_id][bucket]++;
+  thread_range_count[thread_id]++;
 }
 
 void reset_all_params() {
@@ -208,8 +216,11 @@ void thread_run(int id) {
 
   while (!ready_to_report.load());
 
-  // Clear latency histogram for this thread before measurement
-  memset(latency_histogram[id], 0, sizeof(uint64_t) * LATENCY_BUCKETS);
+  // Clear per-op latency histograms for this thread before measurement
+  memset(read_latency_histogram[id], 0, sizeof(uint64_t) * LATENCY_BUCKETS);
+  memset(range_latency_histogram[id], 0, sizeof(uint64_t) * LATENCY_BUCKETS);
+  thread_read_count[id] = 0;
+  thread_range_count[id] = 0;
 
   // Main execution with latency tracking
   counter = 0;
@@ -253,7 +264,12 @@ void thread_run(int id) {
     }
     
     uint64_t latency_ns = op_timer.end();  // Get latency in nanoseconds
-    record_latency(id, latency_ns);
+    // Record into per-op histogram (no atomics)
+    if (cur_op == op_type::Range) {
+      record_range_latency(id, latency_ns);
+    } else {
+      record_read_latency(id, latency_ns);
+    }
     
     tp[id][0]++;
     ++counter;
@@ -552,14 +568,16 @@ void generate_workload() {
   std::cout << "Finish all workload generation" << std::endl;
 }
 
-void save_latency_histogram(const std::string& filename) {
+void save_latency_histogram(const std::string& filename, 
+                            uint64_t histogram[][LATENCY_BUCKETS],
+                            int thread_count, const char* op_type) {
   // Aggregate latency from all threads
   uint64_t total_histogram[LATENCY_BUCKETS];
   memset(total_histogram, 0, sizeof(total_histogram));
   
-  for (int t = 0; t < kThreadCount; ++t) {
+  for (int t = 0; t < thread_count; ++t) {
     for (int i = 0; i < LATENCY_BUCKETS; ++i) {
-      total_histogram[i] += latency_histogram[t][i];
+      total_histogram[i] += histogram[t][i];
     }
   }
   
@@ -571,7 +589,12 @@ void save_latency_histogram(const std::string& filename) {
     sum_latency += total_histogram[i] * i;
   }
   
-  double avg_latency = (total_ops > 0) ? (double)sum_latency / total_ops : 0;
+  if (total_ops == 0) {
+    printf("No %s samples to save\n", op_type);
+    return;
+  }
+
+  double avg_latency = (double)sum_latency / total_ops;
   
   // Find percentiles
   uint64_t p50_target = total_ops * 0.50;
@@ -593,7 +616,7 @@ void save_latency_histogram(const std::string& filename) {
   }
   
   // Print statistics
-  printf("\n========== DEX LATENCY STATISTICS ==========\n");
+  printf("\n========== DEX %s LATENCY STATISTICS ==========\n", op_type);
   printf("Total operations: %lu\n", total_ops);
   printf("Average latency: %.2f ns\n", avg_latency * LATENCY_NS_GRANULARITY);
   printf("P50 latency: %lu ns\n", p50 * LATENCY_NS_GRANULARITY);
@@ -601,12 +624,12 @@ void save_latency_histogram(const std::string& filename) {
   printf("P95 latency: %lu ns\n", p95 * LATENCY_NS_GRANULARITY);
   printf("P99 latency: %lu ns\n", p99 * LATENCY_NS_GRANULARITY);
   printf("P99.9 latency: %lu ns\n", p999 * LATENCY_NS_GRANULARITY);
-  printf("=============================================\n\n");
+  printf("=================================================\n\n");
   
   // Save to file
   std::ofstream out(filename);
   if (out.is_open()) {
-    out << "# DEX Latency Histogram (nanoseconds)\n";
+    out << "# DEX Latency Histogram - " << op_type << " (nanoseconds)\n";
     out << "# Total ops: " << total_ops << "\n";
     out << "# Avg: " << avg_latency * LATENCY_NS_GRANULARITY << " ns\n";
     out << "# P50: " << p50 * LATENCY_NS_GRANULARITY << " ns, P90: " << p90 * LATENCY_NS_GRANULARITY 
@@ -620,9 +643,9 @@ void save_latency_histogram(const std::string& filename) {
       }
     }
     out.close();
-    printf("Latency histogram saved to: %s\n", filename.c_str());
+    printf("%s latency histogram saved to: %s\n", op_type, filename.c_str());
   } else {
-    printf("ERROR: Failed to save latency histogram to %s\n", filename.c_str());
+    printf("ERROR: Failed to save %s latency histogram to %s\n", op_type, filename.c_str());
   }
 }
 
@@ -631,8 +654,11 @@ int main(int argc, char *argv[]) {
   numa_set_preferred(0);
   parse_args(argc, argv);
 
-  // Initialize latency histograms
-  memset(latency_histogram, 0, sizeof(latency_histogram));
+  // Initialize per-op latency histograms
+  memset(read_latency_histogram, 0, sizeof(read_latency_histogram));
+  memset(range_latency_histogram, 0, sizeof(range_latency_histogram));
+  memset(thread_read_count, 0, sizeof(thread_read_count));
+  memset(thread_range_count, 0, sizeof(thread_range_count));
 
   DSMConfig config;
   config.machineNR = kNodeCount;
@@ -697,9 +723,18 @@ int main(int argc, char *argv[]) {
     
     total_cluster_tp = dsm->sum_total(total_throughput, CNodeCount, false);
     
-    // Save latency histogram (only on node 0)
+    // Save per-op latency histograms (only on node 0)
     if (node_id == 0) {
-      save_latency_histogram("dex_latency.dat");
+      save_latency_histogram("dex_read_latency.dat", read_latency_histogram, kThreadCount, "Read");
+      save_latency_histogram("dex_range_latency.dat", range_latency_histogram, kThreadCount, "Range");
+      
+      // Print aggregate counts
+      uint64_t total_reads = 0, total_ranges = 0;
+      for (int i = 0; i < kThreadCount; ++i) {
+        total_reads += thread_read_count[i];
+        total_ranges += thread_range_count[i];
+      }
+      printf("Total reads: %lu, Total ranges: %lu\n", total_reads, total_ranges);
       printf("Final cluster throughput: %.3f Mops/s\n", total_cluster_tp / 1e6);
     }
   }
