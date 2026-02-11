@@ -34,27 +34,46 @@ SKEW_CONFIGS=(
     "0 0.99  zipf_0.99"
 )
 
-# ===================== HELPER: wait for memcached to be fresh =====================
-wait_for_fresh_memcached() {
-    echo ">>> [memcached] Waiting for fresh memcached at $MEMC_IP:$MEMC_PORT..."
+# Iteration counter — must stay in sync with node0
+ITERATION=0
+
+# ===================== HELPER: wait for node0 to signal new iteration =====================
+wait_for_iteration() {
+    local expected_iter="$1"
+    echo ">>> [sync] Waiting for node0 to signal iteration $expected_iter (qw1_iter key)..."
     local attempts=0
-    local max_attempts=60
+    local max_attempts=120   # 4 min max (iteration may take time)
     while [ $attempts -lt $max_attempts ]; do
         if nc -z -w 2 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null; then
-            # Connection OK — verify serverNum is 0 (freshly reset by node0)
             local val
-            val=$(printf "get serverNum\r\nquit\r\n" | nc -w 2 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | grep -A1 "^VALUE" | tail -1 | tr -d '\r')
-            if [ "$val" = "0" ]; then
-                echo ">>> [memcached] OK — connected and serverNum=0 (fresh state)"
+            val=$(printf "get qw1_iter\r\nquit\r\n" | nc -w 2 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | grep -A1 "^VALUE" | tail -1 | tr -d '\r')
+            if [ "$val" = "$expected_iter" ]; then
+                echo ">>> [sync] OK — qw1_iter=$expected_iter (node0 ready for this iteration)"
+                # Now wait for node0's BINARY to register (serverNum >= 1)
+                # This ensures node0 gets ID 0 (memory role in CHIME)
+                echo ">>> [sync] Waiting for node0 binary to register (serverNum >= 1)..."
+                local reg_attempts=0
+                while [ $reg_attempts -lt 30 ]; do
+                    local sn
+                    sn=$(printf "get serverNum\r\nquit\r\n" | nc -w 2 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | grep -A1 "^VALUE" | tail -1 | tr -d '\r')
+                    if [ -n "$sn" ] && [ "$sn" -ge 1 ] 2>/dev/null; then
+                        echo ">>> [sync] node0 registered (serverNum=$sn). Starting in 1s..."
+                        sleep 1
+                        return 0
+                    fi
+                    reg_attempts=$((reg_attempts + 1))
+                    sleep 1
+                done
+                echo ">>> [sync] WARNING: serverNum never reached 1, starting anyway."
                 return 0
             fi
-            echo ">>> [memcached] Connected but serverNum='$val' (waiting for node0 to reset)..."
+            [ -n "$val" ] && echo ">>> [sync] qw1_iter='$val' (waiting for $expected_iter)..."
         fi
         attempts=$((attempts + 1))
-        echo ">>> [memcached] Waiting... ($attempts/$max_attempts)"
+        [ $((attempts % 10)) -eq 0 ] && echo ">>> [sync] Still waiting... ($attempts/$max_attempts)"
         sleep 2
     done
-    echo ">>> [memcached] WARNING: Timed out waiting for fresh memcached. Proceeding anyway."
+    echo ">>> [sync] ERROR: Timed out waiting for iteration $expected_iter!"
     return 1
 }
 
@@ -105,8 +124,9 @@ for config in "${SKEW_CONFIGS[@]}"; do
     HP_FREE=$(grep HugePages_Free /proc/meminfo | awk '{print $2}')
     echo ">>> [hugepages] Free: $HP_FREE"
     
-    # --- Wait for node0 to reset memcached ---
-    wait_for_fresh_memcached
+    # --- Wait for node0 to signal this iteration ---
+    ITERATION=$((ITERATION + 1))
+    wait_for_iteration "$ITERATION"
     
     # --- Run benchmark (this node SAVES latency files) ---
     cd "$CHIME_DIR/build"

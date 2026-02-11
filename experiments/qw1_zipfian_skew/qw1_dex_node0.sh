@@ -63,6 +63,9 @@ SKEW_CONFIGS=(
     "0 0.99  zipf_0.99"
 )
 
+# Iteration counter for cross-node synchronization
+ITERATION=0
+
 # ===================== HELPER: flush & reset memcached =====================
 flush_and_reset_memcached() {
     echo ">>> [memcached] Killing any existing memcached..."
@@ -101,6 +104,12 @@ flush_and_reset_memcached() {
         printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 "$MEMC_IP" "$MEMC_PORT" || true
         sleep 1
     fi
+
+    # Set iteration sentinel (node1 watches for this — binaries never touch it)
+    ITERATION=$((ITERATION + 1))
+    local iter_len=${#ITERATION}
+    printf "set qw1_iter 0 0 %d\r\n%s\r\nquit\r\n" "$iter_len" "$ITERATION" | nc -w 2 "$MEMC_IP" "$MEMC_PORT" || true
+    echo ">>> [memcached] Set qw1_iter=$ITERATION (node1 sync sentinel)"
 }
 
 # ===================== HELPER: clean previous run state =====================
