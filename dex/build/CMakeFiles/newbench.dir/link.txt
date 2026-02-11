@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wall -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-but-set-variable -Wsign-compare -mssse3 -march=native -O3 -std=c++17 -O3 -DNDEBUG -O3 CMakeFiles/newbench.dir/test/newbench.cpp.o -o newbench  libDEX.a -lcityhash -lboost_system -lboost_coroutine -lpthread -libverbs -lmemcached -ltbb -lnuma 
