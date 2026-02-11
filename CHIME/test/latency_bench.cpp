@@ -51,6 +51,28 @@ uint64_t range_latency[MAX_APP_THREAD][LATENCY_BUCKETS];
 uint64_t thread_read_count[MAX_APP_THREAD];
 uint64_t thread_range_count[MAX_APP_THREAD];
 
+// Per-thread throughput (DEX-style: each thread measures its own)
+uint64_t thread_throughput[MAX_APP_THREAD];
+
+// Thread synchronization — matches DEX's warmup_cnt + ready pattern
+std::atomic<int64_t> warmup_cnt{0};
+std::atomic<bool> ready{false};
+
+// CHIME diagnostic counters (extern from Tree.cpp)
+extern double cache_miss[MAX_APP_THREAD];
+extern double cache_hit[MAX_APP_THREAD];
+extern uint64_t read_handover_num[MAX_APP_THREAD];
+extern uint64_t try_read_op[MAX_APP_THREAD];
+extern uint64_t read_leaf_retry[MAX_APP_THREAD];
+extern uint64_t leaf_cache_invalid[MAX_APP_THREAD];
+extern uint64_t try_speculative_read[MAX_APP_THREAD];
+extern uint64_t correct_speculative_read[MAX_APP_THREAD];
+extern uint64_t try_read_leaf[MAX_APP_THREAD];
+extern uint64_t read_two_segments[MAX_APP_THREAD];
+extern uint64_t try_read_hopscotch[MAX_APP_THREAD];
+extern uint64_t retry_cnt[MAX_APP_THREAD][MAX_FLAG_NUM];
+extern uint64_t leaf_read_sibling[MAX_APP_THREAD];
+
 // Configuration
 int kNodeCount = 2;
 int kThreadCount = 1;
@@ -294,17 +316,17 @@ int main(int argc, char *argv[]) {
     // Bulk load on compute nodes (not memory node)
     if (my_node >= MEMORY_NODE_NUM) {
         if (my_node == MEMORY_NODE_NUM) {
-            printf("Node %d: Starting bulk load (%lu keys)...\n", my_node, kKeySpace);
+            printf("Node %d: Starting bulk load (%d keys, kKeySpace=%lu)...\n", my_node, BULK_LOAD_COUNT, kKeySpace);
             
-            for (uint64_t i = 0; i < kKeySpace; i++) {
+            for (uint64_t i = 0; i < BULK_LOAD_COUNT; i++) {
                 Key k = int2key(i);
                 tree->insert(k, i + 1);
                 
                 if ((i + 1) % 1000000 == 0) {
-                    printf("  Loaded %lu / %lu keys\n", i + 1, kKeySpace);
+                    printf("  Loaded %lu / %d keys\n", i + 1, BULK_LOAD_COUNT);
                 }
             }
-            printf("Node %d: Bulk load complete\n", my_node);
+            printf("Node %d: Bulk load complete (%d keys)\n", my_node, BULK_LOAD_COUNT);
         }
     }
     
@@ -326,8 +348,14 @@ int main(int argc, char *argv[]) {
         memset(range_latency, 0, sizeof(range_latency));
         memset(thread_read_count, 0, sizeof(thread_read_count));
         memset(thread_range_count, 0, sizeof(thread_range_count));
+        memset(thread_throughput, 0, sizeof(thread_throughput));
         
-        auto start_time = std::chrono::high_resolution_clock::now();
+        // Reset CHIME diagnostic counters
+        tree->clear_debug_info();
+        
+        // Reset synchronization
+        warmup_cnt.store(0);
+        ready.store(false);
         
         // Launch worker threads
         std::vector<std::thread> threads;
@@ -360,10 +388,24 @@ int main(int argc, char *argv[]) {
                     }
                 }
                 
+                // ========== BARRIER — sync all threads after warmup (DEX pattern) ==========
+                warmup_cnt.fetch_add(1);
+                if (t == 0) {
+                    while (warmup_cnt.load() != kThreadCount);
+                    printf("Node %d: All threads finished warmup\n", dsm->getMyNodeID());
+                    // Reset diagnostic counters AFTER warmup
+                    tree->clear_debug_info();
+                    ready.store(true);
+                }
+                while (!ready.load());  // spin until all threads synced
+                
                 // ========== MEASUREMENT — with latency tracking ==========
                 // Clear histograms for this thread before measurement
                 memset(read_latency[t], 0, sizeof(uint64_t) * LATENCY_BUCKETS);
                 memset(range_latency[t], 0, sizeof(uint64_t) * LATENCY_BUCKETS);
+                
+                // Per-thread timing (matches DEX approach — no warmup in throughput)
+                auto thread_start = std::chrono::high_resolution_clock::now();
                 
                 for (uint64_t i = 0; i < ops_per_thread; i++) {
                     uint64_t entry = my_workload[i];
@@ -392,6 +434,12 @@ int main(int argc, char *argv[]) {
                         thread_range_count[t]++;
                     }
                 }
+                
+                auto thread_end = std::chrono::high_resolution_clock::now();
+                auto thread_dur = std::chrono::duration_cast<std::chrono::microseconds>(thread_end - thread_start).count();
+                if (thread_dur > 0) {
+                    thread_throughput[t] = (uint64_t)(ops_per_thread / (thread_dur / 1e6));
+                }
             });
         }
         
@@ -405,26 +453,72 @@ int main(int argc, char *argv[]) {
         
         // Aggregate per-thread counters (no atomics needed — threads are joined)
         uint64_t total_reads_val = 0, total_ranges_val = 0;
+        uint64_t total_throughput_val = 0;
         for (int t = 0; t < kThreadCount; t++) {
             total_reads_val += thread_read_count[t];
             total_ranges_val += thread_range_count[t];
+            total_throughput_val += thread_throughput[t];
         }
         uint64_t total_completed = total_reads_val + total_ranges_val;
+        
+        // Aggregate CHIME diagnostic counters
+        double total_cache_hit = 0, total_cache_miss = 0;
+        uint64_t total_read_handover = 0, total_try_read = 0;
+        uint64_t total_try_read_leaf = 0, total_read_leaf_retry = 0;
+        uint64_t total_leaf_cache_invalid = 0, total_leaf_read_sibling = 0;
+        uint64_t total_try_spec_read = 0, total_correct_spec_read = 0;
+        uint64_t total_try_read_hopscotch = 0, total_read_two_segments = 0;
+        uint64_t total_retry[MAX_FLAG_NUM] = {0};
+        for (int t = 0; t < kThreadCount; t++) {
+            total_cache_hit += cache_hit[t];
+            total_cache_miss += cache_miss[t];
+            total_read_handover += read_handover_num[t];
+            total_try_read += try_read_op[t];
+            total_try_read_leaf += try_read_leaf[t];
+            total_read_leaf_retry += read_leaf_retry[t];
+            total_leaf_cache_invalid += leaf_cache_invalid[t];
+            total_leaf_read_sibling += leaf_read_sibling[t];
+            total_try_spec_read += try_speculative_read[t];
+            total_correct_spec_read += correct_speculative_read[t];
+            total_try_read_hopscotch += try_read_hopscotch[t];
+            total_read_two_segments += read_two_segments[t];
+            for (int f = 0; f < MAX_FLAG_NUM; f++) total_retry[f] += retry_cnt[t][f];
+        }
         
         printf("\n===========================================\n");
         printf("Benchmark Complete!\n");
         printf("===========================================\n");
         printf("Threads:        %d\n", kThreadCount);
         printf("Range size:     %d (count-based)\n", kRangeSize);
-        printf("Total time:     %ld ms\n", duration.count());
         printf("Total ops:      %lu\n", total_completed);
         printf("Total reads:    %lu\n", total_reads_val);
         printf("Total ranges:   %lu\n", total_ranges_val);
-        if (duration.count() > 0) {
-            printf("Throughput:     %.2f ops/sec\n", 
-                   total_completed * 1000.0 / duration.count());
-        }
+        printf("Throughput:     %.2f ops/sec  (sum of per-thread, excludes warmup)\n",
+               (double)total_throughput_val);
         printf("===========================================\n");
+        
+        // CHIME diagnostic stats (like ycsb_test.cpp)
+        printf("\n--- CHIME Diagnostic Stats ---\n");
+        double total_cache_all = total_cache_hit + total_cache_miss;
+        if (total_cache_all > 0)
+            printf("Cache hit rate:            %.4f  (%.0f / %.0f)\n", total_cache_hit / total_cache_all, total_cache_hit, total_cache_all);
+        if (total_try_read > 0)
+            printf("Read delegation rate:      %.4f  (%lu / %lu)\n", (double)total_read_handover / total_try_read, total_read_handover, total_try_read);
+        if (total_try_read_leaf > 0) {
+            printf("Read leaf retry rate:      %.4f  (%lu / %lu)\n", (double)total_read_leaf_retry / total_try_read_leaf, total_read_leaf_retry, total_try_read_leaf);
+            printf("Leaf cache invalid rate:   %.4f  (%lu / %lu)\n", (double)total_leaf_cache_invalid / total_try_read_leaf, total_leaf_cache_invalid, total_try_read_leaf);
+            printf("Leaf read sibling rate:    %.4f  (%lu / %lu)\n", (double)total_leaf_read_sibling / total_try_read_leaf, total_leaf_read_sibling, total_try_read_leaf);
+        }
+        if (total_try_read_leaf > 0)
+            printf("Speculative read rate:     %.4f  (%lu / %lu)\n", (double)total_try_spec_read / total_try_read_leaf, total_try_spec_read, total_try_read_leaf);
+        if (total_try_spec_read > 0)
+            printf("Correct speculative ratio: %.4f  (%lu / %lu)\n", (double)total_correct_spec_read / total_try_spec_read, total_correct_spec_read, total_try_spec_read);
+        if (total_try_read_hopscotch > 0)
+            printf("Read two hop-segments:     %.4f  (%lu / %lu)\n", (double)total_read_two_segments / total_try_read_hopscotch, total_read_two_segments, total_try_read_hopscotch);
+        printf("Retry breakdown: first_try=%lu invalid_leaf=%lu invalid_node=%lu find_next=%lu\n",
+               total_retry[0], total_retry[1], total_retry[2], total_retry[3]);
+        tree->statistics();  // prints cache + idx_cache stats
+        printf("------------------------------\n");
         
         // Save separate per-op latency histograms
         save_latency_histogram("chime_read_latency.dat", read_latency, kThreadCount, "Read");

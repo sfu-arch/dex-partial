@@ -39,12 +39,12 @@ INSERT_RATIO=0
 UPDATE_RATIO=0
 DELETE_RATIO=0
 RANGE_RATIO=30
-TOTAL_THREADS=16
-MEM_THREADS=4
+TOTAL_THREADS=30
+MEM_THREADS=8
 CACHE_MB=256
 BULK_LOAD_M=10       # → kKeySpace = 10M + 0 + 1000 = 10,001,000
 WARMUP_M=1
-RUN_M=5              # 5M ops total = CHIME's TOTAL_OPS=5000000
+RUN_M=30             # 30M ops total = CHIME's TOTAL_OPS=30000000
 CHECK=0
 TIME_BASED=0
 EARLY_STOP=0
@@ -52,7 +52,7 @@ INDEX=0              # 0=DEX
 RPC_RATE=0.0         # No offloading — match CHIME (no offload equiv.)
 ADMIT_RATE=1.0
 AUTO_TUNE=0
-MAX_THREAD=16
+MAX_THREAD=30
 
 # Skew sweep: uniform first, then increasing zipfian skew
 SKEW_CONFIGS=(

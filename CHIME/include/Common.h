@@ -50,9 +50,8 @@
 
 
 // app thread
-// Reduced from 65 to 17 to stay under kernel.keys.maxkeys limit (200)
-// Each thread uses ~4 keys, so 17 threads * 4 = 68 keys (safe margin)
-#define MAX_APP_THREAD 17   // one additional thread for data statistics(main thread)  [CONFIG] 65 -> 17
+// Each thread uses ~4 keys, so 32 threads * 4 = 128 keys (under 200 limit)
+#define MAX_APP_THREAD 32   // 30 compute + 1 main + 1 spare  [CONFIG] 65 -> 32
 #define APP_MESSAGE_NR 96
 #define POLL_CQ_MAX_CNT_ONCE 8
 
