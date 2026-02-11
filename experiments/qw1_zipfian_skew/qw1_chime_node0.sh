@@ -24,8 +24,8 @@ MEMC_PORT=$(sed -n '2p' "$CHIME_DIR/memcached.conf")
 # ===================== SHARED CONFIGURATION (must match node1 & DEX!) =====================
 NODE_COUNT=2
 THREAD_COUNT=30
-READ_RATIO=70
-RANGE_RATIO=30
+READ_RATIO=100
+RANGE_RATIO=0
 TOTAL_OPS=30000000    # 30M ops = matches DEX's RUN_M=30
 RANGE_SIZE=100        # matches DEX count-based scan(100)
 
