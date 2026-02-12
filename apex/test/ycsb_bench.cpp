@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
   config.machineNR = kNodeCount;
   config.threadNR = kThreadCount;
   config.dsmSize = define::dsmSize;
-  config.cacheConfig.cacheSize = 72;
+  config.cacheConfig.cacheSize = define::rdmaBufferSize;  // 1 GB RDMA buffer
   dsm = DSM::getInstance(config);
   dsm->registerThread();
 

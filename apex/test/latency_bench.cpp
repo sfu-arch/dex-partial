@@ -232,7 +232,7 @@ int main(int argc, char* argv[]) {
   config.machineNR = kNodeCount;
   config.threadNR = kThreadCount;
   config.dsmSize = define::dsmSize;
-  config.cacheConfig.cacheSize = 72;  // 72 MB (CPT 15 + ASM 51 + VE-ASM 5 + VCS 1)
+  config.cacheConfig.cacheSize = define::rdmaBufferSize;  // 1 GB RDMA buffer (APEX components use separate malloc)
   dsm = DSM::getInstance(config);
   dsm->registerThread();
 
