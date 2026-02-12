@@ -73,7 +73,9 @@ void generate_workload(uint64_t count, double theta,
 }
 
 void worker_thread(int thread_id, uint64_t ops_per_thread) {
-  dsm->registerThread();
+  if (thread_id != 0) {
+    dsm->registerThread();  // Thread 0 already registered in main()
+  }
   bindCore(thread_id);
 
   // Warmup

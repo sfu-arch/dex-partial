@@ -5,6 +5,7 @@
 #include "GlobalAddress.h"
 #include "LeafPage.h"
 #include <cstring>
+#include <vector>
 
 namespace apex {
 
@@ -106,24 +107,28 @@ constexpr uint32_t kTotalLeafAllocation = define::kLeafPageSize + sizeof(Version
 // ─── Local Version Tracker ─────────────────────────────────────────
 // Kept on the compute node. Tracks which version of each leaf page
 // we've synced to, so we know whether our ASM/VE-ASM is stale.
+// Uses a pre-sized vector indexed by leaf_id for O(1) thread-safe access.
 class VersionTracker {
 public:
+  void resize(uint32_t num_leaves) {
+    versions_.resize(num_leaves, 0);
+  }
+
   void set_version(uint32_t leaf_id, uint64_t version) {
-    versions_[leaf_id] = version;
+    if (leaf_id < versions_.size()) versions_[leaf_id] = version;
   }
 
   uint64_t get_version(uint32_t leaf_id) const {
-    auto it = versions_.find(leaf_id);
-    if (it != versions_.end()) return it->second;
+    if (leaf_id < versions_.size()) return versions_[leaf_id];
     return 0;  // Never synced
   }
 
   void clear(uint32_t leaf_id) {
-    versions_.erase(leaf_id);
+    if (leaf_id < versions_.size()) versions_[leaf_id] = 0;
   }
 
 private:
-  std::unordered_map<uint32_t, uint64_t> versions_;
+  std::vector<uint64_t> versions_;
 };
 
 }  // namespace apex

@@ -125,11 +125,11 @@ public:
     delete root_;
   }
 
-  // ─── Lookup: key → leaf page address ─────────────────────────
+  // ─── Lookup: key → leaf page address + leaf_id ────────────────
   // Returns the GlobalAddress of the leaf page containing this key.
   // Returns GlobalAddress::Null() if no matching prefix exists.
-  // Also sets prefix_depth to the depth at which the leaf was found.
-  GlobalAddress lookup(Key key, int &prefix_depth) const {
+  // Also sets prefix_depth and leaf_id.
+  GlobalAddress lookup(Key key, int &prefix_depth, uint32_t &leaf_id) const {
     uint8_t key_bytes[8];
     key_to_bytes(key, key_bytes);
 
@@ -143,6 +143,7 @@ public:
         if (key_bytes[depth] != node->path[i]) {
           // Mismatch in compressed path → key not found
           prefix_depth = depth;
+          leaf_id = 0;
           return GlobalAddress::Null();
         }
         depth++;
@@ -151,6 +152,7 @@ public:
       // If this is a leaf node, we found the matching leaf page
       if (node->is_leaf) {
         prefix_depth = depth;
+        leaf_id = node->leaf_id;
         return node->leaf_addr;
       }
 
@@ -165,17 +167,26 @@ public:
     // If we consumed all 8 bytes and landed on a leaf
     if (node && node->is_leaf) {
       prefix_depth = depth;
+      leaf_id = node->leaf_id;
       return node->leaf_addr;
     }
 
     prefix_depth = depth;
+    leaf_id = 0;
     return GlobalAddress::Null();
   }
 
-  // Simplified lookup (no prefix_depth output)
+  // Lookup without leaf_id output
+  GlobalAddress lookup(Key key, int &prefix_depth) const {
+    uint32_t leaf_id;
+    return lookup(key, prefix_depth, leaf_id);
+  }
+
+  // Simplified lookup (no prefix_depth or leaf_id output)
   GlobalAddress lookup(Key key) const {
     int depth;
-    return lookup(key, depth);
+    uint32_t leaf_id;
+    return lookup(key, depth, leaf_id);
   }
 
   // ─── Lower bound: find the first leaf page >= key ────────────

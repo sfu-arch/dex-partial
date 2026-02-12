@@ -92,7 +92,9 @@ void generate_workload(uint64_t key_space, uint64_t count, double theta,
 
 // ─── Worker Thread ─────────────────────────────────────────────────
 void worker_thread(int thread_id, uint64_t ops_per_thread) {
-  dsm->registerThread();
+  if (thread_id != 0) {
+    dsm->registerThread();  // Thread 0 already registered in main()
+  }
   bindCore(thread_id);
 
   memset(read_latency[thread_id], 0, sizeof(read_latency[thread_id]));
