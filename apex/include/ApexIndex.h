@@ -285,7 +285,8 @@ public:
                                        leaf_prefix_depth_[leaf_id]);
 
         if (full_key >= start_key) {
-          results[found++] = {full_key, entry.value};
+          Value val = entry.value;  // copy from packed field
+          results[found++] = {full_key, val};
         }
       }
 

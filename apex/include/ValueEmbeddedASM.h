@@ -21,13 +21,13 @@ namespace apex {
 
 // ─── VE-ASM Entry ──────────────────────────────────────────────────
 struct VEASMEntry {
-  uint32_t suffix;         // 4B: key suffix
   Value    value;          // 8B: the actual cached value
   uint64_t version;        // 8B: version when this was cached
+  uint32_t suffix;         // 4B: key suffix
   uint16_t access_count;   // 2B: access frequency
   uint8_t  valid;          // 1B: 0=invalid, 1=valid
   uint8_t  _pad;           // 1B: alignment
-  // Total: 24 bytes
+  // Total: 24 bytes (naturally aligned, no padding)
 };
 static_assert(sizeof(VEASMEntry) == 24, "VEASMEntry must be 24 bytes");
 
