@@ -44,15 +44,25 @@ struct CachedLeafMeta {
     uint64_t      vacancy_bitmap;  // Which KV slots are occupied (from leaf)
     Key           fence_low;       // Lower fence key (inclusive)
     Key           fence_high;      // Upper fence key (inclusive)
-    std::atomic<int32_t> freq;     // LFU access frequency
+    std::atomic<int32_t> freq{0};  // LFU access frequency
     uint32_t      version;         // Remote version for staleness detection
 
     CachedLeafMeta()
         : leaf_addr(GlobalAddress::Null()), local_page(nullptr),
           vacancy_bitmap(0), fence_low(0), fence_high(0),
-          freq(0), version(0) {}
+          version(0) {}
 
     bool is_valid() const { return leaf_addr != GlobalAddress::Null(); }
+
+    void reset() {
+        leaf_addr = GlobalAddress::Null();
+        local_page = nullptr;
+        vacancy_bitmap = 0;
+        fence_low = 0;
+        fence_high = 0;
+        freq.store(0, std::memory_order_relaxed);
+        version = 0;
+    }
 };
 
 // -------------------------------------------------------------------
@@ -80,6 +90,12 @@ public:
         void set_occupied(int way)   { occupancy |=  (1u << way); }
         void clear_occupied(int way) { occupancy &= ~(1u << way); }
         bool is_occupied(int way) const { return occupancy & (1u << way); }
+
+        void reset() {
+            for (int i = 0; i < WAYS; ++i)
+                slots[i].reset();
+            occupancy = 0;
+        }
     };
 
     BitmapLeafDirectory(uint64_t cache_size_bytes, uint64_t pg_size)
@@ -219,7 +235,7 @@ public:
 
     void reset() {
         for (uint64_t i = 0; i < num_sets_; ++i)
-            sets_[i] = CacheSet();
+            sets_[i].reset();
         pool_head_.store(0);
         cached_count_.store(0);
         clear_statistics();

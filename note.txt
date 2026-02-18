@@ -534,3 +534,41 @@ $ cat build/chime_range_latency.dat
 305000  1
 $
 
+1. Leaf Caching: DEX vs CHIME
+DEX	CHIME
+What's cached	Full pages (leaf + internal)	Internal nodes only
+Cache capacity	256MB (262,144 pages)	TreeCache (internal) + IdxCache (30MB hotspot buffer)
+Point read cache hit	~500ns (local memory)	~7us (RDMA round-trip to leaf)
+Range scan	Sequential local page reads	Hash-lookup + batch RDMA per leaf segment
+Every CHIME leaf access requires an RDMA round-trip (~7us). DEX caches leaf pages locally, so hot keys hit in ~500ns. This alone is a 14x latency difference for point reads.
+
+2. Range Scans Are Especially Expensive in CHIME
+CHIME uses hopscotch hashing in leaves, so a range scan of 100 keys requires:
+
+Computing hash positions for all 100 keys
+Batch RDMA reads of multiple leaf segments
+Version checking + retry logic
+A Tree.cpp:2087 that does individual search() for any unfound keys
+Our data confirms: CHIME range P50 = 337us vs DEX range P50 = 6.5us (~50x gap).
+
+3. Missing Coroutines
+The original ycsb_test.cpp:332 uses 8 coroutines per thread (kCoroCnt=8) via tree->run_coroutine() for non-scan workloads. Coroutines overlap RDMA latency — while one coroutine waits for an RDMA response, others issue new requests. This is how CHIME achieves competitive throughput in the paper. Our bench runs single-op-per-thread (no coroutine overlap).
+
+However, range_query() doesn't support coroutines — the original ycsb_test.cpp also ycsb_test.cpp:332. So coroutines would only help the read portion.
+
+4. The Constant-Throughput Mystery Explained
+CHIME's throughput being near-constant across skew (117K→190K, 1.62x) is actually consistent with the paper. The paper says skewness "slightly increases" throughput. Since CHIME doesn't cache leaves, skew mainly helps through:
+
+TreeCache hits on internal nodes (small speedup)
+RDWC read delegation on hot keys (small speedup)
+IdxCache hotspot buffer hits (small speedup)
+DEX improves 1.73x (4.4M→7.7M) with skew because hot leaves stay in the local cache.
+
+However, for a fair DEX vs CHIME comparison, the question is: should we compare both systems at their optimized paths or both at their synchronous single-op paths?
+
+Recommendation
+Comparison Mode	What it Shows
+Both synchronous (current)	Raw data-structure cost per operation (valid, but flat for CHIME)
+Both optimized	System-level throughput (matches papers, but DEX may not have equivalent batching)
+For QW1 (skew sensitivity), you need the optimized path — otherwise CHIME's skew-adaptive features are disabled and you're only measuring the B+tree traversal cost, which is indeed constant regardless of skew.
+
