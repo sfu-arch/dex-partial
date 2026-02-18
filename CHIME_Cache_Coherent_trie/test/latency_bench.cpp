@@ -12,7 +12,14 @@
  * Usage: ./latency_bench <node_count> <thread_count> <read_ratio> <range_ratio> <total_ops> [range_size]
  */
 
+#ifdef USE_COHERENT_TREE
+#include "CoherentTree.h"
+using TreeClass = CoherentTree;
+#else
 #include "Tree.h"
+using TreeClass = Tree;
+#endif
+
 #include "Timer.h"
 #include "zipf.h"
 #include <city.h>
@@ -86,7 +93,7 @@ int kUniform = 0;                  // 0=Zipfian, 1=Uniform (matches DEX)
 // With insertRatio=0: kKeySpace = 10,000,000 + 0 + 1000 = 10,001,000
 uint64_t kKeySpace = BULK_LOAD_COUNT + KEY_SPACE_PADDING;
 
-Tree *tree;
+TreeClass *tree;
 DSM *dsm;
 
 // Operation type encoding (matches DEX)
@@ -307,7 +314,10 @@ int main(int argc, char *argv[]) {
     
     // Create tree
     printf("Node %d: Creating B+ tree...\n", my_node);
-    tree = new Tree(dsm);
+#ifdef USE_COHERENT_TREE
+    printf(">>> Using CoherentTree with trie cache and bitmap cache\\n");
+#endif
+    tree = new TreeClass(dsm);
     
     // Synchronize
     dsm->barrier("tree_init");
