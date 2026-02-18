@@ -427,7 +427,7 @@ bool CoherentTree::search(const Key &k, Value &v, CoroPull* sink) {
   try_read_op[dsm_->getMyThreadID()]++;
 
 #ifdef TREE_ENABLE_READ_DELEGATION
-  lock_res = local_lock_table->acquire_local_read_lock(k, v, &busy_waiting_queue, sink);
+  lock_res = local_lock_table->acquire_local_read_lock(k, &busy_waiting_queue, sink);
   read_handover = (lock_res.first && !lock_res.second);
 #else
   UNUSED(lock_res);

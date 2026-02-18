@@ -68,6 +68,20 @@ struct alignas(64) CachedBitmapEntry {
       fence_low(), fence_high(), hop_bitmap(0), max_key_idx(0),
       flags(FLAG_VALID), reserved(0) {}
   
+  // Copy from another entry (handles atomics)
+  void copy_from(const CachedBitmapEntry& other) {
+    leaf_addr = other.leaf_addr;
+    vacancy_bitmap = other.vacancy_bitmap;
+    version.store(other.version.load(std::memory_order_relaxed), std::memory_order_relaxed);
+    access_count.store(other.access_count.load(std::memory_order_relaxed), std::memory_order_relaxed);
+    fence_low = other.fence_low;
+    fence_high = other.fence_high;
+    hop_bitmap = other.hop_bitmap;
+    max_key_idx = other.max_key_idx;
+    flags = other.flags;
+    reserved = other.reserved;
+  }
+  
   // Check if entry is valid
   bool is_valid() const { return flags & FLAG_VALID; }
   bool is_dirty() const { return flags & FLAG_DIRTY; }
@@ -90,8 +104,14 @@ struct alignas(64) CachedBitmapEntry {
     if (mask == 0) return -1;  // No free slots
     
     // Rotate bitmap so hash_idx is at bit 0
-    uint64_t rotated = (mask >> hash_idx) | (mask << (define::leafSpanSize - hash_idx));
-    rotated &= ((1ULL << define::leafSpanSize) - 1);
+    // Handle leafSpanSize carefully to avoid shift overflow
+    uint64_t rotated;
+    if (define::leafSpanSize >= 64) {
+      rotated = mask;  // No masking needed
+    } else {
+      rotated = (mask >> hash_idx) | (mask << (define::leafSpanSize - hash_idx));
+      rotated &= ((1ULL << define::leafSpanSize) - 1);
+    }
     
     if (rotated == 0) return -1;
     
@@ -177,7 +197,7 @@ public:
     // Find empty slot
     for (int i = 0; i < ASSOCIATIVITY; i++) {
       if (!entries[i].is_valid()) {
-        entries[i] = new_entry;
+        entries[i].copy_from(new_entry);
         return &entries[i];
       }
     }
@@ -194,9 +214,9 @@ public:
     }
     
     if (evicted_out) {
-      *evicted_out = entries[min_idx];
+      evicted_out->copy_from(entries[min_idx]);
     }
-    entries[min_idx] = new_entry;
+    entries[min_idx].copy_from(new_entry);
     return &entries[min_idx];
   }
   

@@ -600,15 +600,15 @@ public:
     CoroPull* sink = nullptr
   ) {
     uint64_t lock_offset = ROUND_UP(define::transLeafSize, 3);
-    char* lock_buffer;
+    uint64_t* lock_buffer;
     
     if (async) {
       lock_buffer = (dsm_->get_rbuf(sink)).get_lock_buffer();
-      *(uint64_t*)lock_buffer = lock_value;
+      *lock_buffer = lock_value;
       dsm_->write((char*)lock_buffer, leaf_addr + lock_offset, sizeof(uint64_t), false, sink);
     } else {
       lock_buffer = (dsm_->get_rbuf(sink)).get_lock_buffer();
-      *(uint64_t*)lock_buffer = lock_value;
+      *lock_buffer = lock_value;
       dsm_->write_sync((char*)lock_buffer, leaf_addr + lock_offset, sizeof(uint64_t), sink);
     }
   }
