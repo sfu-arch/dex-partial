@@ -65,7 +65,7 @@ using namespace coherent_tree_stats;
 
 thread_local std::vector<CoroPush> CoherentTree::workers;
 thread_local CoroQueue CoherentTree::busy_waiting_queue;
-thread_local GlobalAddress path_stack[MAX_CORO_NUM][MAX_TREE_HEIGHT];
+thread_local GlobalAddress coherent_path_stack[MAX_CORO_NUM][MAX_TREE_HEIGHT];
 
 
 // ============================================================================
@@ -195,7 +195,7 @@ RootEntry CoherentTree::get_root_ptr(CoroPull* sink) {
 
 void CoherentTree::before_operation(CoroPull* sink) {
   for (int i = 0; i < MAX_TREE_HEIGHT; ++i) {
-    path_stack[sink ? sink->get() : 0][i] = GlobalAddress::Null();
+    coherent_path_stack[sink ? sink->get() : 0][i] = GlobalAddress::Null();
   }
   
   auto tid = dsm_->getMyThreadID();
@@ -334,7 +334,7 @@ void CoherentTree::insert(const Key &k, Value v, CoroPull* sink) {
 
 next:
   retry_cnt[dsm_->getMyThreadID()][retry_flag]++;
-  path_stack[sink ? sink->get() : 0][level - 1] = p;
+  coherent_path_stack[sink ? sink->get() : 0][level - 1] = p;
   
   // Leaf level
   if (level == 1) {
@@ -582,7 +582,7 @@ re_read:
   
   if (k >= fence_keys.highest) {
     node_addr = node->metadata.sibling_ptr;
-    path_stack[sink ? sink->get() : 0][level - 1] = node_addr;
+    coherent_path_stack[sink ? sink->get() : 0][level - 1] = node_addr;
     internal_node_search(node_addr, sibling_addr, k, level, false, sink);
     return true;
   }

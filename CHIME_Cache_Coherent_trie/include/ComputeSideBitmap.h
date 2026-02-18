@@ -105,13 +105,10 @@ struct alignas(64) CachedBitmapEntry {
     
     // Rotate bitmap so hash_idx is at bit 0
     // Handle leafSpanSize carefully to avoid shift overflow
-    uint64_t rotated;
-    if (define::leafSpanSize >= 64) {
-      rotated = mask;  // No masking needed
-    } else {
-      rotated = (mask >> hash_idx) | (mask << (define::leafSpanSize - hash_idx));
-      rotated &= ((1ULL << define::leafSpanSize) - 1);
-    }
+    uint64_t rotated = (mask >> hash_idx) | (mask << (define::leafSpanSize - hash_idx));
+    // Mask to leafSpanSize bits - use constexpr to avoid shift overflow warning
+    constexpr uint64_t span_mask = (define::leafSpanSize >= 64) ? ~0ULL : ((1ULL << define::leafSpanSize) - 1);
+    rotated &= span_mask;
     
     if (rotated == 0) return -1;
     
