@@ -499,7 +499,7 @@ next:
 
 search_finish:
 #ifdef TREE_ENABLE_READ_DELEGATION
-  local_lock_table->release_local_read_lock(k, v, lock_res, res);
+  local_lock_table->release_local_read_lock(k, lock_res, res, v);
 #endif
   return res;
 }

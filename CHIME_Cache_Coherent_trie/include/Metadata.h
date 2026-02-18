@@ -82,6 +82,10 @@ public:
     return max_key_idx;
   }
 
+  uint64_t get_vacancy_bitmap() const {
+    return vacancy_bitmap;
+  }
+
 private:
   int find_bucket(int kv_idx, int span_size) {  // 0~span_size => 0~bitmap_size
     double avg_per_bucket = static_cast<double>(span_size) / define::vacancyMapBit;
