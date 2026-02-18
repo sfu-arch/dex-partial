@@ -924,44 +924,113 @@ void CoherentTree::hopscotch_search(
   bool for_write
 ) {
   try_read_hopscotch[dsm_->getMyThreadID()]++;
-  
-  // Similar to original CHIME implementation
-  // Read entry_num entries starting from hash_idx
-  
   auto leaf = (LeafNode *)leaf_buffer;
-  auto raw_leaf = (LeafNode *)raw_leaf_buffer;
-  
-  // Calculate read ranges considering wrap-around
-  int r_idx = (hash_idx + entry_num) % define::leafSpanSize;
-  
-  // Read the relevant portion of the leaf
-  // This is simplified - full implementation would handle metadata replication
-  
-  if (hash_idx + entry_num <= (int)define::leafSpanSize) {
-    // Single contiguous read
-    size_t offset = sizeof(LeafMetadata) + hash_idx * sizeof(LeafEntry);
-    size_t size = entry_num * sizeof(LeafEntry);
-    dsm_->read_sync(raw_leaf_buffer + offset, node_addr + offset, size, sink);
-  } else {
-    // Wrap-around read
-    read_two_segments[dsm_->getMyThreadID()]++;
-    
-    // First segment: hash_idx to end
-    size_t offset1 = sizeof(LeafMetadata) + hash_idx * sizeof(LeafEntry);
-    size_t size1 = (define::leafSpanSize - hash_idx) * sizeof(LeafEntry);
-    dsm_->read_sync(raw_leaf_buffer + offset1, node_addr + offset1, size1, sink);
-    
-    // Second segment: start to r_idx
-    size_t offset2 = sizeof(LeafMetadata);
-    size_t size2 = r_idx * sizeof(LeafEntry);
-    dsm_->read_sync(raw_leaf_buffer + offset2, node_addr + offset2, size2, sink);
+  auto segment_size_r = std::min(entry_num, (int)define::leafSpanSize - hash_idx);
+  auto segment_size_l = entry_num <= (int)define::leafSpanSize - hash_idx ? 0 : entry_num - ((int)define::leafSpanSize - hash_idx);
+
+#ifdef METADATA_REPLICATION
+  auto [raw_offset_r, raw_len_r, first_offset_r] = LeafVersionManager::get_offset_info(hash_idx, segment_size_r);
+  auto [raw_offset_l, raw_len_l, first_offset_l] = LeafVersionManager::get_offset_info(0, segment_size_l);
+  assert(segment_size_l > 0 || !raw_len_l);
+  if (raw_len_l) read_two_segments[dsm_->getMyThreadID()]++;
+
+  auto raw_segment_buffer_r = raw_leaf_buffer + raw_offset_r;
+  auto raw_segment_buffer_l = raw_leaf_buffer + raw_offset_l;
+  if (raw_len_l) {  // read two hop segments (corner case)
+re_read_2:
+    std::vector<RdmaOpRegion> rs(2);
+    rs[0].source = (uint64_t)raw_segment_buffer_l;
+    rs[0].dest = (node_addr + raw_offset_l).to_uint64();
+    rs[0].size = raw_len_l;
+    rs[0].is_on_chip = false;
+
+    rs[1].source = (uint64_t)raw_segment_buffer_r;
+    rs[1].dest = (node_addr + raw_offset_r).to_uint64();
+    rs[1].size = raw_len_r;
+    rs[1].is_on_chip = false;
+    dsm_->read_batch_sync(&rs[0], 2, sink);
+
+    uint8_t segment_node_versions_r = 0, segment_node_versions_l = 0;
+    LeafMetadata metadata_l, metadata_r;
+    auto intermediate_segment_buffer_l = (dsm_->get_rbuf(sink)).get_segment_buffer();
+    auto intermediate_segment_buffer_r = (dsm_->get_rbuf(sink)).get_segment_buffer();
+    auto [first_metadata_offset_l, new_len_l] = MetadataManager::get_offset_info(0, segment_size_l);
+    auto [first_metadata_offset_r, new_len_r] = MetadataManager::get_offset_info(hash_idx, segment_size_r);
+    if (for_write) {  // for locked node, consistency check is not needed
+      assert((LeafVersionManager::decode_segment_versions(raw_segment_buffer_l, intermediate_segment_buffer_l, first_offset_l, segment_size_l, first_metadata_offset_l, new_len_l, segment_node_versions_l)));
+      assert((LeafVersionManager::decode_segment_versions(raw_segment_buffer_r, intermediate_segment_buffer_r, first_offset_r, segment_size_r, first_metadata_offset_r, new_len_r, segment_node_versions_r)));
+      assert(segment_node_versions_r == segment_node_versions_l);
+    }
+    else if (!LeafVersionManager::decode_segment_versions(raw_segment_buffer_l, intermediate_segment_buffer_l, first_offset_l, segment_size_l, first_metadata_offset_l, new_len_l, segment_node_versions_l) ||
+             !LeafVersionManager::decode_segment_versions(raw_segment_buffer_r, intermediate_segment_buffer_r, first_offset_r, segment_size_r, first_metadata_offset_r, new_len_r, segment_node_versions_r) ||
+             segment_node_versions_r != segment_node_versions_l) {  // consistency check
+      read_leaf_retry[dsm_->getMyThreadID()]++;
+      goto re_read_2;
+    }
+    bool has_metadata_l = MetadataManager::decode_segment_metadata(intermediate_segment_buffer_l, (char*)&(leaf->records[0]), first_metadata_offset_l, segment_size_l, metadata_l);
+    bool has_metadata_r = MetadataManager::decode_segment_metadata(intermediate_segment_buffer_r, (char*)&(leaf->records[hash_idx]), first_metadata_offset_r, segment_size_r, metadata_r);
+    assert(has_metadata_l || has_metadata_r);
+    if (has_metadata_l && has_metadata_r) assert(metadata_l == metadata_r);
+    leaf->metadata = (has_metadata_l ? metadata_l : metadata_r);
+    return;
   }
-  
-  // Also read metadata
-  dsm_->read_sync(raw_leaf_buffer, node_addr, sizeof(LeafMetadata), sink);
-  
-  // Copy to decoded buffer
-  memcpy(leaf_buffer, raw_leaf_buffer, sizeof(LeafNode));
+  else {  // read only one hop segment
+re_read_1:
+    dsm_->read_sync(raw_segment_buffer_r, node_addr + raw_offset_r, raw_len_r, sink);
+    uint8_t segment_node_versions_r = 0;
+    auto intermediate_segment_buffer_r = (dsm_->get_rbuf(sink)).get_segment_buffer();
+    auto [first_metadata_offset_r, new_len_r] = MetadataManager::get_offset_info(hash_idx, segment_size_r);
+    if (for_write) assert((LeafVersionManager::decode_segment_versions(raw_segment_buffer_r, intermediate_segment_buffer_r, first_offset_r, segment_size_r, first_metadata_offset_r, new_len_r, segment_node_versions_r)));
+    else if (!LeafVersionManager::decode_segment_versions(raw_segment_buffer_r, intermediate_segment_buffer_r, first_offset_r, segment_size_r, first_metadata_offset_r, new_len_r, segment_node_versions_r)) {
+      read_leaf_retry[dsm_->getMyThreadID()]++;
+      goto re_read_1;
+    }
+    auto has_metadata = MetadataManager::decode_segment_metadata(intermediate_segment_buffer_r, (char*)&(leaf->records[hash_idx]), first_metadata_offset_r, segment_size_r, leaf->metadata);
+    if (entry_num >= (int)define::neighborSize) assert(has_metadata);
+    return;
+  }
+#else
+  auto [raw_offset_r, raw_len_r, first_offset_r] = VersionManager<LeafNode, LeafEntry>::get_offset_info(hash_idx, segment_size_r);
+  auto [raw_offset_l, raw_len_l, first_offset_l] = VersionManager<LeafNode, LeafEntry>::get_offset_info(0, segment_size_l);
+  assert(segment_size_l > 0 || !raw_len_l);
+  if (raw_len_l) read_two_segments[dsm_->getMyThreadID()]++;
+
+  auto raw_segment_buffer_r = raw_leaf_buffer + raw_offset_r;
+  auto raw_segment_buffer_l = raw_leaf_buffer + raw_offset_l;
+re_read:
+  // read metadata and the hop segment
+  std::vector<RdmaOpRegion> rs(2);
+  rs[0].source = (uint64_t)raw_leaf_buffer;
+  rs[0].dest = node_addr.to_uint64();
+  rs[0].size = raw_offset_l + raw_len_l;  // header + segment_l (corner case)
+  rs[0].is_on_chip = false;
+
+  rs[1].source = (uint64_t)raw_segment_buffer_r;
+  rs[1].dest = (node_addr + raw_offset_r).to_uint64();
+  rs[1].size = raw_len_r;
+  rs[1].is_on_chip = false;
+  // note that the rs array will change by lower-level function
+  dsm_->read_batch_sync(&rs[0], 2, sink);
+  uint8_t metadata_node_version = 0, segment_node_versions_r = 0, segment_node_versions_l = 0;
+  if (for_write) {  // for locked node, consistency check is not needed
+    assert((VersionManager<LeafNode, LeafEntry>::decode_header_versions(raw_leaf_buffer, leaf_buffer, metadata_node_version)));
+    if (segment_size_l > 0) assert((VersionManager<LeafNode, LeafEntry>::decode_segment_versions(raw_segment_buffer_l, (char*)&(leaf->records[0]), first_offset_l, segment_size_l, segment_node_versions_l)));
+    assert((VersionManager<LeafNode, LeafEntry>::decode_segment_versions(raw_segment_buffer_r, (char*)&(leaf->records[hash_idx]), first_offset_r, segment_size_r, segment_node_versions_r)));
+    assert(metadata_node_version == segment_node_versions_r);
+    if (segment_size_l > 0) assert(metadata_node_version == segment_node_versions_l);
+    return;
+  }
+  // consistency check; note that: (segment_size_l > 0) => there are two segments
+  if (!VersionManager<LeafNode, LeafEntry>::decode_header_versions(raw_leaf_buffer, leaf_buffer, metadata_node_version) ||
+      (segment_size_l > 0 && !VersionManager<LeafNode, LeafEntry>::decode_segment_versions(raw_segment_buffer_l, (char*)&(leaf->records[0]), first_offset_l, segment_size_l, segment_node_versions_l)) ||
+      !VersionManager<LeafNode, LeafEntry>::decode_segment_versions(raw_segment_buffer_r, (char*)&(leaf->records[hash_idx]), first_offset_r, segment_size_r, segment_node_versions_r) ||
+      metadata_node_version != segment_node_versions_r ||
+      (segment_size_l > 0 && metadata_node_version != segment_node_versions_l)) {
+    read_leaf_retry[dsm_->getMyThreadID()]++;
+    goto re_read;
+  }
+#endif
+  return;
 }
 
 
