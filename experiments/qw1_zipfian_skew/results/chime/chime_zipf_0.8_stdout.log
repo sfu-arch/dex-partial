@@ -3,8 +3,8 @@ CHIME Latency Benchmark (DEX-matched)
 ===========================================
 Node count:     2
 Thread count:   30
-Read ratio:     70%
-Range ratio:    30%
+Read ratio:     100%
+Range ratio:    0%
 Total ops:      30000000
 Range size:     100 (count-based)
 Latency bucket: 500 ns
@@ -17,245 +17,245 @@ Warmup:         full-mix (reads + ranges)
 Initializing DSM...
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=1024 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee2a2000000, size=1024 MB[0m
+[4mHuge pages allocated at 0x731d5cc00000, size=1024 MB[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=8192 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee0a2000000, size=8192 MB[0m
-[4mshared memory size: 8GB, 0x7ee0a2000000[0m
+[4mHuge pages allocated at 0x731b5cc00000, size=8192 MB[0m
+[4mshared memory size: 8GB, 0x731b5cc00000[0m
 [4mrdma cache size: 1GB[0m
 [4mMachine NR: 2[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee0a1a00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee0a1a00000, size=0 MB, pd=0x5df242fd6870[0m
+[4mHuge pages allocated at 0x731b5c600000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b5c600000, size=0 MB, pd=0x611690d99870[0m
 [4mMemory registration succeeded: lkey=1387571, rkey=1387571[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df242fd6870[0m
-[4mMemory registration succeeded: lkey=1465147, rkey=1465147[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690d99870[0m
+[4mMemory registration succeeded: lkey=1528884, rkey=1528884[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee0a0e00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee0a0e00000, size=0 MB, pd=0x5df24301d6b0[0m
+[4mHuge pages allocated at 0x731b5ba00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b5ba00000, size=0 MB, pd=0x611690de06b0[0m
 [4mMemory registration succeeded: lkey=1386798, rkey=1386798[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df24301d6b0[0m
-[4mMemory registration succeeded: lkey=1463091, rkey=1463091[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690de06b0[0m
+[4mMemory registration succeeded: lkey=1528370, rkey=1528370[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee0a0400000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee0a0400000, size=0 MB, pd=0x5df24301ff50[0m
+[4mHuge pages allocated at 0x731b5b000000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b5b000000, size=0 MB, pd=0x611690de2f50[0m
 [4mMemory registration succeeded: lkey=1384996, rkey=1384996[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df24301ff50[0m
-[4mMemory registration succeeded: lkey=1452586, rkey=1452586[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690de2f50[0m
+[4mMemory registration succeeded: lkey=1527856, rkey=1527856[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee09f800000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee09f800000, size=0 MB, pd=0x5df243068db0[0m
+[4mHuge pages allocated at 0x731b5a400000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b5a400000, size=0 MB, pd=0x611690e2bdb0[0m
 [4mMemory registration succeeded: lkey=1390873, rkey=1390873[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df243068db0[0m
-[4mMemory registration succeeded: lkey=1450016, rkey=1450016[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690e2bdb0[0m
+[4mMemory registration succeeded: lkey=1518893, rkey=1518893[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee09ee00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee09ee00000, size=0 MB, pd=0x5df24308ddf0[0m
+[4mHuge pages allocated at 0x731b59a00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b59a00000, size=0 MB, pd=0x611690e50df0[0m
 [4mMemory registration succeeded: lkey=1380104, rkey=1380104[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df24308ddf0[0m
-[4mMemory registration succeeded: lkey=1455897, rkey=1455897[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690e50df0[0m
+[4mMemory registration succeeded: lkey=1518379, rkey=1518379[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee09e200000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee09e200000, size=0 MB, pd=0x5df24308df90[0m
+[4mHuge pages allocated at 0x731b58e00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b58e00000, size=0 MB, pd=0x611690e50f90[0m
 [4mMemory registration succeeded: lkey=1383676, rkey=1383676[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df24308df90[0m
-[4mMemory registration succeeded: lkey=1445390, rkey=1445390[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690e50f90[0m
+[4mMemory registration succeeded: lkey=1517351, rkey=1517351[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee09d800000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee09d800000, size=0 MB, pd=0x5df2430dbf90[0m
+[4mHuge pages allocated at 0x731b58400000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b58400000, size=0 MB, pd=0x611690e9ef90[0m
 [4mMemory registration succeeded: lkey=1381107, rkey=1381107[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2430dbf90[0m
-[4mMemory registration succeeded: lkey=1443077, rkey=1443077[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690e9ef90[0m
+[4mMemory registration succeeded: lkey=1516323, rkey=1516323[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee09cc00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee09cc00000, size=0 MB, pd=0x5df2431042a0[0m
+[4mHuge pages allocated at 0x731b57800000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b57800000, size=0 MB, pd=0x611690ec72a0[0m
 [4mMemory registration succeeded: lkey=1370347, rkey=1370347[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2431042a0[0m
-[4mMemory registration succeeded: lkey=1448698, rkey=1448698[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690ec72a0[0m
+[4mMemory registration succeeded: lkey=1515809, rkey=1515809[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee09c200000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee09c200000, size=0 MB, pd=0x5df243129bf0[0m
+[4mHuge pages allocated at 0x731b56e00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b56e00000, size=0 MB, pd=0x611690eecbf0[0m
 [4mMemory registration succeeded: lkey=1368287, rkey=1368287[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df243129bf0[0m
-[4mMemory registration succeeded: lkey=1437429, rkey=1437429[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690eecbf0[0m
+[4mMemory registration succeeded: lkey=1522973, rkey=1522973[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee09b600000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee09b600000, size=0 MB, pd=0x5df2431527e0[0m
+[4mHuge pages allocated at 0x731b56200000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b56200000, size=0 MB, pd=0x611690f157e0[0m
 [4mMemory registration succeeded: lkey=1373140, rkey=1373140[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2431527e0[0m
-[4mMemory registration succeeded: lkey=1436396, rkey=1436396[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690f157e0[0m
+[4mMemory registration succeeded: lkey=1521945, rkey=1521945[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee09aa00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee09aa00000, size=0 MB, pd=0x5df243179340[0m
+[4mHuge pages allocated at 0x731b55800000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b55800000, size=0 MB, pd=0x611690f3c340[0m
 [4mMemory registration succeeded: lkey=1362120, rkey=1362120[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df243179340[0m
-[4mMemory registration succeeded: lkey=1434081, rkey=1434081[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690f3c340[0m
+[4mMemory registration succeeded: lkey=1520917, rkey=1520917[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee09a000000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee09a000000, size=0 MB, pd=0x5df24319eec0[0m
+[4mHuge pages allocated at 0x731b54c00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b54c00000, size=0 MB, pd=0x611690f61ec0[0m
 [4mMemory registration succeeded: lkey=1367230, rkey=1367230[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df24319eec0[0m
-[4mMemory registration succeeded: lkey=1439446, rkey=1439446[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690f61ec0[0m
+[4mMemory registration succeeded: lkey=1520146, rkey=1520146[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee099400000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee099400000, size=0 MB, pd=0x5df2431c5aa0[0m
+[4mHuge pages allocated at 0x731b54200000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b54200000, size=0 MB, pd=0x611690f88aa0[0m
 [4mMemory registration succeeded: lkey=1364914, rkey=1364914[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2431c5aa0[0m
-[4mMemory registration succeeded: lkey=1428940, rkey=1428940[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690f88aa0[0m
+[4mMemory registration succeeded: lkey=1510926, rkey=1510926[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee098a00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee098a00000, size=0 MB, pd=0x5df2431c7640[0m
+[4mHuge pages allocated at 0x731b53600000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b53600000, size=0 MB, pd=0x611690f8a640[0m
 [4mMemory registration succeeded: lkey=1353638, rkey=1353638[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2431c7640[0m
-[4mMemory registration succeeded: lkey=1425857, rkey=1425857[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690f8a640[0m
+[4mMemory registration succeeded: lkey=1510155, rkey=1510155[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee097e00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee097e00000, size=0 MB, pd=0x5df243215340[0m
+[4mHuge pages allocated at 0x731b52c00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b52c00000, size=0 MB, pd=0x611690fd8340[0m
 [4mMemory registration succeeded: lkey=1358748, rkey=1358748[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df243215340[0m
-[4mMemory registration succeeded: lkey=1431222, rkey=1431222[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690fd8340[0m
+[4mMemory registration succeeded: lkey=1508870, rkey=1508870[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee097400000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee097400000, size=0 MB, pd=0x5df24323ad30[0m
+[4mHuge pages allocated at 0x731b52000000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b52000000, size=0 MB, pd=0x611690ffdd30[0m
 [4mMemory registration succeeded: lkey=1355921, rkey=1355921[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df24323ad30[0m
-[4mMemory registration succeeded: lkey=1420462, rkey=1420462[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690ffdd30[0m
+[4mMemory registration succeeded: lkey=1507842, rkey=1507842[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee096800000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee096800000, size=0 MB, pd=0x5df2431ee8d0[0m
+[4mHuge pages allocated at 0x731b51600000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b51600000, size=0 MB, pd=0x611690fb18d0[0m
 [4mMemory registration succeeded: lkey=1344902, rkey=1344902[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2431ee8d0[0m
-[4mMemory registration succeeded: lkey=1418149, rkey=1418149[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611690fb18d0[0m
+[4mMemory registration succeeded: lkey=1514748, rkey=1514748[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee095e00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee095e00000, size=0 MB, pd=0x5df243263340[0m
+[4mHuge pages allocated at 0x731b50a00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b50a00000, size=0 MB, pd=0x611691026340[0m
 [4mMemory registration succeeded: lkey=1350523, rkey=1350523[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df243263340[0m
-[4mMemory registration succeeded: lkey=1424026, rkey=1424026[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611691026340[0m
+[4mMemory registration succeeded: lkey=1513206, rkey=1513206[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee095200000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee095200000, size=0 MB, pd=0x5df2432afac0[0m
+[4mHuge pages allocated at 0x731b4fe00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b4fe00000, size=0 MB, pd=0x611691072ac0[0m
 [4mMemory registration succeeded: lkey=1457180, rkey=1457180[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2432afac0[0m
-[4mMemory registration succeeded: lkey=1421461, rkey=1421461[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611691072ac0[0m
+[4mMemory registration succeeded: lkey=1511664, rkey=1511664[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee094800000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee094800000, size=0 MB, pd=0x5df2432d6ba0[0m
+[4mHuge pages allocated at 0x731b4f400000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b4f400000, size=0 MB, pd=0x611691099ba0[0m
 [4mMemory registration succeeded: lkey=1454869, rkey=1454869[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2432d6ba0[0m
-[4mMemory registration succeeded: lkey=1411213, rkey=1411213[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611691099ba0[0m
+[4mMemory registration succeeded: lkey=1502187, rkey=1502187[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee093c00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee093c00000, size=0 MB, pd=0x5df2432b1710[0m
+[4mHuge pages allocated at 0x731b4e800000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b4e800000, size=0 MB, pd=0x611691074710[0m
 [4mMemory registration succeeded: lkey=1444361, rkey=1444361[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2432b1710[0m
-[4mMemory registration succeeded: lkey=1409417, rkey=1409417[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611691074710[0m
+[4mMemory registration succeeded: lkey=1500902, rkey=1500902[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee093200000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee093200000, size=0 MB, pd=0x5df2432d82a0[0m
+[4mHuge pages allocated at 0x731b4de00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b4de00000, size=0 MB, pd=0x61169109b2a0[0m
 [4mMemory registration succeeded: lkey=1449981, rkey=1449981[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2432d82a0[0m
-[4mMemory registration succeeded: lkey=1416571, rkey=1416571[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x61169109b2a0[0m
+[4mMemory registration succeeded: lkey=1499360, rkey=1499360[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee092600000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee092600000, size=0 MB, pd=0x5df24334be20[0m
+[4mHuge pages allocated at 0x731b4d200000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b4d200000, size=0 MB, pd=0x61169110ee20[0m
 [4mMemory registration succeeded: lkey=1446890, rkey=1446890[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df24334be20[0m
-[4mMemory registration succeeded: lkey=1404784, rkey=1404784[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x61169110ee20[0m
+[4mMemory registration succeeded: lkey=1506010, rkey=1506010[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee091c00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee091c00000, size=0 MB, pd=0x5df243372a00[0m
+[4mHuge pages allocated at 0x731b4c800000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b4c800000, size=0 MB, pd=0x611691135a00[0m
 [4mMemory registration succeeded: lkey=1441503, rkey=1441503[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df243372a00[0m
-[4mMemory registration succeeded: lkey=1401965, rkey=1401965[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611691135a00[0m
+[4mMemory registration succeeded: lkey=1504725, rkey=1504725[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee091000000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee091000000, size=0 MB, pd=0x5df2433265a0[0m
+[4mHuge pages allocated at 0x731b4bc00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b4bc00000, size=0 MB, pd=0x6116910e95a0[0m
 [4mMemory registration succeeded: lkey=1439186, rkey=1439186[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2433265a0[0m
-[4mMemory registration succeeded: lkey=1401191, rkey=1401191[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x6116910e95a0[0m
+[4mMemory registration succeeded: lkey=1494993, rkey=1494993[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee090400000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee090400000, size=0 MB, pd=0x5df24334d340[0m
+[4mHuge pages allocated at 0x731b4b200000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b4b200000, size=0 MB, pd=0x611691110340[0m
 [4mMemory registration succeeded: lkey=1427399, rkey=1427399[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df24334d340[0m
-[4mMemory registration succeeded: lkey=1407838, rkey=1407838[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611691110340[0m
+[4mMemory registration succeeded: lkey=1493963, rkey=1493963[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee08fa00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee08fa00000, size=0 MB, pd=0x5df2433e7ce0[0m
+[4mHuge pages allocated at 0x731b4a600000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b4a600000, size=0 MB, pd=0x6116911aace0[0m
 [4mMemory registration succeeded: lkey=1433021, rkey=1433021[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2433e7ce0[0m
-[4mMemory registration succeeded: lkey=1405782, rkey=1405782[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x6116911aace0[0m
+[4mMemory registration succeeded: lkey=1492678, rkey=1492678[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee08ee00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee08ee00000, size=0 MB, pd=0x5df2433748d0[0m
+[4mHuge pages allocated at 0x731b49c00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b49c00000, size=0 MB, pd=0x6116911378d0[0m
 [4mMemory registration succeeded: lkey=1430195, rkey=1430195[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2433748d0[0m
-[4mMemory registration succeeded: lkey=1395795, rkey=1395795[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x6116911378d0[0m
+[4mMemory registration succeeded: lkey=1491136, rkey=1491136[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee08e400000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee08e400000, size=0 MB, pd=0x5df2433c2340[0m
+[4mHuge pages allocated at 0x731b49000000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b49000000, size=0 MB, pd=0x611691185340[0m
 [4mMemory registration succeeded: lkey=1419176, rkey=1419176[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2433c2340[0m
-[4mMemory registration succeeded: lkey=1394502, rkey=1394502[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611691185340[0m
+[4mMemory registration succeeded: lkey=1498300, rkey=1498300[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee08d800000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee08d800000, size=0 MB, pd=0x5df24345cac0[0m
+[4mHuge pages allocated at 0x731b48600000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b48600000, size=0 MB, pd=0x61169121fac0[0m
 [4mMemory registration succeeded: lkey=1424796, rkey=1424796[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df24345cac0[0m
-[4mMemory registration succeeded: lkey=1399360, rkey=1399360[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x61169121fac0[0m
+[4mMemory registration succeeded: lkey=1496758, rkey=1496758[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee08ce00000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee08ce00000, size=0 MB, pd=0x5df243483bf0[0m
+[4mHuge pages allocated at 0x731b47a00000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b47a00000, size=0 MB, pd=0x611691246bf0[0m
 [4mMemory registration succeeded: lkey=1421718, rkey=1421718[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df243483bf0[0m
-[4mMemory registration succeeded: lkey=1398076, rkey=1398076[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x611691246bf0[0m
+[4mMemory registration succeeded: lkey=1495216, rkey=1495216[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee08c200000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee08c200000, size=0 MB, pd=0x5df2434107e0[0m
+[4mHuge pages allocated at 0x731b47000000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b47000000, size=0 MB, pd=0x6116911d37e0[0m
 [4mMemory registration succeeded: lkey=1411727, rkey=1411727[0m
-[4mRegistering memory: addr=0x7ee2a2000000, size=1024 MB, pd=0x5df2434107e0[0m
-[4mMemory registration succeeded: lkey=1396768, rkey=1396768[0m
+[4mRegistering memory: addr=0x731d5cc00000, size=1024 MB, pd=0x6116911d37e0[0m
+[4mMemory registration succeeded: lkey=1485739, rkey=1485739[0m
 [4mMemlock limit: soft=48003 MB, hard=48003 MB, requested=0 MB[0m
 [4mUsing NUMA node 1 (max available: 1)[0m
-[4mHuge pages allocated at 0x7ee08b800000, size=0 MB[0m
-[4mRegistering memory: addr=0x7ee08b800000, size=0 MB, pd=0x5df243437500[0m
+[4mHuge pages allocated at 0x731b46400000, size=0 MB[0m
+[4mRegistering memory: addr=0x731b46400000, size=0 MB, pd=0x6116911fa500[0m
 [4mMemory registration succeeded: lkey=1409918, rkey=1409918[0m
-[4mRegistering memory: addr=0x7ee0a2000000, size=8192 MB, pd=0x5df243437500[0m
-[4mMemory registration succeeded: lkey=1562551, rkey=1562551[0m
-[4mCompute server 1 start up [252.127.0.0]
+[4mRegistering memory: addr=0x731b5cc00000, size=8192 MB, pd=0x6116911fa500[0m
+[4mMemory registration succeeded: lkey=1518122, rkey=1518122[0m
+[4mCompute server 1 start up [254.127.0.0]
 [0m
 I connect server 0
 Node 1 initialized (memory nodes: 1)
@@ -280,7 +280,6 @@ Node 1: Bulk load complete (10000000 keys)
 Node 1: All nodes synchronized after bulk load
 Workload generated: 999990 warmup + 30000000 measurement ops (Zipfian, theta=0.80)
 Node 1: Starting benchmark (30000000 ops, 30 threads, range_size=100)...
-[0;31mFailed status unknown (-1274948608) for wr_id 0[0m
 Node 1: All threads finished warmup
 
 ===========================================
@@ -289,41 +288,34 @@ Benchmark Complete!
 Threads:        30
 Range size:     100 (count-based)
 Total ops:      30000000
-Total reads:    21000000
-Total ranges:   9000000
-Throughput:     180826.00 ops/sec  (sum of per-thread, excludes warmup)
+Total reads:    30000000
+Total ranges:   0
+Throughput:     4268139.00 ops/sec  (sum of per-thread, excludes warmup)
 ===========================================
 
 --- CHIME Diagnostic Stats ---
-Cache hit rate:            0.9999  (890261236 / 890337694)
-Read delegation rate:      0.0001  (2823 / 20376821)
-Read leaf retry rate:      0.0000  (0 / 291076668)
-Leaf cache invalid rate:   0.0000  (0 / 291076668)
-Leaf read sibling rate:    0.0000  (0 / 291076668)
-Speculative read rate:     0.3291  (95798263 / 291076668)
-Correct speculative ratio: 1.0000  (95798263 / 95798263)
-Read two hop-segments:     0.1118  (1422203 / 12716413)
-Retry breakdown: first_try=20373998 invalid_leaf=0 invalid_node=0 find_next=0
+Cache hit rate:            1.0000  (28923165 / 28923165)
+Read delegation rate:      0.0026  (76835 / 29000000)
+Read leaf retry rate:      0.0000  (0 / 28923165)
+Leaf cache invalid rate:   0.0000  (0 / 28923165)
+Leaf read sibling rate:    0.0000  (0 / 28923165)
+Speculative read rate:     0.7024  (20314813 / 28923165)
+Correct speculative ratio: 1.0000  (20314813 / 20314813)
+Read two hop-segments:     0.1098  (945089 / 8608352)
+Retry breakdown: first_try=28923165 invalid_leaf=0 invalid_node=0 find_next=0
  ----- [TreeCache]:  cache size=226 MB free_size=220.176 MB skiplist_node_cnt=20213 ----- 
 consumed cache size = 5.824 MB
  ----- [IdxCache]:  cache size=30 MB free_size=0.000 MB ---- 
 consumed hotspot buffer size = 30.000000 MB
 
 ------------------------------
-Saved Read latency histogram to chime_read_latency.dat (21000000 samples)
+Saved Read latency histogram to chime_read_latency.dat (30000000 samples)
 
 Read Latency Percentiles:
-  P50.0: 8.00 us
-  P90.0: 14.00 us
-  P95.0: 25.00 us
-  P99.0: 51.50 us
-  P99.9: 170.00 us
-Saved Range latency histogram to chime_range_latency.dat (9000000 samples)
-
-Range Latency Percentiles:
-  P50.0: 522.00 us
-  P90.0: 888.00 us
-  P95.0: 999.50 us
-  P99.0: 1209.00 us
-  P99.9: 1465.50 us
+  P50.0: 6.50 us
+  P90.0: 8.00 us
+  P95.0: 9.00 us
+  P99.0: 12.50 us
+  P99.9: 17.00 us
+No Range samples to save
 Node 1: Benchmark finished

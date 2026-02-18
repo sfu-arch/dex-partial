@@ -1,0 +1,5 @@
+/home/apa222/dex-partial/trie_bitmap_cache/build/CMakeFiles/DEX_LIB.dir
+/home/apa222/dex-partial/trie_bitmap_cache/build/CMakeFiles/tbc_bench.dir
+/home/apa222/dex-partial/trie_bitmap_cache/build/CMakeFiles/tbc_unit_test.dir
+/home/apa222/dex-partial/trie_bitmap_cache/build/CMakeFiles/edit_cache.dir
+/home/apa222/dex-partial/trie_bitmap_cache/build/CMakeFiles/rebuild_cache.dir

@@ -24,8 +24,8 @@ mkdir -p "$RESULTS_DIR"
 # ===================== SHARED CONFIGURATION (must match node0!) =====================
 NODE_COUNT=2
 THREAD_COUNT=30
-READ_RATIO=100
-RANGE_RATIO=0
+READ_RATIO=70
+RANGE_RATIO=30
 TOTAL_OPS=30000000    # 30M ops
 RANGE_SIZE=100
 

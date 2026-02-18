@@ -1,0 +1,5 @@
+/home/apa222/dex-partial/apex/build/CMakeFiles/APEX.dir
+/home/apa222/dex-partial/apex/build/CMakeFiles/latency_bench.dir
+/home/apa222/dex-partial/apex/build/CMakeFiles/ycsb_bench.dir
+/home/apa222/dex-partial/apex/build/CMakeFiles/edit_cache.dir
+/home/apa222/dex-partial/apex/build/CMakeFiles/rebuild_cache.dir
