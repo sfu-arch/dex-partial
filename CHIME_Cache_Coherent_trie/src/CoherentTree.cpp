@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <city.h>
+#include <cstddef>
 #include <iostream>
 #include <queue>
 #include <utility>
@@ -1115,8 +1116,8 @@ void CoherentTree::entry_write_and_unlock(
   // Update the entry
   node->records[idx].update(k, v);
   
-  // Encode and write
-  size_t entry_offset = sizeof(typename NODE::MetadataType) + idx * sizeof(ENTRY);
+  // Encode and write - calculate offset to records array
+  size_t entry_offset = offsetof(NODE, records) + idx * sizeof(ENTRY);
   // Simplified - would need proper version encoding
   
   auto write_buffer = (dsm_->get_rbuf(sink)).get_leaf_buffer();
