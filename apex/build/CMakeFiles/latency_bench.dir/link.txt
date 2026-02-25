@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wall -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-but-set-variable -Wsign-compare -O3 -std=c++17 -mssse3 -march=native CMakeFiles/latency_bench.dir/test/latency_bench.cpp.o -o latency_bench  libAPEX.a -lnuma -lcityhash -lboost_coroutine -lboost_context -lpthread -libverbs -lmemcached -ltbb 

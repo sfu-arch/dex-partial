@@ -956,14 +956,10 @@ re_read_2:
     auto intermediate_segment_buffer_r = (dsm_->get_rbuf(sink)).get_segment_buffer();
     auto [first_metadata_offset_l, new_len_l] = MetadataManager::get_offset_info(0, segment_size_l);
     auto [first_metadata_offset_r, new_len_r] = MetadataManager::get_offset_info(hash_idx, segment_size_r);
-    if (for_write) {  // for locked node, consistency check is not needed
-      assert((LeafVersionManager::decode_segment_versions(raw_segment_buffer_l, intermediate_segment_buffer_l, first_offset_l, segment_size_l, first_metadata_offset_l, new_len_l, segment_node_versions_l)));
-      assert((LeafVersionManager::decode_segment_versions(raw_segment_buffer_r, intermediate_segment_buffer_r, first_offset_r, segment_size_r, first_metadata_offset_r, new_len_r, segment_node_versions_r)));
-      assert(segment_node_versions_r == segment_node_versions_l);
-    }
-    else if (!LeafVersionManager::decode_segment_versions(raw_segment_buffer_l, intermediate_segment_buffer_l, first_offset_l, segment_size_l, first_metadata_offset_l, new_len_l, segment_node_versions_l) ||
-             !LeafVersionManager::decode_segment_versions(raw_segment_buffer_r, intermediate_segment_buffer_r, first_offset_r, segment_size_r, first_metadata_offset_r, new_len_r, segment_node_versions_r) ||
-             segment_node_versions_r != segment_node_versions_l) {  // consistency check
+    // Retry if decode fails, even for locked nodes
+    if (!LeafVersionManager::decode_segment_versions(raw_segment_buffer_l, intermediate_segment_buffer_l, first_offset_l, segment_size_l, first_metadata_offset_l, new_len_l, segment_node_versions_l) ||
+        !LeafVersionManager::decode_segment_versions(raw_segment_buffer_r, intermediate_segment_buffer_r, first_offset_r, segment_size_r, first_metadata_offset_r, new_len_r, segment_node_versions_r) ||
+        segment_node_versions_r != segment_node_versions_l) {
       read_leaf_retry[dsm_->getMyThreadID()]++;
       goto re_read_2;
     }
@@ -980,8 +976,8 @@ re_read_1:
     uint8_t segment_node_versions_r = 0;
     auto intermediate_segment_buffer_r = (dsm_->get_rbuf(sink)).get_segment_buffer();
     auto [first_metadata_offset_r, new_len_r] = MetadataManager::get_offset_info(hash_idx, segment_size_r);
-    if (for_write) assert((LeafVersionManager::decode_segment_versions(raw_segment_buffer_r, intermediate_segment_buffer_r, first_offset_r, segment_size_r, first_metadata_offset_r, new_len_r, segment_node_versions_r)));
-    else if (!LeafVersionManager::decode_segment_versions(raw_segment_buffer_r, intermediate_segment_buffer_r, first_offset_r, segment_size_r, first_metadata_offset_r, new_len_r, segment_node_versions_r)) {
+    // For locked nodes (for_write=true), decode should succeed, but retry if it fails
+    if (!LeafVersionManager::decode_segment_versions(raw_segment_buffer_r, intermediate_segment_buffer_r, first_offset_r, segment_size_r, first_metadata_offset_r, new_len_r, segment_node_versions_r)) {
       read_leaf_retry[dsm_->getMyThreadID()]++;
       goto re_read_1;
     }
