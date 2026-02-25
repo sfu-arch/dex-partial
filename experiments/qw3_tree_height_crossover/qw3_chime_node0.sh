@@ -131,12 +131,18 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         
         echo ">>> [exec] Launching chime_bench (memory node)..."
         
+        # Change to CHIME directory so memcached.conf is found
+        cd "$CHIME_DIR"
+        
         # CHIME args: <kNodeCount> <kThreadCount> [read_ratio] [zipfian] [bulk_M] [ops_M] [range_ratio]
         "$CHIME_BUILD_DIR/chime_bench" \
             $NODE_COUNT $THREAD_COUNT \
             $READ_RATIO $ZIPF_ARG \
             $KEY_M $OPS_M $RANGE_RATIO \
             2>&1 | tee "$STDOUT_LOG"
+        
+        # Return to script directory
+        cd "$SCRIPT_DIR"
         
         echo ">>> Completed: ${RUN_LABEL}"
         sleep 5

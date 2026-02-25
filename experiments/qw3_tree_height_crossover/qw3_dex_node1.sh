@@ -100,6 +100,9 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         
         echo ">>> [exec] Launching newbench_latency..."
         
+        # Change to DEX directory so memcached.conf is found
+        cd "$DEX_DIR"
+        
         "$DEX_BUILD_DIR/newbench_latency" \
             $NODE_COUNT $READ_RATIO $INSERT_RATIO $UPDATE_RATIO $DELETE_RATIO $RANGE_RATIO \
             $TOTAL_THREADS $MEM_THREADS $CACHE_MB \
@@ -107,6 +110,9 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
             $KEY_M $WARMUP_M $RUN_M \
             $CHECK $TIME_BASED $EARLY_STOP \
             $INDEX $RPC_RATE $ADMIT_RATE $AUTO_TUNE $MAX_THREAD
+        
+        # Return to script directory
+        cd "$SCRIPT_DIR"
         
         echo ">>> Completed: ${RUN_LABEL}"
         sleep 3

@@ -121,6 +121,9 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         
         echo ">>> [exec] Launching newbench_latency..."
         
+        # Change to DEX directory so memcached.conf is found
+        cd "$DEX_DIR"
+        
         # DEX arguments (23 total):
         # 1:kNodeCount 2:kReadRatio 3:kInsertRatio 4:kUpdateRatio 5:kDeleteRatio 6:kRangeRatio
         # 7:totalThreadCount 8:memThreadCount 9:cacheSize(MB) 10:uniform_workload 11:zipfian_theta
@@ -142,6 +145,9 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
             mv latency_read.dat "$LATENCY_FILE"
             echo ">>> Saved latency to: $LATENCY_FILE"
         fi
+        
+        # Return to script directory
+        cd "$SCRIPT_DIR"
         
         echo ">>> Completed: ${RUN_LABEL}"
         sleep 5
