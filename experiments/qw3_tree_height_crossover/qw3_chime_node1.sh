@@ -8,7 +8,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CHIME_DIR="$SCRIPT_DIR/../../CHIME"
+CHIME_DIR="$(cd "$SCRIPT_DIR/../../CHIME" && pwd)"
 CHIME_BUILD_DIR="$CHIME_DIR/build"
 RESULTS_DIR="$SCRIPT_DIR/results/chime"
 MEMC_IP=$(head -1 "$CHIME_DIR/memcached.conf")

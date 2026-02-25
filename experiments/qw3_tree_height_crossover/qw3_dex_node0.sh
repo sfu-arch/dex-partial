@@ -12,7 +12,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEX_DIR="$SCRIPT_DIR/../../dex"
+DEX_DIR="$(cd "$SCRIPT_DIR/../../dex" && pwd)"
 DEX_BUILD_DIR="$DEX_DIR/build"
 RESULTS_DIR="$SCRIPT_DIR/results/dex"
 MEMC_IP=$(head -1 "$DEX_DIR/memcached.conf")
@@ -120,9 +120,12 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         flush_and_reset_memcached
         
         echo ">>> [exec] Launching newbench_latency..."
+        echo ">>> [debug] DEX_DIR=$DEX_DIR"
         
         # Change to DEX directory so memcached.conf is found
         cd "$DEX_DIR"
+        echo ">>> [debug] CWD=$(pwd)"
+        ls memcached.conf
         
         # DEX arguments (23 total):
         # 1:kNodeCount 2:kReadRatio 3:kInsertRatio 4:kUpdateRatio 5:kDeleteRatio 6:kRangeRatio

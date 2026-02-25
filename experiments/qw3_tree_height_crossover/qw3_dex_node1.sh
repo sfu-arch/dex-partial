@@ -8,7 +8,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEX_DIR="$SCRIPT_DIR/../../dex"
+DEX_DIR="$(cd "$SCRIPT_DIR/../../dex" && pwd)"
 DEX_BUILD_DIR="$DEX_DIR/build"
 MEMC_IP=$(head -1 "$DEX_DIR/memcached.conf")
 MEMC_PORT=$(sed -n '2p' "$DEX_DIR/memcached.conf")
