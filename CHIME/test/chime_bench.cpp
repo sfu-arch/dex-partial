@@ -134,10 +134,10 @@ void thread_run(int id) {
     // Clear latency histogram
     memset(latency_histogram[id], 0, sizeof(uint64_t) * LATENCY_BUCKETS);
     
-    // ========== PARALLEL BULK LOAD (all threads on node 1 participate) ==========
-    // Node 0 is memory server, Node 1 is compute node
-    // All threads on Node 1 load in parallel for ~30x speedup
-    if (dsm->getMyNodeID() == 1) {
+    // ========== PARALLEL BULK LOAD (all threads on Node 0 - memory server) ==========
+    // Like DEX: Node 0 is memory server, bulk load happens locally (no RDMA)
+    // This gives ~100x speedup vs remote inserts
+    if (dsm->getMyNodeID() == 0) {
         uint64_t keys_per_thread = bulk_load_num / kThreadCount;
         uint64_t start_key = id * keys_per_thread;
         uint64_t end_key = (id == kThreadCount - 1) ? bulk_load_num : start_key + keys_per_thread;
