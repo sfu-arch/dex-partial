@@ -122,10 +122,10 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         echo ">>> [exec] Launching newbench_latency..."
         echo ">>> [debug] DEX_DIR=$DEX_DIR"
         
-        # Change to DEX directory so memcached.conf is found
-        cd "$DEX_DIR"
+        # Change to build directory so ../memcached.conf is found
+        cd "$DEX_BUILD_DIR"
         echo ">>> [debug] CWD=$(pwd)"
-        ls memcached.conf
+        ls ../memcached.conf
         
         # DEX arguments (23 total):
         # 1:kNodeCount 2:kReadRatio 3:kInsertRatio 4:kUpdateRatio 5:kDeleteRatio 6:kRangeRatio

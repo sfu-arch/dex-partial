@@ -100,8 +100,8 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         
         echo ">>> [exec] Launching newbench_latency..."
         
-        # Change to DEX directory so memcached.conf is found
-        cd "$DEX_DIR"
+        # Change to build directory so ../memcached.conf is found
+        cd "$DEX_BUILD_DIR"
         
         "$DEX_BUILD_DIR/newbench_latency" \
             $NODE_COUNT $READ_RATIO $INSERT_RATIO $UPDATE_RATIO $DELETE_RATIO $RANGE_RATIO \

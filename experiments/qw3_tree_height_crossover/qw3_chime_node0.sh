@@ -131,8 +131,8 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         
         echo ">>> [exec] Launching chime_bench (memory node)..."
         
-        # Change to CHIME directory so memcached.conf is found
-        cd "$CHIME_DIR"
+        # Change to build directory so ../memcached.conf is found
+        cd "$CHIME_BUILD_DIR"
         
         # CHIME args: <kNodeCount> <kThreadCount> [read_ratio] [zipfian] [bulk_M] [ops_M] [range_ratio]
         "$CHIME_BUILD_DIR/chime_bench" \

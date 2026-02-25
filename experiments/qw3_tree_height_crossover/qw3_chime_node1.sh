@@ -114,8 +114,8 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         
         echo ">>> [exec] Launching chime_bench (compute node)..."
         
-        # Change to CHIME directory so memcached.conf is found
-        cd "$CHIME_DIR"
+        # Change to build directory so ../memcached.conf is found
+        cd "$CHIME_BUILD_DIR"
         
         "$CHIME_BUILD_DIR/chime_bench" \
             $NODE_COUNT $THREAD_COUNT \
@@ -127,8 +127,8 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         cd "$SCRIPT_DIR"
         
         # Copy latency file if generated
-        if [[ -f "$CHIME_DIR/chime_latency.dat" ]]; then
-            mv "$CHIME_DIR/chime_latency.dat" "$LATENCY_FILE"
+        if [[ -f "$CHIME_BUILD_DIR/chime_latency.dat" ]]; then
+            mv "$CHIME_BUILD_DIR/chime_latency.dat" "$LATENCY_FILE"
             echo ">>> Saved latency to: $LATENCY_FILE"
         fi
         
