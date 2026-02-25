@@ -56,6 +56,23 @@ wait_for_iteration() {
         fi
         sleep 2
     done
+    
+    # Wait for node0's binary to register (serverNum >= 1)
+    # This ensures node0 gets ID 0 (memory/primary role)
+    echo ">>> [sync] Waiting for node0 binary to register (serverNum >= 1)..."
+    local reg_attempts=0
+    while [ $reg_attempts -lt 60 ]; do
+        local sn
+        sn=$(printf "get serverNum\r\nquit\r\n" | nc -w 2 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | grep -A1 "^VALUE" | tail -1 | tr -d '\r')
+        if [ -n "$sn" ] && [ "$sn" -ge 1 ] 2>/dev/null; then
+            echo ">>> [sync] node0 registered (serverNum=$sn). Starting in 1s..."
+            sleep 1
+            return 0
+        fi
+        reg_attempts=$((reg_attempts + 1))
+        sleep 1
+    done
+    echo ">>> [sync] WARNING: serverNum never reached 1, starting anyway."
 }
 
 # ===================== HELPER: cleanup =====================
@@ -94,16 +111,22 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         
         cleanup_previous_run
-        wait_for_iteration "$ITERATION"
         
-        sleep 3  # Give node0 time to start its process
+        # --- Hugepages ---
+        echo ">>> [hugepages] Setting 36864 pages..."
+        echo 36864 | sudo tee /proc/sys/vm/nr_hugepages > /dev/null
+        ulimit -l unlimited 2>/dev/null || true
+        HP_FREE=$(grep HugePages_Free /proc/meminfo | awk '{print $2}')
+        echo ">>> [hugepages] Free: $HP_FREE"
+        
+        wait_for_iteration "$ITERATION"
         
         echo ">>> [exec] Launching newbench_latency..."
         
         # Change to build directory so ../memcached.conf is found
         cd "$DEX_BUILD_DIR"
         
-        "$DEX_BUILD_DIR/newbench_latency" \
+        sudo "$DEX_BUILD_DIR/newbench_latency" \
             $NODE_COUNT $READ_RATIO $INSERT_RATIO $UPDATE_RATIO $DELETE_RATIO $RANGE_RATIO \
             $TOTAL_THREADS $MEM_THREADS $CACHE_MB \
             $UNIFORM $ZIPF \

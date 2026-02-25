@@ -117,6 +117,14 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         
         cleanup_previous_run
+        
+        # --- Hugepages ---
+        echo ">>> [hugepages] Setting 36864 pages..."
+        echo 36864 | sudo tee /proc/sys/vm/nr_hugepages > /dev/null
+        ulimit -l unlimited 2>/dev/null || true
+        HP_FREE=$(grep HugePages_Free /proc/meminfo | awk '{print $2}')
+        echo ">>> [hugepages] Free: $HP_FREE"
+        
         flush_and_reset_memcached
         
         echo ">>> [exec] Launching newbench_latency..."
@@ -134,7 +142,7 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         # 15:check_correctness 16:time_based 17:early_stop
         # 18:index(0=DEX) 19:rpc_rate 20:admission_rate 21:auto_tune 22:kMaxThread
         
-        "$DEX_BUILD_DIR/newbench_latency" \
+        sudo "$DEX_BUILD_DIR/newbench_latency" \
             $NODE_COUNT $READ_RATIO $INSERT_RATIO $UPDATE_RATIO $DELETE_RATIO $RANGE_RATIO \
             $TOTAL_THREADS $MEM_THREADS $CACHE_MB \
             $UNIFORM $ZIPF \
