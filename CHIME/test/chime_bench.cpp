@@ -134,24 +134,31 @@ void thread_run(int id) {
     // Clear latency histogram
     memset(latency_histogram[id], 0, sizeof(uint64_t) * LATENCY_BUCKETS);
     
-    // ========== BULK LOAD (only thread 0 on node 1 - the compute node) ==========
+    // ========== PARALLEL BULK LOAD (all threads on node 1 participate) ==========
     // Node 0 is memory server, Node 1 is compute node
-    // Loading from Node 1 to avoid potential loopback RDMA issues on Node 0
-    if (dsm->getMyNodeID() == 1 && id == 0) {
-        printf("Thread %d on Node 1 loading %lu keys...\n", id, bulk_load_num);
+    // All threads on Node 1 load in parallel for ~30x speedup
+    if (dsm->getMyNodeID() == 1) {
+        uint64_t keys_per_thread = bulk_load_num / kThreadCount;
+        uint64_t start_key = id * keys_per_thread;
+        uint64_t end_key = (id == kThreadCount - 1) ? bulk_load_num : start_key + keys_per_thread;
         
-        for (uint64_t i = 0; i < bulk_load_num; ++i) {
+        printf("Thread %d loading keys [%lu, %lu) (%lu keys)...\n", 
+               id, start_key, end_key, end_key - start_key);
+        
+        for (uint64_t i = start_key; i < end_key; ++i) {
             Key k = int2key(i);
             tree->insert(k, i);
             
-            if (i % 100000 == 0 && i > 0) {
-                printf("Thread %d: loaded %lu keys (%.1f%%)\n", id, i, (100.0 * i / bulk_load_num));
+            if ((i - start_key) % 500000 == 0 && i > start_key) {
+                printf("Thread %d: loaded %lu / %lu keys (%.1f%%)\n", 
+                       id, i - start_key, end_key - start_key, 
+                       100.0 * (i - start_key) / (end_key - start_key));
             }
         }
-        printf("Thread %d: bulk load complete (%lu keys)\n", id, bulk_load_num);
+        printf("Thread %d: bulk load complete (%lu keys)\n", id, end_key - start_key);
     }
     
-    // LOCAL barrier: wait for all local threads to reach here
+    // LOCAL barrier: wait for all local threads to finish loading
     warmup_cnt.fetch_add(1);
     while (warmup_cnt.load() < kThreadCount);
     
