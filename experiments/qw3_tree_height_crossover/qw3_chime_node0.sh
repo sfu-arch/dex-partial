@@ -29,6 +29,7 @@ THREAD_COUNT=30
 READ_RATIO=100        # 100% reads
 RANGE_RATIO=0         # No range scans
 TOTAL_OPS=10000000    # 10M ops
+RANGE_SIZE=100        # Range scan size (unused with 0% range)
 CACHE_MB=64           # 64MB cache - stress test
 
 # ===================== SWEEP CONFIGURATIONS =====================
@@ -89,8 +90,8 @@ set_cache_size $CACHE_MB
 echo ">>> [build] Building CHIME..."
 mkdir -p "$CHIME_BUILD_DIR"
 cd "$CHIME_BUILD_DIR"
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc) chime_bench
+cmake .. -DCMAKE_BUILD_TYPE=Release -DSHORT_TEST_EPOCH=ON
+make -j$(nproc) latency_bench
 cd "$SCRIPT_DIR"
 
 # ===================== MAIN SWEEP =====================
@@ -110,15 +111,6 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         RUN_LABEL="keys_${KEY_M}M_${LABEL}"
         STDOUT_LOG="$RESULTS_DIR/chime_${RUN_LABEL}_stdout.log"
         
-        # Convert uniform flag to zipfian theta for CHIME
-        if [[ "$UNIFORM" == "1" ]]; then
-            ZIPF_ARG="0.0"
-        else
-            ZIPF_ARG="$ZIPF"
-        fi
-        
-        OPS_M=$((TOTAL_OPS / 1000000))
-        
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ">>> Running: ${RUN_LABEL}"
@@ -127,18 +119,30 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         
         cleanup_previous_run
+        
+        # --- Hugepages ---
+        echo ">>> [hugepages] Setting 36864 pages..."
+        echo 36864 | sudo tee /proc/sys/vm/nr_hugepages > /dev/null
+        ulimit -l unlimited 2>/dev/null || true
+        HP_FREE=$(grep HugePages_Free /proc/meminfo | awk '{print $2}')
+        echo ">>> [hugepages] Free: $HP_FREE"
+        
         flush_and_reset_memcached
         
-        echo ">>> [exec] Launching chime_bench (memory node)..."
+        echo ">>> [exec] Launching latency_bench (memory node)..."
         
         # Change to build directory so ../memcached.conf is found
         cd "$CHIME_BUILD_DIR"
         
-        # CHIME args: <kNodeCount> <kThreadCount> [read_ratio] [zipfian] [bulk_M] [ops_M] [range_ratio]
-        "$CHIME_BUILD_DIR/chime_bench" \
+        # CHIME latency_bench args:
+        # <kNodeCount> <kThreadCount> <read_ratio> <range_ratio>
+        # <total_ops> <range_size> <zipfian_theta> <uniform> <bulk_load_M>
+        sudo "$CHIME_BUILD_DIR/latency_bench" \
             $NODE_COUNT $THREAD_COUNT \
-            $READ_RATIO $ZIPF_ARG \
-            $KEY_M $OPS_M $RANGE_RATIO \
+            $READ_RATIO $RANGE_RATIO \
+            $TOTAL_OPS $RANGE_SIZE \
+            $ZIPF $UNIFORM \
+            $KEY_M \
             2>&1 | tee "$STDOUT_LOG"
         
         # Return to script directory

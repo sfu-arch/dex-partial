@@ -40,8 +40,10 @@
 #define LATENCY_NS_GRANULARITY 500    // 500 nanoseconds per bucket
 #define LATENCY_BUCKETS 100000        // Up to 50ms (100000 * 500ns)
 #define WARMUP_OPS 1000000            // 1M warmup operations (DEX WARMUP_M=1)
-#define BULK_LOAD_COUNT 10000000      // 10M keys (DEX BULK_LOAD_M=10)
 #define KEY_SPACE_PADDING 1000        // DEX adds +1000 to kKeySpace
+
+// Bulk load count - configurable via command line (default 10M)
+uint64_t bulk_load_count = 10000000;
 
 // Per-thread latency histograms
 uint64_t read_latency[MAX_APP_THREAD][LATENCY_BUCKETS];
@@ -83,8 +85,8 @@ int kRangeSize = 100;
 double kZipfTheta = 0.99;          // Runtime parameter (matches DEX zipfian)
 int kUniform = 0;                  // 0=Zipfian, 1=Uniform (matches DEX)
 // Match DEX: kKeySpace = bulk_load_num + ceil((op_num+warmup_num)*(insertRatio/100.0)) + 1000
-// With insertRatio=0: kKeySpace = 10,000,000 + 0 + 1000 = 10,001,000
-uint64_t kKeySpace = BULK_LOAD_COUNT + KEY_SPACE_PADDING;
+// With insertRatio=0: kKeySpace = bulk_load_count + 0 + 1000
+uint64_t kKeySpace = 0;  // Calculated after parsing args
 
 Tree *tree;
 DSM *dsm;
@@ -245,6 +247,7 @@ void print_usage(const char* prog) {
     printf("  range_size   - Count-based range scan size (default: 100)\n");
     printf("  zipf_theta   - Zipfian skew parameter (default: 0.99)\n");
     printf("  uniform      - 0=Zipfian, 1=Uniform (default: 0)\n");
+    printf("  bulk_load_M  - Millions of keys to bulk load (default: 10)\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -261,6 +264,10 @@ int main(int argc, char *argv[]) {
     if (argc > 6) kRangeSize = atoi(argv[6]);
     if (argc > 7) kZipfTheta = atof(argv[7]);
     if (argc > 8) kUniform = atoi(argv[8]);
+    if (argc > 9) bulk_load_count = atoll(argv[9]) * 1000000ULL;  // Convert M to actual count
+    
+    // Calculate kKeySpace after parsing bulk_load_count
+    kKeySpace = bulk_load_count + KEY_SPACE_PADDING;
     
     if (kReadRatio + kRangeRatio != 100) {
         printf("Error: read_ratio + range_ratio must equal 100\n");
@@ -275,6 +282,8 @@ int main(int argc, char *argv[]) {
     printf("Read ratio:     %d%%\n", kReadRatio);
     printf("Range ratio:    %d%%\n", kRangeRatio);
     printf("Total ops:      %lu\n", kTotalOps);
+    printf("Bulk load:      %lu keys (%lu M)\n", bulk_load_count, bulk_load_count / 1000000);
+    printf("Key space:      %lu\n", kKeySpace);
     printf("Range size:     %d (count-based)\n", kRangeSize);
     printf("Latency bucket: %d ns\n", LATENCY_NS_GRANULARITY);
     printf("Zipf theta:     %.2f\n", kZipfTheta);
@@ -316,17 +325,17 @@ int main(int argc, char *argv[]) {
     // Bulk load on compute nodes (not memory node)
     if (my_node >= MEMORY_NODE_NUM) {
         if (my_node == MEMORY_NODE_NUM) {
-            printf("Node %d: Starting bulk load (%d keys, kKeySpace=%lu)...\n", my_node, BULK_LOAD_COUNT, kKeySpace);
+            printf("Node %d: Starting bulk load (%lu keys, kKeySpace=%lu)...\n", my_node, bulk_load_count, kKeySpace);
             
-            for (uint64_t i = 0; i < BULK_LOAD_COUNT; i++) {
+            for (uint64_t i = 0; i < bulk_load_count; i++) {
                 Key k = int2key(i);
                 tree->insert(k, i + 1);
                 
                 if ((i + 1) % 1000000 == 0) {
-                    printf("  Loaded %lu / %d keys\n", i + 1, BULK_LOAD_COUNT);
+                    printf("  Loaded %lu / %lu keys\n", i + 1, bulk_load_count);
                 }
             }
-            printf("Node %d: Bulk load complete (%d keys)\n", my_node, BULK_LOAD_COUNT);
+            printf("Node %d: Bulk load complete (%lu keys)\n", my_node, bulk_load_count);
         }
     }
     
