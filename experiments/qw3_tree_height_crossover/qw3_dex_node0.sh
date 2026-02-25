@@ -53,8 +53,32 @@ DIST_CONFIGS=(
 
 ITERATION=0
 
+# ===================== HELPER: wait for node1 to complete previous iteration =====================
+wait_for_node1_done() {
+    local prev_iter=$1
+    if [ "$prev_iter" -le 0 ]; then
+        return 0  # No previous iteration to wait for
+    fi
+    echo ">>> [sync] Waiting for node1 to finish iteration $prev_iter..."
+    local wait_attempts=0
+    while [ $wait_attempts -lt 120 ]; do  # Wait up to 2 minutes
+        local done_val
+        done_val=$(printf "get node1_done_%d\r\nquit\r\n" "$prev_iter" | nc -w 2 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | grep -A1 "^VALUE" | tail -1 | tr -d '\r\n')
+        if [ "$done_val" = "1" ]; then
+            echo ">>> [sync] Node1 finished iteration $prev_iter"
+            return 0
+        fi
+        wait_attempts=$((wait_attempts + 1))
+        sleep 1
+    done
+    echo ">>> [sync] WARNING: Timeout waiting for node1 iteration $prev_iter"
+}
+
 # ===================== HELPER: flush & reset memcached =====================
 flush_and_reset_memcached() {
+    # Wait for node1 to finish previous iteration before killing memcached
+    wait_for_node1_done "$ITERATION"
+    
     echo ">>> [memcached] Killing any existing memcached..."
     sudo pkill -9 memcached 2>/dev/null || true
     sleep 2

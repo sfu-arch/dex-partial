@@ -134,6 +134,10 @@ for KEY_M in "${KEY_COUNTS[@]}"; do
             $CHECK $TIME_BASED $EARLY_STOP \
             $INDEX $RPC_RATE $ADMIT_RATE $AUTO_TUNE $MAX_THREAD
         
+        # Signal to node0 that we're done with this iteration
+        printf "set node1_done_%d 0 0 1\r\n1\r\nquit\r\n" "$ITERATION" | nc -w 2 "$MEMC_IP" "$MEMC_PORT" || true
+        echo ">>> [sync] Signaled node1_done_$ITERATION"
+        
         # Return to script directory
         cd "$SCRIPT_DIR"
         
