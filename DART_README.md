@@ -220,4 +220,3 @@ After loading, DART traverses the ART tree and creates shortcut entries:
 | Latency | 17.878 µs | 17.916 µs |
 | Avg RTTs | 4.49 | 4.49 |
 
-**Nearly identical performance.** This confirms that DART's performance is **independent of key access skew** — every query still does the same number of RDMA reads regardless of whether it's a hot or cold key. Without a persistent local data cache, skew provides no benefit.
