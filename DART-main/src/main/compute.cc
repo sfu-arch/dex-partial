@@ -27,7 +27,7 @@
 #include "race/common.h"
 #endif
 
-const char* ips[] = {"192.168.98.74", "192.168.98.72", "192.168.98.70"};
+const char* ips[] = {"10.30.1.9","10.30.1.9","10.30.1.6"};
 
 template<typename T>
 using coro = boost::coroutines2::coroutine<T>;
