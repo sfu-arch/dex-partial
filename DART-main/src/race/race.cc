@@ -56,7 +56,7 @@ void PrintDir(Directory *dir)
     // }
 }
 
-Server::Server(int dev_index, Config &config) : dev(dev_index, 1, 1), ser(dev)
+Server::Server(int dev_index, Config &config) : dev(dev_index, 1, -1), ser(dev)
 {
     uint64_t mem_size = 10 * 1024L * 1024L * 1024L;
     lmr = dev.reg_mr(233, mem_size);

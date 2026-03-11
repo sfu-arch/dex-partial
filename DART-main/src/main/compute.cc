@@ -488,7 +488,7 @@ int main(int argc, char** argv) {
     config.machine_id = com_ind;
     std::mutex dir_lock;
     std::thread ths[112];
-    RACE::rdma_dev dev(FLAGS_nic_index, 1, 1);
+    RACE::rdma_dev dev(FLAGS_nic_index, 1, -1);
     uint64_t cbuf_size = (1ul << 20) * 32;
     std::vector<std::vector<RACE::rdma_client *>> rdma_clis(thread_num_per_compute + 1, std::vector<RACE::rdma_client*>(memory_machine_num, nullptr));
     std::vector<std::vector<RACE::Client *>> clis;
