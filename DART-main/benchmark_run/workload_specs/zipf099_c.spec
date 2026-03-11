@@ -1,6 +1,6 @@
 # Workload C: Read-only, Zipfian 0.99
-# 100M records, 10M operations — matches DEX config
-recordcount=100000000
+# 10M records, 10M operations
+recordcount=10000000
 operationcount=10000000
 workload=site.ycsb.workloads.CoreWorkload
 readallfields=true

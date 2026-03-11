@@ -15,13 +15,13 @@ LABELS=("Uniform" "Zipfian-0.3" "Zipfian-0.5" "Zipfian-0.8" "Zipfian-0.99")
 
 echo "============================================"
 echo "  DART Benchmark — Compute Node (10.30.1.6)"
-echo "  30 threads, 100M load, 10M run ops"
+echo "  30 threads, 10M load, 10M run ops"
 echo "============================================"
 
 for i in "${!CONFIGS[@]}"; do
     CONFIG="${CONFIGS[$i]}"
     LABEL="${LABELS[$i]}"
-    LOAD_FILE="100m_load"
+    LOAD_FILE="10m_load"
     RUN_FILE="${CONFIG}_run"
     RESULT_FILE="$RESULTS_DIR/dart_compute_${CONFIG}.txt"
 

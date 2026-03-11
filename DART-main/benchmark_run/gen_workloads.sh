@@ -24,16 +24,16 @@ CONFIGS=("uniform" "zipf03" "zipf05" "zipf08" "zipf099")
 SPECS=("uniform_c.spec" "zipf03_c.spec" "zipf05_c.spec" "zipf08_c.spec" "zipf099_c.spec")
 
 echo "============================================"
-echo "  DART Workload Generation (100M records)"
+echo "  DART Workload Generation (10M records)"
 echo "============================================"
 
 # Generate the common load file (same for all — 100M inserts, distribution irrelevant)
-LOAD_FILE="$SPLIT_DIR/100m_load"
+LOAD_FILE="$SPLIT_DIR/10m_load"
 if [ -f "$LOAD_FILE" ] && [ "$(wc -l < "$LOAD_FILE")" -gt 1000 ]; then
     echo "[SKIP] Load file $LOAD_FILE already exists ($(wc -l < "$LOAD_FILE") lines)"
 else
     echo ""
-    echo "[1/6] Generating load file: $LOAD_FILE (100M records — this will take a while)..."
+    echo "[1/6] Generating load file: $LOAD_FILE (10M records)..."
     cd "$YCSB_DIR"
     bin/ycsb.sh load basic -P "../../$SPEC_DIR/uniform_c.spec" -s > "../../$LOAD_FILE"
     cd ../..
