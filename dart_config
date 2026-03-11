@@ -1,0 +1,14 @@
+What's actually "cache" in DART
+~1 MB: The locally cached copy of the RACE skip-table hash directory (Directory struct synced via sync_dir()). This is the only data persistently retained across queries and reused to avoid remote lookups.
+What's NOT cache (just RDMA scratch buffers)
+10 MB/thread (--th_mb): A transient RDMA memory region. When DART reads a remote ART node, it RDMA-reads it into this buffer, processes it, then moves on. The data is not retained between queries — it's overwritten on the next RDMA read. It's working memory, like a scratch pad.
+32 MB/thread (cbuf_size): Same concept for the RACE client — RDMA working memory for skip-table operations, not persistent storage.
+The key difference
+Cache = data is fetched once and reused on future accesses (like DEX's 512 MB kIndexCacheSize that stores B-tree nodes and serves future lookups from local memory)
+RDMA buffer = temporary landing zone for one-sided RDMA reads; data is discarded/overwritten after each operation
+Corrected summary
+Component	Size	Type	Persisted?
+Skip-table hash directory	~1 MB	Cache	Yes — synced once, reused every query
+Per-thread ART buffer (--th_mb)	10 MB × 30 = 300 MB	RDMA scratch buffer	No — overwritten each RDMA read
+Per-thread RACE buffer (cbuf_size)	32 MB × 30 = 960 MB	RDMA scratch buffer	No — overwritten each operation
+So the dart_config file should say DART's actual cache ≈ 1 MB, not 1.26 GB. The 1.26 GB is total local RDMA buffer allocation, which is a very different thing from an index cache.

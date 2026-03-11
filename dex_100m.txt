@@ -1,0 +1,113 @@
+DEX LATENCY BENCHMARK
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0
+totalThreadCount 30, memThreadCount 4, cache_size 64 MB    
+uniform_workload 1, zipfian 0.000000
+bulk_load_num 100000000, warmup_num 1000000, op_num 10000000
+KeySpace = 100001000
+shared memory size: 8GB, 0x7fd832a00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [218.127.0.0]
+I connect server 1
+dir 3 launch!
+
+dir 1 launch!
+
+dir 0 launch!
+
+dir 2 launch!
+
+Pushdown (RPC) Rate: 0
+Admission Rate: 1
+Cache size(MB) = 64
+-----Cache initial addr = 0x7fd825800000
+page num = 65536
+alloc_unit = 1024
+entry_num: 65536
+bucket_num: 21846
+Bucket size = 64
+entry_num: 6553
+bucket_num: 1093
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33556480]
+Height = 2
+Success: tree root pointer value [0, 33616896]
+Height = 3
+Success: tree root pointer value [0, 35369984]
+Height = 4
+Success: tree root pointer value [1, 4328522752]
+Height = 5
+entering dynamic phase
+Success: tree root pointer value [1, 6962864128]
+Height = 6
+#leaf nodes = 3448275
+leaf size(MB) = 3367.46
+#inner nodes = 123147
+inner size(MB) = 120.261
+Tree height = 6
+Cache capacity = 65536
+max. leaf entries = 58
+max. inner entries = 59
+Inner page size = 1024
+Leaf page size = 1024
+node 0 finish bulkload
+IMPORTANT: my root is 456318263492609
+I am 0
+I am 8
+I am 6
+Fetched new height = 6
+I am 12
+I am 24
+I am 4
+I am 9
+I am 11
+I am 17
+I am 1
+I am 10
+I am 21
+I am 15
+I am 25
+I am 5
+I am 23
+I am 22
+I am 26
+I am 18
+I am 13
+I am 29
+I am 16
+I am 14
+I am 28
+I am 27
+I am 20
+I am 19
+I am 2
+I am 3
+I am 7
+entering dynamic phase
+Thread_op_num = 333333
+node 0 finish warmup
+RPC ratio = 0
+
+========== DEX Read LATENCY STATISTICS ==========
+Total operations: 9999990
+Average latency: 5441.61 ns
+P50 latency: 5500 ns
+P90 latency: 7000 ns
+P95 latency: 7500 ns
+P99 latency: 9000 ns
+P99.9 latency: 11500 ns
+=================================================
+
+Read latency histogram saved to: dex_read_latency.dat      
+No Range samples to save
+Total reads: 9999990, Total ranges: 0
+Final cluster throughput: 5.134 Mops/s
+[apa222@cs-dis-srv09s test]$

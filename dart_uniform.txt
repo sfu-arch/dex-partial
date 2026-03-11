@@ -1,0 +1,189 @@
+$ cd ~/dex-partial/DART-main && rm -f workload/split/*__bin_* && bin/compute --monitor_addr=10.30.1.9:9898 --nic_index=0 2>&1 | tee benchmark_run/results/dart_compute_uniform.txt
+[backtrace.hpp:58] (InstallSignalHandlers) Install signal handlers
+[compute.cc:422] (main) gflag: tab_completion_columns = 80
+[compute.cc:422] (main) gflag: help = false
+[compute.cc:422] (main) gflag: helpfull = false
+[compute.cc:422] (main) gflag: helppackage = false
+[compute.cc:422] (main) gflag: helpshort = false
+[compute.cc:422] (main) gflag: helpxml = false
+[compute.cc:422] (main) gflag: version = false
+[compute.cc:422] (main) gflag: ib_port = 1
+[compute.cc:422] (main) gflag: monitor_addr = 10.30.1.9:9898
+[compute.cc:422] (main) gflag: nic_index = 0
+[compute.cc:422] (main) gflag: numa_node_group = 0
+[compute.cc:422] (main) gflag: numa_node_total_num = 2
+[socket-connection.cc:22] (client_connect) connect to 10.30.1.9:9898
+[socket-connection.cc:28] (client_connect) init (connect) 3
+workload_load_string: ./workload/split/2m_load
+workload_run_string: ./workload/split/uniform_run
+[compute.cc:475] (main) this compute node is No.1
+[compute.cc:480] (main) is_email = 0
+[compute.cc:523] (main) Establish the connection of skip table.
+[ycsb-fileloader.cc:33] (load_from_file) use int64 key
+[ycsb-fileloader.cc:220] (load_from_file) read 200000 data from ./workload/split/2m_load
+[ycsb-fileloader.cc:220] (load_from_file) read 400000 data from ./workload/split/2m_load
+[ycsb-fileloader.cc:220] (load_from_file) read 600000 data from ./workload/split/2m_load
+[ycsb-fileloader.cc:220] (load_from_file) read 800000 data from ./workload/split/2m_load
+[ycsb-fileloader.cc:220] (load_from_file) read 1000000 data from ./workload/split/2m_load
+[ycsb-fileloader.cc:220] (load_from_file) read 1200000 data from ./workload/split/2m_load
+[ycsb-fileloader.cc:220] (load_from_file) read 1400000 data from ./workload/split/2m_load
+[ycsb-fileloader.cc:220] (load_from_file) read 1600000 data from ./workload/split/2m_load
+[ycsb-fileloader.cc:220] (load_from_file) read 1800000 data from ./workload/split/2m_load
+[ycsb-fileloader.cc:220] (load_from_file) read 2000000 data from ./workload/split/2m_load
+[ycsb-fileloader.cc:226] (load_from_file) writing cache to ./workload/split/2m_load__bin_buffer_    
+[ycsb-fileloader.cc:242] (load_from_file) writing cache to ./workload/split/2m_load__bin_
+[ycsb-fileloader.cc:252] (load_from_file) use size = 2000000 from ./workload/split/2m_load
+[ycsb-fileloader.cc:33] (load_from_file) use int64 key
+[ycsb-fileloader.cc:220] (load_from_file) read 200000 data from ./workload/split/uniform_run
+[ycsb-fileloader.cc:220] (load_from_file) read 400000 data from ./workload/split/uniform_run
+[ycsb-fileloader.cc:220] (load_from_file) read 600000 data from ./workload/split/uniform_run
+[ycsb-fileloader.cc:220] (load_from_file) read 800000 data from ./workload/split/uniform_run
+[ycsb-fileloader.cc:220] (load_from_file) read 1000000 data from ./workload/split/uniform_run
+[ycsb-fileloader.cc:220] (load_from_file) read 1200000 data from ./workload/split/uniform_run
+[ycsb-fileloader.cc:220] (load_from_file) read 1400000 data from ./workload/split/uniform_run
+[ycsb-fileloader.cc:220] (load_from_file) read 1600000 data from ./workload/split/uniform_run
+[ycsb-fileloader.cc:220] (load_from_file) read 1800000 data from ./workload/split/uniform_run
+[ycsb-fileloader.cc:220] (load_from_file) read 2000000 data from ./workload/split/uniform_run
+[ycsb-fileloader.cc:226] (load_from_file) writing cache to ./workload/split/uniform_run__bin_buffer_
+[ycsb-fileloader.cc:242] (load_from_file) writing cache to ./workload/split/uniform_run__bin_
+[ycsb-fileloader.cc:252] (load_from_file) use size = 2000000 from ./workload/split/uniform_run
+[compute.cc:539] (main) workload_load_string: ./workload/split/2m_load, record_len = 2000000        
+[compute.cc:540] (main) workload_run_string: ./workload/split/uniform_run, record_len = 2000000     
+[compute.cc:627] (main) thread 1 to memory 1 connected
+[compute.cc:627] (main) thread 2 to memory 1 connected
+[compute.cc:627] (main) thread 3 to memory 1 connected
+[compute.cc:627] (main) thread 4 to memory 1 connected
+[compute.cc:627] (main) thread 5 to memory 1 connected
+[compute.cc:627] (main) thread 6 to memory 1 connected
+[compute.cc:627] (main) thread 7 to memory 1 connected
+[compute.cc:627] (main) thread 8 to memory 1 connected
+[compute.cc:627] (main) thread 9 to memory 1 connected
+[compute.cc:627] (main) thread 10 to memory 1 connected
+[compute.cc:627] (main) thread 11 to memory 1 connected
+[compute.cc:627] (main) thread 12 to memory 1 connected
+[compute.cc:627] (main) thread 13 to memory 1 connected
+[compute.cc:627] (main) thread 14 to memory 1 connected
+[compute.cc:627] (main) thread 15 to memory 1 connected
+[compute.cc:627] (main) thread 16 to memory 1 connected
+[compute.cc:627] (main) thread 17 to memory 1 connected
+[compute.cc:627] (main) thread 18 to memory 1 connected
+[compute.cc:627] (main) thread 19 to memory 1 connected
+[compute.cc:627] (main) thread 20 to memory 1 connected
+[compute.cc:627] (main) thread 21 to memory 1 connected
+[compute.cc:627] (main) thread 22 to memory 1 connected
+[compute.cc:627] (main) thread 23 to memory 1 connected
+[compute.cc:627] (main) thread 24 to memory 1 connected
+[compute.cc:627] (main) thread 25 to memory 1 connected
+[compute.cc:627] (main) thread 26 to memory 1 connected
+[compute.cc:627] (main) thread 27 to memory 1 connected
+[compute.cc:627] (main) thread 28 to memory 1 connected
+[compute.cc:627] (main) thread 29 to memory 1 connected
+[compute.cc:627] (main) thread 30 to memory 1 connected
+[compute.cc:641] (main) Compute node No.1 ready.
+[compute.cc:651] (main) Waiting for other compute nodes...
+[compute.cc:662] (main) Compute node No.1 start.
+[compute.cc:667] (main) load start
+[rdma-connection.hpp:29] (print) read_size_times
+[printtype.hpp:24] (print) 256: 184557
+[printtype.hpp:24] (print) 136: 7208
+[printtype.hpp:24] (print) 64: 9288
+[printtype.hpp:24] (print) 8: 3780
+[printtype.hpp:24] (print) 128: 11052
+[printtype.hpp:24] (print) 512: 456
+[printtype.hpp:24] (print) 1024: 4
+[rdma-connection.hpp:31] (print) read_fail_size_times
+[rdma-connection.hpp:33] (print) write_size_times
+[printtype.hpp:24] (print) 1095: 66719
+[printtype.hpp:24] (print) 64: 7208
+[printtype.hpp:24] (print) 128: 1124
+[printtype.hpp:24] (print) 256: 1117
+[printtype.hpp:24] (print) 512: 1079
+[printtype.hpp:24] (print) 1024: 456
+[printtype.hpp:24] (print) 2048: 4
+[rdma-connection.hpp:35] (print) write_fail_size_times
+[rdma-connection.hpp:37] (print) cas_size_times
+[printtype.hpp:24] (print) 8: 70441
+[rdma-connection.hpp:39] (print) cas_fail_size_times
+[printtype.hpp:24] (print) 8: 58
+[compute.cc:712] (main) load done, start to prepare
+[compute.cc:354] (create_skip_table) num shortcuts:251247
+[compute.cc:356] (create_skip_table) [level 0] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 1] shortcut num: 128
+[compute.cc:356] (create_skip_table) [level 2] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 3] shortcut num: 251119
+[compute.cc:356] (create_skip_table) [level 4] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 5] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 6] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 7] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 8] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 9] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 10] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 11] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 12] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 13] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 14] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 15] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 16] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 17] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 18] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 19] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 20] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 21] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 22] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 23] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 24] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 25] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 26] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 27] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 28] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 29] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 30] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 31] shortcut num: 0
+[compute.cc:745] (main) skip list: load done!
+[compute.cc:766] (main) prepare done, start to run
+[rdma-connection.hpp:29] (print) read_size_times
+[printtype.hpp:24] (print) 256: 147498
+[printtype.hpp:24] (print) 136: 66657
+[printtype.hpp:24] (print) 1095: 66657
+[printtype.hpp:24] (print) 64: 17505
+[rdma-connection.hpp:31] (print) read_fail_size_times
+[rdma-connection.hpp:33] (print) write_size_times
+[rdma-connection.hpp:35] (print) write_fail_size_times
+[rdma-connection.hpp:37] (print) cas_size_times
+[rdma-connection.hpp:39] (print) cas_fail_size_times
+[compute.cc:809] (main) thread 1: total event count: 0.066667 M; avg rtt count: 4.47473; avg bandwidth consumption: 1814.01; throughput: 0.0545338 MOps; latency: 18.3373 us
+[compute.cc:809] (main) thread 2: total event count: 0.066667 M; avg rtt count: 4.47065; avg bandwidth consumption: 1812.52; throughput: 0.0536732 MOps; latency: 18.6313 us
+[compute.cc:809] (main) thread 3: total event count: 0.066667 M; avg rtt count: 4.47041; avg bandwidth consumption: 1812.51; throughput: 0.0532652 MOps; latency: 18.774 us
+[compute.cc:809] (main) thread 4: total event count: 0.066667 M; avg rtt count: 4.47704; avg bandwidth consumption: 1814.78; throughput: 0.0530963 MOps; latency: 18.8337 us
+[compute.cc:809] (main) thread 5: total event count: 0.066667 M; avg rtt count: 4.47608; avg bandwidth consumption: 1814.48; throughput: 0.0528484 MOps; latency: 18.9221 us
+[compute.cc:809] (main) thread 6: total event count: 0.066667 M; avg rtt count: 4.47892; avg bandwidth consumption: 1815.46; throughput: 0.0533058 MOps; latency: 18.7597 us
+[compute.cc:809] (main) thread 7: total event count: 0.066667 M; avg rtt count: 4.4723; avg bandwidth consumption: 1813.09; throughput: 0.0532569 MOps; latency: 18.7769 us
+[compute.cc:809] (main) thread 8: total event count: 0.066667 M; avg rtt count: 4.4767; avg bandwidth consumption: 1814.72; throughput: 0.0533542 MOps; latency: 18.7427 us
+[compute.cc:809] (main) thread 9: total event count: 0.066667 M; avg rtt count: 4.47086; avg bandwidth consumption: 1812.62; throughput: 0.0533145 MOps; latency: 18.7566 us
+[compute.cc:809] (main) thread 10: total event count: 0.066667 M; avg rtt count: 4.47968; avg bandwidth consumption: 1815.67; throughput: 0.0530294 MOps; latency: 18.8575 us
+[compute.cc:809] (main) thread 11: total event count: 0.066667 M; avg rtt count: 4.47785; avg bandwidth consumption: 1815.11; throughput: 0.0615452 MOps; latency: 16.2482 us
+[compute.cc:809] (main) thread 12: total event count: 0.066667 M; avg rtt count: 4.47697; avg bandwidth consumption: 1814.78; throughput: 0.0614323 MOps; latency: 16.2781 us
+[compute.cc:809] (main) thread 13: total event count: 0.066667 M; avg rtt count: 4.48334; avg bandwidth consumption: 1817.08; throughput: 0.0613689 MOps; latency: 16.2949 us
+[compute.cc:809] (main) thread 14: total event count: 0.066667 M; avg rtt count: 4.47265; avg bandwidth consumption: 1813.28; throughput: 0.0613043 MOps; latency: 16.3121 us
+[compute.cc:809] (main) thread 15: total event count: 0.066667 M; avg rtt count: 4.47773; avg bandwidth consumption: 1815.09; throughput: 0.0613002 MOps; latency: 16.3132 us
+[compute.cc:809] (main) thread 16: total event count: 0.066667 M; avg rtt count: 4.4887; avg bandwidth consumption: 1818.91; throughput: 0.0609397 MOps; latency: 16.4097 us
+[compute.cc:809] (main) thread 17: total event count: 0.066667 M; avg rtt count: 4.48004; avg bandwidth consumption: 1815.79; throughput: 0.0611824 MOps; latency: 16.3446 us
+[compute.cc:809] (main) thread 18: total event count: 0.066667 M; avg rtt count: 4.47815; avg bandwidth consumption: 1815.22; throughput: 0.06126 MOps; latency: 16.3239 us
+[compute.cc:809] (main) thread 19: total event count: 0.066667 M; avg rtt count: 4.47191; avg bandwidth consumption: 1812.99; throughput: 0.0612204 MOps; latency: 16.3344 us
+[compute.cc:809] (main) thread 20: total event count: 0.066667 M; avg rtt count: 4.47632; avg bandwidth consumption: 1814.55; throughput: 0.0610861 MOps; latency: 16.3703 us
+[compute.cc:809] (main) thread 21: total event count: 0.066667 M; avg rtt count: 4.47268; avg bandwidth consumption: 1813.28; throughput: 0.0542025 MOps; latency: 18.4493 us
+[compute.cc:809] (main) thread 22: total event count: 0.066667 M; avg rtt count: 4.47616; avg bandwidth consumption: 1814.5; throughput: 0.0531177 MOps; latency: 18.8261 us
+[compute.cc:809] (main) thread 23: total event count: 0.066667 M; avg rtt count: 4.47881; avg bandwidth consumption: 1815.39; throughput: 0.0533397 MOps; latency: 18.7478 us
+[compute.cc:809] (main) thread 24: total event count: 0.066667 M; avg rtt count: 4.47755; avg bandwidth consumption: 1814.95; throughput: 0.053396 MOps; latency: 18.728 us
+[compute.cc:809] (main) thread 25: total event count: 0.066667 M; avg rtt count: 4.48051; avg bandwidth consumption: 1816.03; throughput: 0.0533463 MOps; latency: 18.7454 us
+[compute.cc:809] (main) thread 26: total event count: 0.066667 M; avg rtt count: 4.46782; avg bandwidth consumption: 1811.56; throughput: 0.0532474 MOps; latency: 18.7803 us
+[compute.cc:809] (main) thread 27: total event count: 0.066667 M; avg rtt count: 4.47586; avg bandwidth consumption: 1814.4; throughput: 0.052989 MOps; latency: 18.8718 us
+[compute.cc:809] (main) thread 28: total event count: 0.066667 M; avg rtt count: 4.47223; avg bandwidth consumption: 1813.16; throughput: 0.0533337 MOps; latency: 18.7499 us
+[compute.cc:809] (main) thread 29: total event count: 0.066667 M; avg rtt count: 4.47409; avg bandwidth consumption: 1813.76; throughput: 0.0532067 MOps; latency: 18.7946 us
+[compute.cc:809] (main) thread 30: total event count: 0.066657 M; avg rtt count: 4.47978; avg bandwidth consumption: 1815.8; throughput: 0.0532919 MOps; latency: 18.7646 us
+[compute.cc:811] (main) total event count: 2 M
+[compute.cc:812] (main) throughput: 1.67262 MOps; latency: 17.936 us
+[compute.cc:817] (main) ALL: throughput = 1.67262 MOps
+[compute.cc:818] (main) ALL: latency = 17.936 us
+[compute.cc:831] (main) waiting the end...
+[socket-connection.cc:136] (disconnect) disconnect (connet/listen) 3
