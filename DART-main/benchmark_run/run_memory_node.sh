@@ -9,27 +9,27 @@ MONITOR_IP="10.30.1.9"
 RESULTS_DIR="benchmark_run/results"
 mkdir -p "$RESULTS_DIR"
 
-# Match DEX config: 30 threads, 10M ops
+# Match DEX config: 30 threads, 2M ops
 LOAD_THREADS=30
 RUN_THREADS=30
 CORO_NUM=1
-MEM_MB=8192        # 8GB remote memory for 10M records
+MEM_MB=4096        # 4GB remote memory for 2M records
 TH_MB=10
 BUCKET=256
-RUN_MAX_REQ=10000000  # 10M ops matching DEX op_num
+RUN_MAX_REQ=2000000  # 2M ops
 
 CONFIGS=("uniform" "zipf03" "zipf05" "zipf08" "zipf099")
 LABELS=("Uniform" "Zipfian-0.3" "Zipfian-0.5" "Zipfian-0.8" "Zipfian-0.99")
 
 echo "============================================"
 echo "  DART Benchmark — Memory Node (10.30.1.9)"
-echo "  30 threads, 10M load, 10M run ops"
+echo "  30 threads, 2M load, 2M run ops"
 echo "============================================"
 
 for i in "${!CONFIGS[@]}"; do
     CONFIG="${CONFIGS[$i]}"
     LABEL="${LABELS[$i]}"
-    LOAD_FILE="10m_load"
+    LOAD_FILE="2m_load"
     RUN_FILE="${CONFIG}_run"
     RESULT_FILE="$RESULTS_DIR/dart_${CONFIG}.txt"
 

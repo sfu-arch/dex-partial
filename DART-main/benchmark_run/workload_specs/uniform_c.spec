@@ -1,7 +1,7 @@
 # Workload C: Read-only, Uniform distribution
-# 10M records, 10M operations
-recordcount=10000000
-operationcount=10000000
+# 2M records, 2M operations
+recordcount=2000000
+operationcount=2000000
 workload=site.ycsb.workloads.CoreWorkload
 readallfields=true
 readproportion=1.0

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # gen_workloads.sh — Run on BOTH nodes (10.30.1.9 and 10.30.1.6)
 # Generates YCSB workload files for all skew levels
-# 100M records load, 10M operations run
+# 2M records load, 2M operations run
 set -e
 
 cd "$(dirname "$0")/.."
@@ -24,16 +24,16 @@ CONFIGS=("uniform" "zipf03" "zipf05" "zipf08" "zipf099")
 SPECS=("uniform_c.spec" "zipf03_c.spec" "zipf05_c.spec" "zipf08_c.spec" "zipf099_c.spec")
 
 echo "============================================"
-echo "  DART Workload Generation (10M records)"
+echo "  DART Workload Generation (2M records)"
 echo "============================================"
 
-# Generate the common load file (same for all — 100M inserts, distribution irrelevant)
-LOAD_FILE="$SPLIT_DIR/10m_load"
+# Generate the common load file (same for all — 2M inserts, distribution irrelevant)
+LOAD_FILE="$SPLIT_DIR/2m_load"
 if [ -f "$LOAD_FILE" ] && [ "$(wc -l < "$LOAD_FILE")" -gt 1000 ]; then
     echo "[SKIP] Load file $LOAD_FILE already exists ($(wc -l < "$LOAD_FILE") lines)"
 else
     echo ""
-    echo "[1/6] Generating load file: $LOAD_FILE (10M records)..."
+    echo "[1/6] Generating load file: $LOAD_FILE (2M records)..."
     cd "$YCSB_DIR"
     bin/ycsb.sh load basic -P "../../$SPEC_DIR/uniform_c.spec" -s > "../../$LOAD_FILE"
     cd ../..
@@ -53,7 +53,7 @@ for i in "${!CONFIGS[@]}"; do
         echo "[SKIP] Run file $RUN_FILE already exists ($(wc -l < "$RUN_FILE") lines)"
     else
         echo ""
-        echo "[$((i+2))/6] Generating run file: $RUN_FILE ($CONFIG, 10M operations)..."
+        echo "[$((i+2))/6] Generating run file: $RUN_FILE ($CONFIG, 2M operations)..."
         cd "$YCSB_DIR"
         bin/ycsb.sh run basic -P "../../$SPEC_DIR/$SPEC" -s > "../../$RUN_FILE"
         cd ../..
