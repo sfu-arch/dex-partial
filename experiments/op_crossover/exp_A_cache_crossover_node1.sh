@@ -96,7 +96,7 @@ save_results() {
             cp "$f" "${prefix}_${f}" && echo ">>> Saved: ${prefix}_${f}" && saved=1 || true
         fi
     done
-    [ $saved -eq 0 ] && echo ">>> WARNING: no .dat files found for ${system} in $(pwd)"
+    [ $saved -eq 0 ] && echo ">>> WARNING: no .dat files found for ${system} in $(pwd)" || true
 }
 
 # ════════════════════════════════
