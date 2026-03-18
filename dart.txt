@@ -1,0 +1,239 @@
+# Delete stale binary caches
+rm -f workload/split/c_load__bin_ workload/split/c_load__bin_buffer_
+rm -f workload/split/c_run__b$ in_ workload/split/c_run__bin_buffer_-sh: 90: kill: Usage: kill [-s sigspec | -signum | -sigspec] [pid | job]... or
+kill -l [exitstatus]
+$ $ $ $ 
+$ 
+$ bin/compute --monitor_addr=10.30.1.9:9898 --nic_index=0
+[backtrace.hpp:58] (InstallSignalHandlers) Install signal handlers
+[compute.cc:422] (main) gflag: tab_completion_columns = 80
+[compute.cc:422] (main) gflag: help = false
+[compute.cc:422] (main) gflag: helpfull = false
+[compute.cc:422] (main) gflag: helppackage = false
+[compute.cc:422] (main) gflag: helpshort = false
+[compute.cc:422] (main) gflag: helpxml = false
+[compute.cc:422] (main) gflag: version = false
+[compute.cc:422] (main) gflag: ib_port = 1
+[compute.cc:422] (main) gflag: monitor_addr = 10.30.1.9:9898
+[compute.cc:422] (main) gflag: nic_index = 0
+[compute.cc:422] (main) gflag: numa_node_group = 0
+[compute.cc:422] (main) gflag: numa_node_total_num = 2
+[socket-connection.cc:22] (client_connect) connect to 10.30.1.9:9898
+[socket-connection.cc:28] (client_connect) init (connect) 3
+workload_load_string: ./workload/split/c_load
+workload_run_string: ./workload/split/c_run
+[compute.cc:475] (main) this compute node is No.1
+[compute.cc:480] (main) is_email = 0
+[compute.cc:523] (main) Establish the connection of skip table.
+[ycsb-fileloader.cc:33] (load_from_file) use int64 key
+[ycsb-fileloader.cc:220] (load_from_file) read 200000 data from ./workload/split/c_load
+[ycsb-fileloader.cc:220] (load_from_file) read 400000 data from ./workload/split/c_load
+[ycsb-fileloader.cc:220] (load_from_file) read 600000 data from ./workload/split/c_load
+[ycsb-fileloader.cc:220] (load_from_file) read 800000 data from ./workload/split/c_load
+[ycsb-fileloader.cc:220] (load_from_file) read 1000000 data from ./workload/split/c_load
+[ycsb-fileloader.cc:226] (load_from_file) writing cache to ./workload/split/c_load__bin_buffer_     
+[ycsb-fileloader.cc:242] (load_from_file) writing cache to ./workload/split/c_load__bin_
+[ycsb-fileloader.cc:252] (load_from_file) use size = 1000000 from ./workload/split/c_load
+[ycsb-fileloader.cc:33] (load_from_file) use int64 key
+[ycsb-fileloader.cc:220] (load_from_file) read 200000 data from ./workload/split/c_run
+[ycsb-fileloader.cc:220] (load_from_file) read 400000 data from ./workload/split/c_run
+[ycsb-fileloader.cc:220] (load_from_file) read 600000 data from ./workload/split/c_run
+[ycsb-fileloader.cc:220] (load_from_file) read 800000 data from ./workload/split/c_run
+[ycsb-fileloader.cc:220] (load_from_file) read 1000000 data from ./workload/split/c_run
+[ycsb-fileloader.cc:226] (load_from_file) writing cache to ./workload/split/c_run__bin_buffer_      
+[ycsb-fileloader.cc:242] (load_from_file) writing cache to ./workload/split/c_run__bin_
+[ycsb-fileloader.cc:252] (load_from_file) use size = 1000000 from ./workload/split/c_run
+[compute.cc:539] (main) workload_load_string: ./workload/split/c_load, record_len = 1000000
+[compute.cc:540] (main) workload_run_string: ./workload/split/c_run, record_len = 1000000
+[compute.cc:627] (main) thread 1 to memory 1 connected
+[compute.cc:627] (main) thread 2 to memory 1 connected
+[compute.cc:627] (main) thread 3 to memory 1 connected
+[compute.cc:627] (main) thread 4 to memory 1 connected
+[compute.cc:627] (main) thread 5 to memory 1 connected
+[compute.cc:627] (main) thread 6 to memory 1 connected
+[compute.cc:627] (main) thread 7 to memory 1 connected
+[compute.cc:627] (main) thread 8 to memory 1 connected
+[compute.cc:627] (main) thread 9 to memory 1 connected
+[compute.cc:627] (main) thread 10 to memory 1 connected
+[compute.cc:627] (main) thread 11 to memory 1 connected
+[compute.cc:627] (main) thread 12 to memory 1 connected
+[compute.cc:627] (main) thread 13 to memory 1 connected
+[compute.cc:627] (main) thread 14 to memory 1 connected
+[compute.cc:627] (main) thread 15 to memory 1 connected
+[compute.cc:627] (main) thread 16 to memory 1 connected
+[compute.cc:627] (main) thread 17 to memory 1 connected
+[compute.cc:627] (main) thread 18 to memory 1 connected
+[compute.cc:627] (main) thread 19 to memory 1 connected
+[compute.cc:627] (main) thread 20 to memory 1 connected
+[compute.cc:627] (main) thread 21 to memory 1 connected
+[compute.cc:627] (main) thread 22 to memory 1 connected
+[compute.cc:627] (main) thread 23 to memory 1 connected
+[compute.cc:627] (main) thread 24 to memory 1 connected
+[compute.cc:627] (main) thread 25 to memory 1 connected
+[compute.cc:627] (main) thread 26 to memory 1 connected
+[compute.cc:627] (main) thread 27 to memory 1 connected
+[compute.cc:627] (main) thread 28 to memory 1 connected
+[compute.cc:627] (main) thread 29 to memory 1 connected
+[compute.cc:627] (main) thread 30 to memory 1 connected
+[compute.cc:627] (main) thread 31 to memory 1 connected
+[compute.cc:627] (main) thread 32 to memory 1 connected
+[compute.cc:627] (main) thread 33 to memory 1 connected
+[compute.cc:627] (main) thread 34 to memory 1 connected
+[compute.cc:627] (main) thread 35 to memory 1 connected
+[compute.cc:627] (main) thread 36 to memory 1 connected
+[compute.cc:627] (main) thread 37 to memory 1 connected
+[compute.cc:627] (main) thread 38 to memory 1 connected
+[compute.cc:627] (main) thread 39 to memory 1 connected
+[compute.cc:627] (main) thread 40 to memory 1 connected
+[compute.cc:627] (main) thread 41 to memory 1 connected
+[compute.cc:627] (main) thread 42 to memory 1 connected
+[compute.cc:627] (main) thread 43 to memory 1 connected
+[compute.cc:627] (main) thread 44 to memory 1 connected
+[compute.cc:627] (main) thread 45 to memory 1 connected
+[compute.cc:627] (main) thread 46 to memory 1 connected
+[compute.cc:627] (main) thread 47 to memory 1 connected
+[compute.cc:627] (main) thread 48 to memory 1 connected
+[compute.cc:627] (main) thread 49 to memory 1 connected
+[compute.cc:627] (main) thread 50 to memory 1 connected
+[compute.cc:627] (main) thread 51 to memory 1 connected
+[compute.cc:627] (main) thread 52 to memory 1 connected
+[compute.cc:627] (main) thread 53 to memory 1 connected
+[compute.cc:627] (main) thread 54 to memory 1 connected
+[compute.cc:627] (main) thread 55 to memory 1 connected
+[compute.cc:627] (main) thread 56 to memory 1 connected
+[compute.cc:641] (main) Compute node No.1 ready.
+[compute.cc:651] (main) Waiting for other compute nodes...
+[compute.cc:662] (main) Compute node No.1 start.
+[compute.cc:667] (main) load start
+[rdma-connection.hpp:29] (print) read_size_times
+[printtype.hpp:24] (print) 256: 43644
+[printtype.hpp:24] (print) 136: 1094
+[printtype.hpp:24] (print) 64: 5320
+[printtype.hpp:24] (print) 128: 6216
+[printtype.hpp:24] (print) 8: 1429
+[printtype.hpp:24] (print) 512: 3
+[printtype.hpp:24] (print) 1024: 2
+[rdma-connection.hpp:31] (print) read_fail_size_times
+[rdma-connection.hpp:33] (print) write_size_times
+[printtype.hpp:24] (print) 1095: 17895
+[printtype.hpp:24] (print) 64: 1094
+[printtype.hpp:24] (print) 128: 633
+[printtype.hpp:24] (print) 256: 617
+[printtype.hpp:24] (print) 512: 174
+[printtype.hpp:24] (print) 1024: 3
+[printtype.hpp:24] (print) 2048: 2
+[rdma-connection.hpp:35] (print) write_fail_size_times
+[rdma-connection.hpp:37] (print) cas_size_times
+[printtype.hpp:24] (print) 8: 19283
+[rdma-connection.hpp:39] (print) cas_fail_size_times
+[printtype.hpp:24] (print) 8: 41
+[compute.cc:712] (main) load done, start to prepare
+[compute.cc:354] (create_skip_table) num shortcuts:50943
+[compute.cc:356] (create_skip_table) [level 0] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 1] shortcut num: 128
+[compute.cc:356] (create_skip_table) [level 2] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 3] shortcut num: 50815
+[compute.cc:356] (create_skip_table) [level 4] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 5] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 6] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 7] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 8] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 9] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 10] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 11] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 12] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 13] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 14] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 15] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 16] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 17] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 18] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 19] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 20] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 21] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 22] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 23] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 24] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 25] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 26] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 27] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 28] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 29] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 30] shortcut num: 0
+[compute.cc:356] (create_skip_table) [level 31] shortcut num: 0
+[compute.cc:745] (main) skip list: load done!
+[compute.cc:766] (main) prepare done, start to run
+[rdma-connection.hpp:29] (print) read_size_times
+[printtype.hpp:24] (print) 256: 46493
+[printtype.hpp:24] (print) 136: 17858
+[printtype.hpp:24] (print) 1095: 17858
+[printtype.hpp:24] (print) 64: 2324
+[printtype.hpp:24] (print) 128: 109
+[rdma-connection.hpp:31] (print) read_fail_size_times
+[rdma-connection.hpp:33] (print) write_size_times
+[rdma-connection.hpp:35] (print) write_fail_size_times
+[rdma-connection.hpp:37] (print) cas_size_times
+[rdma-connection.hpp:39] (print) cas_fail_size_times
+[compute.cc:809] (main) thread 1: total event count: 0.017858 M; avg rtt count: 4.73972; avg bandwidth consumption: 1906.6; throughput: 0.00338268 MOps; latency: 295.624 us
+[compute.cc:809] (main) thread 2: total event count: 0.017858 M; avg rtt count: 4.75053; avg bandwidth consumption: 1910.32; throughput: 0.0485359 MOps; latency: 20.6033 us
+[compute.cc:809] (main) thread 3: total event count: 0.017858 M; avg rtt count: 4.7488; avg bandwidth consumption: 1909.89; throughput: 0.0480991 MOps; latency: 20.7904 us
+[compute.cc:809] (main) thread 4: total event count: 0.017858 M; avg rtt count: 4.74868; avg bandwidth consumption: 1909.82; throughput: 0.0482706 MOps; latency: 20.7166 us
+[compute.cc:809] (main) thread 5: total event count: 0.017858 M; avg rtt count: 4.74566; avg bandwidth consumption: 1908.76; throughput: 0.0483348 MOps; latency: 20.689 us
+[compute.cc:809] (main) thread 6: total event count: 0.017858 M; avg rtt count: 4.75137; avg bandwidth consumption: 1910.73; throughput: 0.048275 MOps; latency: 20.7147 us
+[compute.cc:809] (main) thread 7: total event count: 0.017858 M; avg rtt count: 4.74544; avg bandwidth consumption: 1908.61; throughput: 0.0478951 MOps; latency: 20.879 us
+[compute.cc:809] (main) thread 8: total event count: 0.017858 M; avg rtt count: 4.74432; avg bandwidth consumption: 1908.29; throughput: 0.0479063 MOps; latency: 20.8741 us
+[compute.cc:809] (main) thread 9: total event count: 0.017858 M; avg rtt count: 4.74745; avg bandwidth consumption: 1909.25; throughput: 0.0482848 MOps; latency: 20.7105 us
+[compute.cc:809] (main) thread 10: total event count: 0.017858 M; avg rtt count: 4.74208; avg bandwidth consumption: 1907.46; throughput: 0.048124 MOps; latency: 20.7796 us
+[compute.cc:809] (main) thread 11: total event count: 0.017858 M; avg rtt count: 4.74488; avg bandwidth consumption: 1908.34; throughput: 0.0480966 MOps; latency: 20.7915 us
+[compute.cc:809] (main) thread 12: total event count: 0.017858 M; avg rtt count: 4.74084; avg bandwidth consumption: 1907.03; throughput: 0.0481835 MOps; latency: 20.754 us
+[compute.cc:809] (main) thread 13: total event count: 0.017858 M; avg rtt count: 4.74611; avg bandwidth consumption: 1908.78; throughput: 0.048129 MOps; latency: 20.7775 us
+[compute.cc:809] (main) thread 14: total event count: 0.017858 M; avg rtt count: 4.75384; avg bandwidth consumption: 1911.57; throughput: 0.0480233 MOps; latency: 20.8232 us
+[compute.cc:809] (main) thread 15: total event count: 0.017858 M; avg rtt count: 4.74667; avg bandwidth consumption: 1909; throughput: 0.0483024 MOps; latency: 20.7029 us
+[compute.cc:809] (main) thread 16: total event count: 0.017858 M; avg rtt count: 4.74801; avg bandwidth consumption: 1909.55; throughput: 0.0482061 MOps; latency: 20.7443 us
+[compute.cc:809] (main) thread 17: total event count: 0.017858 M; avg rtt count: 4.73222; avg bandwidth consumption: 1904.04; throughput: 0.0482702 MOps; latency: 20.7167 us
+[compute.cc:809] (main) thread 18: total event count: 0.017858 M; avg rtt count: 4.75003; avg bandwidth consumption: 1910.21; throughput: 0.0480842 MOps; latency: 20.7969 us
+[compute.cc:809] (main) thread 19: total event count: 0.017858 M; avg rtt count: 4.7554; avg bandwidth consumption: 1912.05; throughput: 0.0482258 MOps; latency: 20.7358 us
+[compute.cc:809] (main) thread 20: total event count: 0.017858 M; avg rtt count: 4.74712; avg bandwidth consumption: 1909.27; throughput: 0.0481309 MOps; latency: 20.7767 us
+[compute.cc:809] (main) thread 21: total event count: 0.017858 M; avg rtt count: 4.74544; avg bandwidth consumption: 1908.62; throughput: 0.0477583 MOps; latency: 20.9388 us
+[compute.cc:809] (main) thread 22: total event count: 0.017858 M; avg rtt count: 4.74051; avg bandwidth consumption: 1906.9; throughput: 0.0481879 MOps; latency: 20.7521 us
+[compute.cc:809] (main) thread 23: total event count: 0.017858 M; avg rtt count: 4.74745; avg bandwidth consumption: 1909.13; throughput: 0.048322 MOps; latency: 20.6945 us
+[compute.cc:809] (main) thread 24: total event count: 0.017858 M; avg rtt count: 4.74174; avg bandwidth consumption: 1907.17; throughput: 0.0483149 MOps; latency: 20.6976 us
+[compute.cc:809] (main) thread 25: total event count: 0.017858 M; avg rtt count: 4.74325; avg bandwidth consumption: 1907.89; throughput: 0.0478812 MOps; latency: 20.885 us
+[compute.cc:809] (main) thread 26: total event count: 0.017858 M; avg rtt count: 4.73816; avg bandwidth consumption: 1905.99; throughput: 0.0482853 MOps; latency: 20.7103 us
+[compute.cc:809] (main) thread 27: total event count: 0.017858 M; avg rtt count: 4.74157; avg bandwidth consumption: 1907.27; throughput: 0.0480833 MOps; latency: 20.7973 us
+[compute.cc:809] (main) thread 28: total event count: 0.017858 M; avg rtt count: 4.73631; avg bandwidth consumption: 1905.35; throughput: 0.0479631 MOps; latency: 20.8494 us
+[compute.cc:809] (main) thread 29: total event count: 0.017858 M; avg rtt count: 4.74398; avg bandwidth consumption: 1907.96; throughput: 0.0482332 MOps; latency: 20.7326 us
+[compute.cc:809] (main) thread 30: total event count: 0.017858 M; avg rtt count: 4.74499; avg bandwidth consumption: 1908.55; throughput: 0.0483082 MOps; latency: 20.7004 us
+[compute.cc:809] (main) thread 31: total event count: 0.017858 M; avg rtt count: 4.74196; avg bandwidth consumption: 1907.39; throughput: 0.0483076 MOps; latency: 20.7007 us
+[compute.cc:809] (main) thread 32: total event count: 0.017858 M; avg rtt count: 4.73592; avg bandwidth consumption: 1905.36; throughput: 0.0479501 MOps; latency: 20.855 us
+[compute.cc:809] (main) thread 33: total event count: 0.017858 M; avg rtt count: 4.74364; avg bandwidth consumption: 1907.99; throughput: 0.0479915 MOps; latency: 20.837 us
+[compute.cc:809] (main) thread 34: total event count: 0.017858 M; avg rtt count: 4.73827; avg bandwidth consumption: 1906.13; throughput: 0.0480853 MOps; latency: 20.7964 us
+[compute.cc:809] (main) thread 35: total event count: 0.017858 M; avg rtt count: 4.74846; avg bandwidth consumption: 1909.57; throughput: 0.048229 MOps; latency: 20.7344 us
+[compute.cc:809] (main) thread 36: total event count: 0.017858 M; avg rtt count: 4.74073; avg bandwidth consumption: 1906.88; throughput: 0.0484468 MOps; latency: 20.6412 us
+[compute.cc:809] (main) thread 37: total event count: 0.017858 M; avg rtt count: 4.74521; avg bandwidth consumption: 1908.56; throughput: 0.0480923 MOps; latency: 20.7934 us
+[compute.cc:809] (main) thread 38: total event count: 0.017858 M; avg rtt count: 4.74639; avg bandwidth consumption: 1908.99; throughput: 0.0479895 MOps; latency: 20.8379 us
+[compute.cc:809] (main) thread 39: total event count: 0.017858 M; avg rtt count: 4.74555; avg bandwidth consumption: 1908.63; throughput: 0.0484383 MOps; latency: 20.6448 us
+[compute.cc:809] (main) thread 40: total event count: 0.017858 M; avg rtt count: 4.73177; avg bandwidth consumption: 1903.67; throughput: 0.0483671 MOps; latency: 20.6752 us
+[compute.cc:809] (main) thread 41: total event count: 0.017858 M; avg rtt count: 4.73894; avg bandwidth consumption: 1906.35; throughput: 0.00314543 MOps; latency: 317.922 us
+[compute.cc:809] (main) thread 42: total event count: 0.017858 M; avg rtt count: 4.74336; avg bandwidth consumption: 1907.86; throughput: 0.00333187 MOps; latency: 300.132 us
+[compute.cc:809] (main) thread 43: total event count: 0.017858 M; avg rtt count: 4.74773; avg bandwidth consumption: 1909.48; throughput: 0.00314103 MOps; latency: 318.367 us
+[compute.cc:809] (main) thread 44: total event count: 0.017858 M; avg rtt count: 4.73916; avg bandwidth consumption: 1906.37; throughput: 0.0032308 MOps; latency: 309.52 us
+[compute.cc:809] (main) thread 45: total event count: 0.017858 M; avg rtt count: 4.74947; avg bandwidth consumption: 1910.05; throughput: 0.00326973 MOps; latency: 305.836 us
+[compute.cc:809] (main) thread 46: total event count: 0.017858 M; avg rtt count: 4.73681; avg bandwidth consumption: 1905.62; throughput: 0.00312759 MOps; latency: 319.735 us
+[compute.cc:809] (main) thread 47: total event count: 0.017858 M; avg rtt count: 4.74555; avg bandwidth consumption: 1908.62; throughput: 0.0032122 MOps; latency: 311.313 us
+[compute.cc:809] (main) thread 48: total event count: 0.017858 M; avg rtt count: 4.73726; avg bandwidth consumption: 1905.59; throughput: 0.003334 MOps; latency: 299.94 us
+[compute.cc:809] (main) thread 49: total event count: 0.017858 M; avg rtt count: 4.74958; avg bandwidth consumption: 1909.88; throughput: 0.00314977 MOps; latency: 317.484 us
+[compute.cc:809] (main) thread 50: total event count: 0.017858 M; avg rtt count: 4.74712; avg bandwidth consumption: 1909.11; throughput: 0.00324881 MOps; latency: 307.805 us
+[compute.cc:809] (main) thread 51: total event count: 0.017858 M; avg rtt count: 4.74868; avg bandwidth consumption: 1909.84; throughput: 0.00325969 MOps; latency: 306.777 us
+[compute.cc:809] (main) thread 52: total event count: 0.017858 M; avg rtt count: 4.74846; avg bandwidth consumption: 1909.57; throughput: 0.00318471 MOps; latency: 314 us
+[compute.cc:809] (main) thread 53: total event count: 0.017858 M; avg rtt count: 4.75395; avg bandwidth consumption: 1911.71; throughput: 0.00326923 MOps; latency: 305.882 us
+[compute.cc:809] (main) thread 54: total event count: 0.017858 M; avg rtt count: 4.747; avg bandwidth consumption: 1909.13; throughput: 0.00336378 MOps; latency: 297.285 us
+[compute.cc:809] (main) thread 55: total event count: 0.017858 M; avg rtt count: 4.75003; avg bandwidth consumption: 1910.28; throughput: 0.00324874 MOps; latency: 307.812 us
+[compute.cc:809] (main) thread 56: total event count: 0.01781 M; avg rtt count: 4.74307; avg bandwidth consumption: 1907.57; throughput: 0.0032749 MOps; latency: 305.353 us
+[compute.cc:811] (main) total event count: 1 M
+[compute.cc:812] (main) throughput: 0.518355 MOps; latency: 108.034 us
+[compute.cc:817] (main) ALL: throughput = 0.518355 MOps
+[compute.cc:818] (main) ALL: latency = 108.034 us
+[compute.cc:831] (main) waiting the end...
+[socket-connection.cc:136] (disconnect) disconnect (connet/listen) 3
+$ 
