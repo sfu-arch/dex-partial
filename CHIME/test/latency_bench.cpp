@@ -26,6 +26,7 @@
 
 #include "Tree.h"
 #include "DSM.h"
+#include "Key.h"
 #include "Timer.h"
 #include "zipf.h"
 
@@ -82,7 +83,8 @@ std::atomic_bool     ready{false};
 
 // ─── Key derivation (same as DEX for fair comparison) ───────────────────────
 inline Key to_key(uint64_t k) {
-  return (CityHash64((char *)&k, sizeof(k)) + 1) % kKeySpace;
+  uint64_t hashed = (CityHash64((char *)&k, sizeof(k)) + 1) % kKeySpace;
+  return int2key(hashed);
 }
 
 // ─── Record a single latency sample (nanoseconds) ───────────────────────────
