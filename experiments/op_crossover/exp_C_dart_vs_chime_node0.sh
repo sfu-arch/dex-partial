@@ -113,7 +113,7 @@ for CHIME_CACHE in "${CHIME_CACHES[@]}"; do
         sudo /tmp/latency_bench_c${CHIME_CACHE} \
             $NODE_COUNT $THREADS $READ_RATIO $RANGE_RATIO \
             $((RUN_M * 1000000)) $RANGE_SIZE $ZIPF_THETA $UNIFORM $BULK_LOAD_M \
-            2>&1 | tee "/tmp/expC_chime_c${CHIME_CACHE}_${LABEL}_node0.log"
+            2>&1 | tee "/tmp/expC_chime_c${CHIME_CACHE}_${LABEL}_node0.log" || true
 
         echo ">>> Done. Sleeping 8s..."; sleep 8
     done

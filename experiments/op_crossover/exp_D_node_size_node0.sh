@@ -137,7 +137,7 @@ for LEAF_SZ in "${DEX_LEAF_SIZES[@]}"; do
         $CACHE_MB $UNIFORM $ZIPF_THETA $BULK_LOAD_M $WARMUP_M $RUN_M \
         $CHECK $TIME_BASED $EARLY_STOP $INDEX $RPC_RATE $ADMIT_RATE \
         $AUTO_TUNE $MAX_THREAD \
-        2>&1 | tee "/tmp/expD_dex_leaf${LEAF_SZ}_node0.log"
+        2>&1 | tee "/tmp/expD_dex_leaf${LEAF_SZ}_node0.log" || true
 
     echo ">>> Done. Sleeping 8s..."; sleep 8
 done
@@ -154,7 +154,7 @@ for SPAN in "${CHIME_SPAN_SIZES[@]}"; do
     sudo /tmp/latency_bench_span${SPAN} \
         $NODE_COUNT $THREADS $READ_RATIO $RANGE_RATIO \
         $((RUN_M * 1000000)) $RANGE_SIZE $ZIPF_THETA $UNIFORM $BULK_LOAD_M \
-        2>&1 | tee "/tmp/expD_chime_span${SPAN}_node0.log"
+        2>&1 | tee "/tmp/expD_chime_span${SPAN}_node0.log" || true
 
     echo ">>> Done. Sleeping 8s..."; sleep 8
 done

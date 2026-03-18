@@ -100,7 +100,7 @@ for config in "${SKEW_CONFIGS[@]}"; do
         $CACHE_MB $UNIFORM $ZIPF_THETA $BULK_LOAD_M $WARMUP_M $RUN_M \
         $CHECK $TIME_BASED $EARLY_STOP $INDEX $RPC_RATE $ADMIT_RATE \
         $AUTO_TUNE $MAX_THREAD \
-        2>&1 | tee "$RESULTS_DEX/expB_dex_${LABEL}_stdout.log"
+        2>&1 | tee "$RESULTS_DEX/expB_dex_${LABEL}_stdout.log" || true
 
     save_results "$RESULTS_DEX/expB_dex_${LABEL}" "dex"
     echo ">>> DEX $LABEL done. Sleeping 8s..."; sleep 8
@@ -119,7 +119,7 @@ for config in "${SKEW_CONFIGS[@]}"; do
     sudo /tmp/latency_bench_b256 \
         $NODE_COUNT $THREADS $READ_RATIO $RANGE_RATIO \
         $((RUN_M * 1000000)) $RANGE_SIZE $ZIPF_THETA $UNIFORM $BULK_LOAD_M \
-        2>&1 | tee "$RESULTS_CHIME/expB_chime_${LABEL}_stdout.log"
+        2>&1 | tee "$RESULTS_CHIME/expB_chime_${LABEL}_stdout.log" || true
 
     save_results "$RESULTS_CHIME/expB_chime_${LABEL}" "chime"
     echo ">>> CHIME $LABEL done. Sleeping 8s..."; sleep 8

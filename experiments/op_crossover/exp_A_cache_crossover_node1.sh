@@ -93,9 +93,7 @@ save_results() {
     local saved=0
     for f in ${system}_read_latency.dat ${system}_range_latency.dat; do
         if [ -f "$f" ]; then
-            cp "$f" "${prefix}_${f}"
-            echo ">>> Saved: ${prefix}_${f}"
-            saved=1
+            cp "$f" "${prefix}_${f}" && echo ">>> Saved: ${prefix}_${f}" && saved=1 || true
         fi
     done
     [ $saved -eq 0 ] && echo ">>> WARNING: no .dat files found for ${system} in $(pwd)"
@@ -147,7 +145,7 @@ for CACHE_MB in "${DEX_CACHES[@]}"; do
         $CACHE_MB $UNIFORM $ZIPF_THETA $BULK_LOAD_M $WARMUP_M $RUN_M \
         $CHECK $TIME_BASED $EARLY_STOP $INDEX $RPC_RATE $ADMIT_RATE \
         $AUTO_TUNE $MAX_THREAD \
-        2>&1 | tee "$RESULTS_DEX/expA_dex_cache${CACHE_MB}mb_stdout.log"
+        2>&1 | tee "$RESULTS_DEX/expA_dex_cache${CACHE_MB}mb_stdout.log" || true
 
     save_results "$RESULTS_DEX/expA_dex_cache${CACHE_MB}mb" "dex"
     echo ">>> DEX cache=${CACHE_MB}MB done. Sleeping 8s..."; sleep 8
@@ -171,7 +169,7 @@ for CHIME_CACHE in "${CHIME_CACHES[@]}"; do
     sudo /tmp/latency_bench_cache${CHIME_CACHE} \
         $NODE_COUNT $THREADS $READ_RATIO $RANGE_RATIO \
         $((RUN_M * 1000000)) $RANGE_SIZE $ZIPF_THETA $UNIFORM $BULK_LOAD_M \
-        2>&1 | tee "$RESULTS_CHIME/expA_chime_cache${CHIME_CACHE}mb_stdout.log"
+        2>&1 | tee "$RESULTS_CHIME/expA_chime_cache${CHIME_CACHE}mb_stdout.log" || true
 
     save_results "$RESULTS_CHIME/expA_chime_cache${CHIME_CACHE}mb" "chime"
     echo ">>> CHIME cache=${CHIME_CACHE}MB done. Sleeping 8s..."; sleep 8

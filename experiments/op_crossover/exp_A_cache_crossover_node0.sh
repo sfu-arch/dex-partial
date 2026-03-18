@@ -194,7 +194,7 @@ for CACHE_MB in "${DEX_CACHES[@]}"; do
         $CACHE_MB $UNIFORM $ZIPF_THETA $BULK_LOAD_M $WARMUP_M $RUN_M \
         $CHECK $TIME_BASED $EARLY_STOP $INDEX $RPC_RATE $ADMIT_RATE \
         $AUTO_TUNE $MAX_THREAD \
-        2>&1 | tee "/tmp/expA_dex_cache${CACHE_MB}mb_node0.log"
+        2>&1 | tee "/tmp/expA_dex_cache${CACHE_MB}mb_node0.log" || true
 
     echo ">>> DEX cache=${CACHE_MB}MB memory done. Sleeping 8s..."; sleep 8
 done
@@ -215,7 +215,7 @@ for CHIME_CACHE in "${CHIME_CACHES[@]}"; do
     sudo /tmp/latency_bench_cache${CHIME_CACHE} \
         $NODE_COUNT $THREADS $READ_RATIO $RANGE_RATIO \
         $((RUN_M * 1000000)) $RANGE_SIZE $ZIPF_THETA $UNIFORM $BULK_LOAD_M \
-        2>&1 | tee "/tmp/expA_chime_cache${CHIME_CACHE}mb_node0.log"
+        2>&1 | tee "/tmp/expA_chime_cache${CHIME_CACHE}mb_node0.log" || true
 
     echo ">>> CHIME cache=${CHIME_CACHE}MB memory done. Sleeping 8s..."; sleep 8
 done

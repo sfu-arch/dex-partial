@@ -96,7 +96,7 @@ for CHIME_CACHE in "${CHIME_CACHES[@]}"; do
         sudo /tmp/latency_bench_c${CHIME_CACHE} \
             $NODE_COUNT $THREADS $READ_RATIO $RANGE_RATIO \
             $((RUN_M * 1000000)) $RANGE_SIZE $ZIPF_THETA $UNIFORM $BULK_LOAD_M \
-            2>&1 | tee "$RESULTS_CHIME/expC_chime_${FULL_LABEL}_stdout.log"
+            2>&1 | tee "$RESULTS_CHIME/expC_chime_${FULL_LABEL}_stdout.log" || true
 
         save_results "$RESULTS_CHIME/expC_chime_${FULL_LABEL}" "chime"
         echo ">>> Done. Sleeping 8s..."; sleep 8
@@ -121,7 +121,7 @@ for config in "${SKEW_CONFIGS[@]}"; do
     cd "$DART_BIN"
     if [ -d "$DART_DIR/workload/split" ]; then
         sudo ./compute \
-            2>&1 | tee "$RESULTS_DART/expC_dart_${LABEL}_stdout.log"
+            2>&1 | tee "$RESULTS_DART/expC_dart_${LABEL}_stdout.log" || true
         echo ">>> DART $LABEL done."
     else
         echo ">>> SKIPPING DART (no workload files)"
