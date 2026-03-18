@@ -115,11 +115,12 @@ void thread_run(int id) {
 
   auto myNodeID = dsm->getMyNodeID();
 
-  // Memory nodes just participate in barriers; compute nodes benchmark
+  // Memory nodes: only thread 0 calls the node-level barriers (one call per node expected)
   if (myNodeID < MEMORY_NODE_NUM) {
-    // Wait until compute side is done
-    dsm->barrier("warm_finish");
-    dsm->barrier("run_finish");
+    if (id == 0) {
+      dsm->barrier("warm_finish");
+      dsm->barrier("run_finish");
+    }
     return;
   }
 
@@ -303,7 +304,10 @@ int main(int argc, char *argv[]) {
   dsm = DSM::getInstance(config);
   bindCore(kThreadCount * 2 + 1);
   dsm->registerThread();
-  tree = new Tree(dsm, 0, (dsm->getMyNodeID() >= MEMORY_NODE_NUM));
+  // All nodes call new Tree(dsm) with default init_root=true.
+  // The Tree constructor gates actual root page creation on myNodeID==0 internally,
+  // so only the memory server allocates the root; compute nodes just get root_ptr_ptr.
+  tree = new Tree(dsm);
   dsm->barrier("benchmark");
 
   // Zero out all histograms
