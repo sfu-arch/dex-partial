@@ -60,7 +60,7 @@ wait_for_iter() {
     echo ">>> Waiting for exp_iter=$target from node0..."
     while true; do
         local raw val
-        raw=$(printf "get exp_iter\r\nquit\r\n" | nc -q1 -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null || true)
+        raw=$(printf "get exp_iter\r\nquit\r\n" | timeout 3 nc -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null || true)
         # strip carriage returns, extract the value line (a bare integer after VALUE header)
         val=$(echo "$raw" | tr -d '\r' | awk '/^[0-9]+$/{print $1}' | head -1)
         if [ "$val" = "$target" ]; then

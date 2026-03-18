@@ -43,7 +43,7 @@ SKEW_CONFIGS=(
 
 ITERATION=0
 
-memc_cmd() { printf "%s\r\nquit\r\n" "$1" | nc -q1 -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null || true; }
+memc_cmd() { printf "%s\r\nquit\r\n" "$1" | timeout 3 nc -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null || true; }
 
 start_memcached() {
     echo ">>> [memc] Killing old memcached..."
@@ -52,21 +52,21 @@ start_memcached() {
     local retries=0
     while true; do
         local reply
-        reply=$(printf "set ping 0 0 2\r\nok\r\nquit\r\n" | nc -q1 -w 2 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | tr -d '\r\n' || true)
+        reply=$(printf "set ping 0 0 2\r\nok\r\nquit\r\n" | timeout 2 nc -w 2 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | tr -d '\r\n' || true)
         [[ "$reply" == *"STORED"* ]] && { echo ">>> [memc] Up."; break; }
         retries=$((retries + 1)); [ $retries -ge 15 ] && { echo "ERROR: memcached not up"; exit 1; }
         echo ">>> [memc] Waiting... ($retries)"; sleep 1
     done
     memc_cmd "flush_all"; sleep 1
-    printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -q1 -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | tr -d '\r\n' | grep -q "STORED" || true
-    printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -q1 -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | tr -d '\r\n' | grep -q "STORED" || true
+    printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | timeout 3 nc -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | tr -d '\r\n' | grep -q "STORED" || true
+    printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | timeout 3 nc -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | tr -d '\r\n' | grep -q "STORED" || true
     echo ">>> [memc] serverNum=0, clientNum=0 set."
 }
 
 set_iter() {
     local val=$1 len=${#1}
     printf "set exp_iter 0 0 %d\r\n%s\r\nquit\r\n" "$len" "$val" \
-        | nc -q1 -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | tr -d '\r\n' | grep -q "STORED" \
+        | timeout 3 nc -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | tr -d '\r\n' | grep -q "STORED" \
         && echo ">>> [memc] exp_iter=$val" || echo ">>> WARNING: set exp_iter=$val failed"
 }
 

@@ -34,7 +34,7 @@ wait_for_iter() {
     echo ">>> Waiting for exp_iter=$target ..."
     while true; do
         local raw val
-        raw=$(printf "get exp_iter\r\nquit\r\n" | nc -q1 -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null || true)
+        raw=$(printf "get exp_iter\r\nquit\r\n" | timeout 3 nc -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null || true)
         val=$(echo "$raw" | tr -d '\r' | awk '/^[0-9]+$/{print $1}' | head -1)
         [ "$val" = "$target" ] && { echo ">>> Synced — exp_iter=$target"; return 0; }
         elapsed=$((elapsed + 2))
