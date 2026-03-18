@@ -86,10 +86,7 @@ CHIME_COMMON="$CHIME_DIR/include/Common.h"
 # ════ PHASE 1: Build ════
 echo ""; echo "════ PHASE 1: Build ════"
 
-echo ">>> Building DART..."
-cd "$DART_DIR"; mkdir -p build; cd build
-cmake .. > /dev/null 2>&1; make -j$(nproc) 2>&1 | tail -3
-
+# Build CHIME variants first (always required)
 for CHIME_CACHE in "${CHIME_CACHES[@]}"; do
     echo ">>> Building CHIME cache=${CHIME_CACHE}MB..."
     sed -i "s/constexpr int kIndexCacheSize\s*=\s*[0-9]*/constexpr int kIndexCacheSize  = ${CHIME_CACHE}/" "$CHIME_COMMON"
@@ -99,7 +96,25 @@ for CHIME_CACHE in "${CHIME_CACHES[@]}"; do
     cp "$CHIME_BUILD/latency_bench" "/tmp/latency_bench_c${CHIME_CACHE}"
 done
 sed -i "s/constexpr int kIndexCacheSize\s*=\s*[0-9]*/constexpr int kIndexCacheSize  = 100/" "$CHIME_COMMON"
-echo ">>> All builds done."
+echo ">>> All CHIME variants built."
+
+# Build DART (optional — skip if DART-main not present)
+DART_AVAILABLE=0
+if [ -d "$DART_DIR" ]; then
+    echo ">>> Building DART..."
+    cd "$DART_DIR"; mkdir -p build; cd build
+    if cmake .. 2>&1 | tail -3 && make -j$(nproc) 2>&1 | tail -3; then
+        echo ">>> DART built OK."
+        DART_AVAILABLE=1
+    else
+        echo ">>> WARNING: DART build failed — Phase 3 will be skipped."
+    fi
+    cd "$SCRIPT_DIR"
+else
+    echo ">>> WARNING: DART-main not found at $DART_DIR"
+    echo ">>>   Clone it there to enable DART runs. Skipping Phase 3."
+fi
+echo ">>> Phase 1 complete (DART_AVAILABLE=$DART_AVAILABLE)."
 
 # ════ PHASE 2: CHIME cache sweep (memory server) ════
 echo ""; echo "════ PHASE 2: CHIME cache sweep (memory server) ════"
@@ -121,33 +136,42 @@ done
 
 # ════ PHASE 3: DART (monitor + memory on node0) ════
 echo ""; echo "════ PHASE 3: DART runs (monitor + memory on node0) ════"
-echo "NOTE: DART uses its own 3-process architecture."
-echo "      node0 runs monitor + memory; node1 runs compute."
-echo "      No memcached sync needed for DART (uses its own IPC)."
 
-for config in "${SKEW_CONFIGS[@]}"; do
-    read -r UNIFORM ZIPF_THETA LABEL <<< "$config"
-    echo ""; echo "─── DART $LABEL ───"
+if [ "$DART_AVAILABLE" -eq 0 ]; then
+    echo ">>> DART not available — skipping Phase 3."
+    echo "    Publish ITERATION counter so node1 can skip DART waits too."
+    for config in "${SKEW_CONFIGS[@]}"; do
+        ITERATION=$((ITERATION + 1))
+        set_iter "$ITERATION"
+        sleep 2
+    done
+else
+    echo "NOTE: DART uses its own 3-process architecture."
+    echo "      node0 runs monitor + memory; node1 runs compute."
 
-    # For DART, use the exp_iter as a loose sync hint for node1
-    ITERATION=$((ITERATION + 1))
-    set_iter "$ITERATION"
+    for config in "${SKEW_CONFIGS[@]}"; do
+        read -r UNIFORM ZIPF_THETA LABEL <<< "$config"
+        echo ""; echo "─── DART $LABEL ───"
 
-    cleanup
+        ITERATION=$((ITERATION + 1))
+        set_iter "$ITERATION"
 
-    cd "$DART_BIN"
-    sudo ./monitor &
-    MONITOR_PID=$!
-    sleep 2
-    sudo ./memory &
-    MEMORY_PID=$!
-    echo ">>> DART monitor(pid=$MONITOR_PID) + memory(pid=$MEMORY_PID) started for $LABEL"
-    echo ">>> Waiting for DART to finish..."
+        cleanup
 
-    wait $MONITOR_PID 2>/dev/null || true
-    wait $MEMORY_PID  2>/dev/null || true
+        cd "$DART_BIN"
+        sudo ./monitor &
+        MONITOR_PID=$!
+        sleep 2
+        sudo ./memory &
+        MEMORY_PID=$!
+        echo ">>> DART monitor(pid=$MONITOR_PID) + memory(pid=$MEMORY_PID) started for $LABEL"
+        echo ">>> Waiting for DART to finish..."
 
-    echo ">>> DART $LABEL done. Sleeping 8s..."; sleep 8
-done
+        wait $MONITOR_PID 2>/dev/null || true
+        wait $MEMORY_PID  2>/dev/null || true
+
+        echo ">>> DART $LABEL done. Sleeping 8s..."; sleep 8
+    done
+fi
 
 echo ""; echo "════ EXP C Node 0 COMPLETE ════"

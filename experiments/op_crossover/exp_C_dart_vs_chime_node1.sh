@@ -76,10 +76,22 @@ for CHIME_CACHE in "${CHIME_CACHES[@]}"; do
 done
 sed -i "s/constexpr int kIndexCacheSize\s*=\s*[0-9]*/constexpr int kIndexCacheSize  = 100/" "$CHIME_COMMON"
 
-echo ">>> Building DART..."
-cd "$DART_DIR"; mkdir -p build; cd build
-cmake .. > /dev/null 2>&1; make -j$(nproc) 2>&1 | tail -3
-echo ">>> All builds done."
+# Build DART (optional — skip if DART-main not present)
+DART_AVAILABLE=0
+if [ -d "$DART_DIR" ]; then
+    echo ">>> Building DART..."
+    cd "$DART_DIR"; mkdir -p build; cd build
+    if cmake .. 2>&1 | tail -3 && make -j$(nproc) 2>&1 | tail -3; then
+        echo ">>> DART built OK."
+        DART_AVAILABLE=1
+    else
+        echo ">>> WARNING: DART build failed — Phase 3 will be skipped."
+    fi
+    cd "$SCRIPT_DIR"
+else
+    echo ">>> WARNING: DART-main not found at $DART_DIR — Phase 3 will be skipped."
+fi
+echo ">>> All builds done (DART_AVAILABLE=$DART_AVAILABLE)."
 
 # ════ PHASE 2: CHIME cache sweep (compute) ════
 echo ""; echo "════ PHASE 2: CHIME cache sweep (compute) ════"
@@ -106,26 +118,27 @@ done
 # ════ PHASE 3: DART compute ════
 echo ""; echo "════ PHASE 3: DART compute ════"
 
-if [ ! -d "$DART_DIR/workload/split" ]; then
-    echo "WARNING: DART workload not found at $DART_DIR/workload/split"
-    echo "  Run workload generation first on this node:"
-    echo "  cd $DART_DIR && python3 benchmark_script/gen_workload.py"
-fi
-
 for config in "${SKEW_CONFIGS[@]}"; do
     read -r UNIFORM ZIPF_THETA LABEL <<< "$config"
     ITERATION=$((ITERATION + 1))
     echo ""; echo "─── DART $LABEL (iter=$ITERATION) ───"
     cleanup; hugepages; wait_for_iter "$ITERATION"
 
-    cd "$DART_BIN"
-    if [ -d "$DART_DIR/workload/split" ]; then
-        sudo ./compute \
-            2>&1 | tee "$RESULTS_DART/expC_dart_${LABEL}_stdout.log" || true
-        echo ">>> DART $LABEL done."
-    else
-        echo ">>> SKIPPING DART (no workload files)"
+    if [ "$DART_AVAILABLE" -eq 0 ]; then
+        echo ">>> SKIPPING DART (not built — DART-main missing or build failed)"
+        sleep 4; continue
     fi
+
+    if [ ! -d "$DART_DIR/workload/split" ]; then
+        echo ">>> SKIPPING DART (workload not found at $DART_DIR/workload/split)"
+        echo "    Generate with: cd $DART_DIR && python3 benchmark_script/gen_workload.py"
+        sleep 4; continue
+    fi
+
+    cd "$DART_BIN"
+    sudo ./compute \
+        2>&1 | tee "$RESULTS_DART/expC_dart_${LABEL}_stdout.log" || true
+    echo ">>> DART $LABEL done."
     sleep 8
 done
 
