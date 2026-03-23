@@ -648,8 +648,8 @@ public:
       start = std::chrono::high_resolution_clock::now();
     }
 
-    if (state == 1 && flag) {
-      // if (state == 1 && flag && rpc_rate_ != 0) {
+    if (state == 1 && flag && rpc_rate_ != 0) {
+      // restored: guard rpc_lookup behind rpc_rate_ != 0 to prevent segfault when rpc=0
       GlobalAddress leaf_addr;
       int ret = 0;
       switch (rpc_type) {

@@ -2,11 +2,10 @@
 ###############################################################################
 # DEX Sweep — Node 1 (Compute Node, 10.30.1.6)
 #
-# Polls memcached for each run signal from node0, then launches newbench_latency.
-# Start this AFTER or AT THE SAME TIME as node0_memory.sh.
+# Polls for each run signal from node0_memory.sh, then launches newbench_latency.
+# Start at the same time as node0_memory.sh.
 #
-# USAGE:
-#   bash node1_compute.sh
+# MUST match node0_memory.sh exactly (same params, same label order).
 ###############################################################################
 set -e
 
@@ -20,20 +19,6 @@ MEMC_IP="10.30.1.9"
 MEMC_PORT="11211"
 
 # ── Must exactly match node0_memory.sh ───────────────────────────────────────
-CACHE_SIZES=(32 64 128 256 512)
-
-PAGE_CONFIGS=(
-    "1024 1024 1kb_1kb"
-)
-# "1024 2048 1kb_2kb"
-# "1024 4096 1kb_4kb"
-# "512  1024 512b_1kb"
-
-WORKLOADS=(
-    "1 0.0  uniform"
-    "0 0.99 zipf099"
-)
-
 NODES=2
 THREADS=30
 MEM_THREADS=4
@@ -46,10 +31,37 @@ CHECK=0
 TIMEBASE=1
 EARLY=0
 INDEX=0
-RPC=1
+RPC=0
 ADMIT=0.1
 TUNE=0
 MAX_THREAD=30
+
+CACHE_SWEEP=(
+    "32  1 0.0  uniform_32mb"
+    "64  1 0.0  uniform_64mb"
+    "128 1 0.0  uniform_128mb"
+    "256 1 0.0  uniform_256mb"
+    "512 1 0.0  uniform_512mb"
+    "32  0 0.99 zipf099_32mb"
+    "64  0 0.99 zipf099_64mb"
+    "128 0 0.99 zipf099_128mb"
+    "256 0 0.99 zipf099_256mb"
+    "512 0 0.99 zipf099_512mb"
+)
+
+LEAF_SIZE_CONFIGS=(
+    "1024 1024 leaf1kb"
+    "1024 2048 leaf2kb"
+    "1024 4096 leaf4kb"
+)
+LEAF_SWEEP_CACHE=256; LEAF_SWEEP_UNIFORM=1; LEAF_SWEEP_THETA=0.0
+
+INNER_SIZE_CONFIGS=(
+    "1024 1024 inner1kb"
+    "512  1024 inner512b"
+    "128  1024 inner128b"
+)
+INNER_SWEEP_CACHE=256; INNER_SWEEP_UNIFORM=1; INNER_SWEEP_THETA=0.0
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 log() { echo "[$(date '+%H:%M:%S')] [NODE1] $*"; }
@@ -67,8 +79,8 @@ wait_for_signal() {
     while true; do
         local val
         val=$(get_key "node0_ready")
-        [ "$val" = "$expected" ] && { log "  Signal received: $expected"; return 0; }
-        (( elapsed % 10 == 0 )) && log "  node0_ready='$val' (want '$expected') — ${elapsed}s elapsed"
+        [ "$val" = "$expected" ] && { log "  Signal received — launching"; return 0; }
+        (( elapsed % 10 == 0 )) && log "  node0_ready='$val' (want '$expected') — ${elapsed}s"
         sleep 2; elapsed=$(( elapsed + 2 ))
         [ "$elapsed" -ge 600 ] && { log "ERROR: timed out waiting for $expected"; exit 1; }
     done
@@ -76,12 +88,14 @@ wait_for_signal() {
 
 run_dex() {
     local label="$1" cache="$2" uniform="$3" theta="$4"
-    log "=== RUN: $label | cache=${cache}MB | uniform=$uniform | theta=$theta ==="
+    echo ""
+    log "══════════════════════════════════════════════════"
+    log "RUN: $label  cache=${cache}MB  uniform=$uniform  theta=$theta"
+    log "══════════════════════════════════════════════════"
 
     wait_for_signal "$label"
 
     cd "$BUILD_DIR"
-    log "Launching newbench_latency..."
     sudo ./newbench_latency \
         $NODES $READ $INSERT $UPDATE $DELETE $RANGE \
         $THREADS $MEM_THREADS \
@@ -92,27 +106,34 @@ run_dex() {
         $INDEX $RPC $ADMIT $TUNE $MAX_THREAD \
         2>&1 | tee "$RESULTS_DIR/${label}_node1.log"
 
-    log "Run $label done."
+    log "Run $label DONE."
     cd "$SCRIPT_DIR"
 }
 
-# ── Main ──────────────────────────────────────────────────────────────────────
-log "DEX Sweep — Compute Node"
-log "Results: $RESULTS_DIR"
-echo ""
-
-for page_cfg in "${PAGE_CONFIGS[@]}"; do
-    read -r INNER_SZ LEAF_SZ PAGE_LABEL <<< "$page_cfg"
-
-    for wl_cfg in "${WORKLOADS[@]}"; do
-        read -r UNIFORM THETA WL_LABEL <<< "$wl_cfg"
-
-        for CACHE in "${CACHE_SIZES[@]}"; do
-            LABEL="${PAGE_LABEL}_${WL_LABEL}_cache${CACHE}mb"
-            run_dex "$LABEL" "$CACHE" "$UNIFORM" "$THETA"
-        done
-    done
+# ── SECTION A+D ───────────────────────────────────────────────────────────────
+log "SECTION A+D: Cache cliff & skew recovery"
+for entry in "${CACHE_SWEEP[@]}"; do
+    read -r CACHE UNIFORM THETA LABEL <<< "$entry"
+    run_dex "$LABEL" "$CACHE" "$UNIFORM" "$THETA"
 done
 
-log "=== ALL RUNS COMPLETE ==="
+# ── SECTION B ─────────────────────────────────────────────────────────────────
+log "SECTION B: Fat leaf dilution"
+for cfg in "${LEAF_SIZE_CONFIGS[@]}"; do
+    read -r INNER_SZ LEAF_SZ PAGE_LABEL <<< "$cfg"
+    [ "$INNER_SZ" -eq 1024 ] && [ "$LEAF_SZ" -eq 1024 ] && continue
+    run_dex "leafsize_${PAGE_LABEL}_cache${LEAF_SWEEP_CACHE}mb" \
+        "$LEAF_SWEEP_CACHE" "$LEAF_SWEEP_UNIFORM" "$LEAF_SWEEP_THETA"
+done
+
+# ── SECTION C ─────────────────────────────────────────────────────────────────
+log "SECTION C: Height effect"
+for cfg in "${INNER_SIZE_CONFIGS[@]}"; do
+    read -r INNER_SZ LEAF_SZ PAGE_LABEL <<< "$cfg"
+    [ "$INNER_SZ" -eq 1024 ] && [ "$LEAF_SZ" -eq 1024 ] && continue
+    run_dex "innersize_${PAGE_LABEL}_cache${INNER_SWEEP_CACHE}mb" \
+        "$INNER_SWEEP_CACHE" "$INNER_SWEEP_UNIFORM" "$INNER_SWEEP_THETA"
+done
+
+log "ALL SECTIONS COMPLETE"
 ls -lh "$RESULTS_DIR/"

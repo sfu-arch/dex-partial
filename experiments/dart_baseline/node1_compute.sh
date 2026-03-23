@@ -2,11 +2,8 @@
 ###############################################################################
 # DART Baseline — Node 1 (Compute Node, 10.30.1.6)
 #
-# Polls memcached for each signal from node0, then runs DART compute process.
+# Polls for each signal from node0_memory.sh, then runs DART compute.
 # Start at the same time as node0_memory.sh.
-#
-# USAGE:
-#   bash node1_compute.sh
 ###############################################################################
 set -e
 
@@ -21,9 +18,13 @@ MEMC_PORT="11211"
 
 WORKLOAD_RUNS=(
     "uniform_run   uniform"
+    "zipf06_run    zipf06"
+    "zipf08_run    zipf08"
+    "zipf09_run    zipf09"
     "zipf099_run   zipf099"
 )
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
 log() { echo "[$(date '+%H:%M:%S')] [DART-N1] $*"; }
 
 get_key() {
@@ -39,31 +40,35 @@ wait_for_signal() {
     while true; do
         local val
         val=$(get_key "dart_ready")
-        [ "$val" = "$expected" ] && { log "  Signal received: $expected"; return 0; }
+        [ "$val" = "$expected" ] && { log "  Signal received — launching"; return 0; }
         (( elapsed % 10 == 0 )) && log "  dart_ready='$val' (want '$expected') — ${elapsed}s"
         sleep 2; elapsed=$(( elapsed + 2 ))
-        [ "$elapsed" -ge 600 ] && { log "ERROR: timed out"; exit 1; }
+        [ "$elapsed" -ge 600 ] && { log "ERROR: timed out waiting for $expected"; exit 1; }
     done
 }
 
-log "DART Baseline — Compute Node"
+log "================================================================"
+log "DART Flatness Sweep — Compute Node"
+log "================================================================"
 
 for wl_cfg in "${WORKLOAD_RUNS[@]}"; do
     read -r WL_FILE WL_LABEL <<< "$wl_cfg"
     LABEL="dart_${WL_LABEL}"
-
     echo ""
-    log "=== RUN: $LABEL ==="
+    log "══════════════════════════════════════════"
+    log "RUN: $LABEL"
+    log "══════════════════════════════════════════"
+
     wait_for_signal "$LABEL"
 
     cd "$DART_DIR"
-    log "Starting compute process..."
+    log "Starting compute process (30 threads)..."
     bin/compute --monitor_addr=${MEMC_IP}:9898 --nic_index=0 \
         2>&1 | tee "$RESULTS_DIR/${LABEL}_compute.log"
 
-    log "Run $LABEL complete."
+    log "Run $LABEL DONE."
     sleep 3
 done
 
-log "=== ALL DART RUNS COMPLETE ==="
+log "ALL DART RUNS COMPLETE"
 ls -lh "$RESULTS_DIR/"
