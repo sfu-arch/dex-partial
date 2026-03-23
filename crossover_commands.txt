@@ -1,0 +1,276 @@
+================================================================================
+DEX vs DART Cache Crossover — Execution Commands
+rpc_rate=0 (one-sided RDMA only), admission_rate=0.1
+================================================================================
+
+SETUP: Two nodes
+  Memory node  : 10.30.1.9  (run.sh / memory-side commands)
+  Compute node : 10.30.1.6  (run_other.sh / compute-side commands)
+
+================================================================================
+STEP 0 — On MEMORY NODE (10.30.1.9): Start memcached ONCE before all DEX runs
+================================================================================
+
+sudo pkill -9 memcached 2>/dev/null; sleep 2
+sudo memcached -u root -l 0.0.0.0 -p 11211 -c 10000 -d
+sleep 2
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# Verify memcached is live (should print: VALUE serverNum 0 1)
+printf "get serverNum\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+================================================================================
+STEP 1 — DEX UNIFORM WORKLOAD SWEEP (rpc=0, admit=0.1)
+Between each run: reset memcached counters (commands shown before each run)
+================================================================================
+
+cd /home/apa222/dex-partial/dex/build
+
+------------------------------------------------------------
+Run 1: DEX — 32 MB cache, uniform  [expect: DART wins]
+------------------------------------------------------------
+
+# Reset counters (memory node):
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# MEMORY NODE (10.30.1.9):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 32 1 0.0 50 10 50 0 1 0 0 0 0.1 0 30
+
+# COMPUTE NODE (10.30.1.6) — run immediately after memory node:
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 32 1 0.0 50 10 50 0 1 0 0 0 0.1 0 30
+
+cp dex_read_latency.dat dex_uniform_32mb_read_latency.dat
+cp dex_range_latency.dat dex_uniform_32mb_range_latency.dat
+
+------------------------------------------------------------
+Run 2: DEX — 64 MB cache, uniform  [expect: DART ≈ DEX crossover]
+------------------------------------------------------------
+
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# MEMORY NODE (10.30.1.9):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 64 1 0.0 50 10 50 0 1 0 0 0 0.1 0 30
+
+# COMPUTE NODE (10.30.1.6):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 64 1 0.0 50 10 50 0 1 0 0 0 0.1 0 30
+
+cp dex_read_latency.dat dex_uniform_64mb_read_latency.dat
+cp dex_range_latency.dat dex_uniform_64mb_range_latency.dat
+
+------------------------------------------------------------
+Run 3: DEX — 128 MB cache, uniform  [expect: DEX starts winning]
+------------------------------------------------------------
+
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# MEMORY NODE (10.30.1.9):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 128 1 0.0 50 10 50 0 1 0 0 0 0.1 0 30
+
+# COMPUTE NODE (10.30.1.6):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 128 1 0.0 50 10 50 0 1 0 0 0 0.1 0 30
+
+cp dex_read_latency.dat dex_uniform_128mb_read_latency.dat
+cp dex_range_latency.dat dex_uniform_128mb_range_latency.dat
+
+------------------------------------------------------------
+Run 4: DEX — 256 MB cache, uniform  [expect: DEX clearly better]
+------------------------------------------------------------
+
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# MEMORY NODE (10.30.1.9):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 256 1 0.0 50 10 50 0 1 0 0 0 0.1 0 30
+
+# COMPUTE NODE (10.30.1.6):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 256 1 0.0 50 10 50 0 1 0 0 0 0.1 0 30
+
+cp dex_read_latency.dat dex_uniform_256mb_read_latency.dat
+cp dex_range_latency.dat dex_uniform_256mb_range_latency.dat
+
+------------------------------------------------------------
+Run 5: DEX — 512 MB cache, uniform  [expect: DEX dominant]
+------------------------------------------------------------
+
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# MEMORY NODE (10.30.1.9):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 512 1 0.0 50 10 50 0 1 0 0 0 0.1 0 30
+
+# COMPUTE NODE (10.30.1.6):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 512 1 0.0 50 10 50 0 1 0 0 0 0.1 0 30
+
+cp dex_read_latency.dat dex_uniform_512mb_read_latency.dat
+cp dex_range_latency.dat dex_uniform_512mb_range_latency.dat
+
+================================================================================
+STEP 2 — DEX ZIPFIAN WORKLOAD SWEEP (theta=0.99, rpc=0, admit=0.1)
+================================================================================
+
+------------------------------------------------------------
+Run 6: DEX — 32 MB cache, zipf=0.99
+------------------------------------------------------------
+
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# MEMORY NODE (10.30.1.9):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 32 0 0.99 50 10 50 0 1 0 0 0 0.1 0 30
+
+# COMPUTE NODE (10.30.1.6):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 32 0 0.99 50 10 50 0 1 0 0 0 0.1 0 30
+
+cp dex_read_latency.dat dex_zipf099_32mb_read_latency.dat
+
+------------------------------------------------------------
+Run 7: DEX — 64 MB cache, zipf=0.99
+------------------------------------------------------------
+
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# MEMORY NODE (10.30.1.9):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 64 0 0.99 50 10 50 0 1 0 0 0 0.1 0 30
+
+# COMPUTE NODE (10.30.1.6):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 64 0 0.99 50 10 50 0 1 0 0 0 0.1 0 30
+
+cp dex_read_latency.dat dex_zipf099_64mb_read_latency.dat
+
+------------------------------------------------------------
+Run 8: DEX — 128 MB cache, zipf=0.99
+------------------------------------------------------------
+
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# MEMORY NODE (10.30.1.9):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 128 0 0.99 50 10 50 0 1 0 0 0 0.1 0 30
+
+# COMPUTE NODE (10.30.1.6):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 128 0 0.99 50 10 50 0 1 0 0 0 0.1 0 30
+
+cp dex_read_latency.dat dex_zipf099_128mb_read_latency.dat
+
+------------------------------------------------------------
+Run 9: DEX — 256 MB cache, zipf=0.99
+------------------------------------------------------------
+
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# MEMORY NODE (10.30.1.9):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 256 0 0.99 50 10 50 0 1 0 0 0 0.1 0 30
+
+# COMPUTE NODE (10.30.1.6):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 256 0 0.99 50 10 50 0 1 0 0 0 0.1 0 30
+
+cp dex_read_latency.dat dex_zipf099_256mb_read_latency.dat
+
+------------------------------------------------------------
+Run 10: DEX — 512 MB cache, zipf=0.99
+------------------------------------------------------------
+
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# MEMORY NODE (10.30.1.9):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 512 0 0.99 50 10 50 0 1 0 0 0 0.1 0 30
+
+# COMPUTE NODE (10.30.1.6):
+sudo ./newbench_latency 2 100 0 0 0 0 30 4 512 0 0.99 50 10 50 0 1 0 0 0 0.1 0 30
+
+cp dex_read_latency.dat dex_zipf099_512mb_read_latency.dat
+
+================================================================================
+STEP 3 — DART BASELINE (flat ~1.67 Mops/s regardless of workload)
+Run on MEMORY NODE (10.30.1.9) terminals 1 & 2, then COMPUTE NODE (10.30.1.6)
+================================================================================
+
+# Generate workloads first (once, on both nodes):
+cd /home/apa222/dex-partial/DART-main
+bash benchmark_run/gen_workloads.sh
+
+------------------------------------------------------------
+DART Run A: uniform workload
+------------------------------------------------------------
+
+# MEMORY NODE — Terminal 1:
+cd /home/apa222/dex-partial/DART-main
+bin/memory --monitor_addr=10.30.1.9:9898 --nic_index=0 &
+
+# MEMORY NODE — Terminal 2 (monitor):
+bin/monitor --test_func=0 --memory_num=1 --compute_num=1 \
+    --load_thread_num=30 --run_thread_num=30 --coro_num=1 \
+    --mem_mb=4096 --th_mb=10 \
+    --workload_load=2m_load --workload_run=uniform_run \
+    --bucket=256 --run_max_request=2000000
+
+# COMPUTE NODE (10.30.1.6):
+cd /home/apa222/dex-partial/DART-main
+bin/compute --monitor_addr=10.30.1.9:9898 --nic_index=0
+
+------------------------------------------------------------
+DART Run B: zipf=0.99 workload
+------------------------------------------------------------
+
+# MEMORY NODE — Terminal 1:
+bin/memory --monitor_addr=10.30.1.9:9898 --nic_index=0 &
+
+# MEMORY NODE — Terminal 2:
+bin/monitor --test_func=0 --memory_num=1 --compute_num=1 \
+    --load_thread_num=30 --run_thread_num=30 --coro_num=1 \
+    --mem_mb=4096 --th_mb=10 \
+    --workload_load=2m_load --workload_run=zipf099_run \
+    --bucket=256 --run_max_request=2000000
+
+# COMPUTE NODE (10.30.1.6):
+bin/compute --monitor_addr=10.30.1.9:9898 --nic_index=0
+
+================================================================================
+ARG REFERENCE (newbench_latency positions)
+================================================================================
+
+pos  1  = nodecount       = 2       (1 memory + 1 compute)
+pos  2  = read%           = 100
+pos  3  = insert%         = 0
+pos  4  = update%         = 0
+pos  5  = delete%         = 0
+pos  6  = range%          = 0
+pos  7  = threads         = 30      (client threads)
+pos  8  = mem_threads     = 4
+pos  9  = cache_mb        = 32/64/128/256/512   ← THE KEY VARIABLE
+pos 10  = uniform         = 1 (uniform) or 0 (zipf)
+pos 11  = theta           = 0.0 (uniform) or 0.99 (zipf)
+pos 12  = bulk_load       = 50      (50M keys)
+pos 13  = warmup          = 10      (10M ops, not measured)
+pos 14  = op_num          = 50      (50M measured ops)
+pos 15  = check           = 0
+pos 16  = time_based      = 1
+pos 17  = early_stop      = 0       (disabled — full run)
+pos 18  = index           = 0       (DEX = cachepush)
+pos 19  = rpc_rate        = 0       (one-sided RDMA only)
+pos 20  = admission_rate  = 0.1     (10% random admission)
+pos 21  = auto_tune       = 0
+pos 22  = kMaxThread      = 30
+
+================================================================================
+EXPECTED RESULTS
+================================================================================
+
+Cache    Uniform DEX Throughput   Zipf DEX Throughput   DART Throughput
+------   ---------------------   --------------------   ---------------
+ 32 MB   ~1 Mops/s  (DART wins)  ~4-6 Mops/s           ~1.67 Mops/s
+ 64 MB   ~1.5 Mops/s (crossover) ~6-8 Mops/s           ~1.67 Mops/s
+128 MB   ~3-4 Mops/s (DEX wins)  ~8-10 Mops/s          ~1.67 Mops/s
+256 MB   ~6-7 Mops/s             ~10-12 Mops/s          ~1.67 Mops/s
+512 MB   ~8+ Mops/s              ~12+ Mops/s            ~1.67 Mops/s
+
+Output files per DEX run (in dex/build/):
+  dex_read_latency.dat   — point read latency histogram
+  dex_range_latency.dat  — range scan latency histogram
