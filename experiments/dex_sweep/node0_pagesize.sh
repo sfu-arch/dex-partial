@@ -77,15 +77,16 @@ patch_and_rebuild() {
     sed -i "s/constexpr uint32_t kLeafPageSize = [0-9]*/constexpr uint32_t kLeafPageSize = $leaf_sz/" "$COMMON_H"
     grep "kInternalPageSize\|kLeafPageSize" "$COMMON_H"
 
-    log "Force-rebuilding newbench_latency (make -B)..."
-    touch "$DEX_DIR/test/newbench_latency.cpp"
+    log "Force-rebuilding newbench_latency (cmake --clean-first)..."
     cd "$BUILD_DIR"
-    make -B -j$(nproc) newbench_latency 2>&1 | tail -5
+    cmake --build . --target newbench_latency --clean-first -j$(nproc) 2>&1 | tail -10
     cd "$SCRIPT_DIR"
 
-    # Verify constants are baked in
-    log "Verifying binary..."
-    strings "$BUILD_DIR/newbench_latency" | grep -iE "inner page|leaf page" | head -4 || true
+    # Verify constants are baked in by checking alloc_unit printed at startup
+    log "Verifying kLeafPageSize baked into binary (alloc_unit should = $leaf_sz)..."
+    # alloc_unit is printed from kLeafPageSize; use timeout to avoid blocking
+    timeout 5 sudo "$BUILD_DIR/newbench_latency" 1 100 0 0 0 0 2 4 32 1 0.0 50 1 1 0 1 0 0 0 0.1 0 2 2>/dev/null \
+        | grep -E "alloc_unit|Inner page size|Leaf page size" | head -5 || true
 
     # Signal node1 to patch + rebuild its own copy
     log "Signalling node1 to rebuild for config=$config_label..."
