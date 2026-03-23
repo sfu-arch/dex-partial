@@ -42,8 +42,10 @@ TUNE=0
 MAX_THREAD=30
 
 CACHES=(32 64 128 256 512)
-declare -A WORKLOAD_UNIFORM=([uniform]=1 [zipf099]=0)
-declare -A WORKLOAD_THETA=(  [uniform]=0.99 [zipf099]=0.99)
+declare -A WORKLOAD_UNIFORM=([uniform]=1  [zipf099]=0)
+declare -A WORKLOAD_THETA=(  [uniform]=0  [zipf099]=0.99)
+# uniform=1 → theta is ignored by newbench_latency (init_key_generator skips zipf init)
+# uniform=0 → theta=0.99 activates Zipfian distribution
 WORKLOADS=(uniform zipf099)
 
 # ── Helpers ──────────────────────────────────────────────────────────────────

@@ -47,8 +47,10 @@ MAX_THREAD=30
 CACHES=(32 64 128 256 512)
 # uniform: UNIFORM=1 theta ignored
 # zipf099: UNIFORM=0 theta=0.99
-declare -A WORKLOAD_UNIFORM=([uniform]=1 [zipf099]=0)
-declare -A WORKLOAD_THETA=(  [uniform]=0.99 [zipf099]=0.99)
+declare -A WORKLOAD_UNIFORM=([uniform]=1  [zipf099]=0)
+declare -A WORKLOAD_THETA=(  [uniform]=0  [zipf099]=0.99)
+# uniform=1 → theta is ignored by newbench_latency (init_key_generator skips zipf init)
+# uniform=0 → theta=0.99 activates Zipfian distribution
 WORKLOADS=(uniform zipf099)
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -70,10 +72,22 @@ restart_memcached() {
     if pgrep memcached >/dev/null 2>&1; then
         sudo pkill memcached && info "  pkill done" || true
     fi
-    sleep 1
+
+    # Wait for port to be fully released (avoids TIME_WAIT bind failure)
+    info "  waiting for port ${MEMC_PORT} to be free..."
+    for i in $(seq 1 20); do
+        if ! ss -tlnp 2>/dev/null | grep -q ":${MEMC_PORT}" && \
+           ! ss -tnp  2>/dev/null | grep -q ":${MEMC_PORT}"; then
+            info "  port ${MEMC_PORT} is free"
+            break
+        fi
+        [ "$i" -eq 20 ] && warn "  port still in use after 10s — attempting start anyway"
+        sleep 0.5
+    done
 
     # Start fresh, bound to cluster IP (not 127.0.0.1)
-    sudo memcached -u nobody -l "${MEMC_HOST}" -p "${MEMC_PORT}" -c 10000 -m 64 -d -P "${PID_FILE}"
+    sudo memcached -u nobody -l "${MEMC_HOST}" -p "${MEMC_PORT}" -c 10000 -m 64 -d -P "${PID_FILE}" \
+        || sudo memcached -l "${MEMC_HOST}" -p "${MEMC_PORT}" -c 10000 -m 64 -d -P "${PID_FILE}"
     sleep 1
 
     # Verify it's up
