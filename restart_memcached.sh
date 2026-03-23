@@ -21,7 +21,7 @@ error() { echo -e "${RED}[x]${NC} $*"; exit 1; }
 
 # ── 1. Kill existing memcached on memory node ────────────────────────────────
 info "Killing memcached on ${MEMCACHED_HOST}..."
-ssh -p ${SSH_PORT} -o ConnectTimeout=5 root@${MEMCACHED_HOST} bash <<'REMOTE'
+ssh -p ${SSH_PORT} -o ConnectTimeout=5 -o StrictHostKeyChecking=no root@${MEMCACHED_HOST} bash <<'REMOTE'
 set -euo pipefail
 # Try PID file first
 if [ -f /tmp/memcached.pid ]; then
@@ -44,7 +44,7 @@ REMOTE
 
 # ── 2. Start fresh memcached on memory node ──────────────────────────────────
 info "Starting memcached on ${MEMCACHED_HOST}:${MEMCACHED_PORT}..."
-ssh -p ${SSH_PORT} -o ConnectTimeout=5 root@${MEMCACHED_HOST} \
+ssh -p ${SSH_PORT} -o ConnectTimeout=5 -o StrictHostKeyChecking=no root@${MEMCACHED_HOST} \
     "memcached -u root -l ${MEMCACHED_HOST} -p ${MEMCACHED_PORT} \
                -c 10000 -m 64 -d -P ${PID_FILE}"
 sleep 1
