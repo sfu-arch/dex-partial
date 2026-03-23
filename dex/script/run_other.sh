@@ -36,8 +36,9 @@ admit=0.1
 tune=0
 
 # ── memcached config ──────────────────────────────────────────────────────────
-MEMC_ADDR=$(head -1 memcached.conf)
-MEMC_PORT=$(awk 'NR==2{print}' memcached.conf)
+CONF=$([ -f memcached.conf ] && echo memcached.conf || echo ../memcached.conf)
+MEMC_ADDR=$(head -1 "$CONF")
+MEMC_PORT=$(awk 'NR==2{print}' "$CONF")
 
 wait_for_memcached() {
     echo "[wait] waiting for memcached on ${MEMC_ADDR}:${MEMC_PORT} to be reset..."

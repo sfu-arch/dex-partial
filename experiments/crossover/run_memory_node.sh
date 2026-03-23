@@ -16,6 +16,7 @@ set -euo pipefail
 # ── Config ───────────────────────────────────────────────────────────────────
 MEMC_HOST="10.30.1.9"
 MEMC_PORT="11211"
+SSH_PORT="404"
 PID_FILE="/tmp/memcached.pid"
 
 # Paths — scripts live in experiments/crossover/, binary in dex/build/
@@ -61,33 +62,25 @@ error()   { echo -e "${RED}[x]${NC} $*"; exit 1; }
 section() { echo -e "\n${CYAN}══════════════════════════════════════════${NC}"; echo -e "${CYAN}  $*${NC}"; echo -e "${CYAN}══════════════════════════════════════════${NC}"; }
 
 restart_memcached() {
-    info "Restarting memcached on localhost (${MEMC_HOST}:${MEMC_PORT})..."
+    info "Restarting memcached on ${MEMC_HOST}:${MEMC_PORT} via SSH..."
 
-    # Kill existing instances — sudo required when memcached runs as another user
-    if [ -f "$PID_FILE" ]; then
-        PID=$(cat "$PID_FILE")
-        sudo kill "$PID" 2>/dev/null && info "  killed pid $PID" || warn "  stale pid file"
-        sudo rm -f "$PID_FILE"
-    fi
-    if pgrep memcached >/dev/null 2>&1; then
-        sudo pkill memcached && info "  pkill done" || true
-    fi
+    # SSH as root (port 404) — same approach as dex/script/run.sh
+    # Kill old instance on remote
+    ssh -p ${SSH_PORT} -o ConnectTimeout=5 -o StrictHostKeyChecking=no \
+        root@${MEMC_HOST} bash <<'REMOTE'
+if [ -f /tmp/memcached.pid ]; then
+    PID=$(cat /tmp/memcached.pid)
+    kill "$PID" 2>/dev/null && echo "  killed pid $PID" || echo "  stale pid file"
+    rm -f /tmp/memcached.pid
+fi
+pgrep memcached >/dev/null 2>&1 && pkill memcached && echo "  pkill done" || true
+sleep 0.5
+REMOTE
 
-    # Wait for port to be fully released (avoids TIME_WAIT bind failure)
-    info "  waiting for port ${MEMC_PORT} to be free..."
-    for i in $(seq 1 20); do
-        if ! ss -tlnp 2>/dev/null | grep -q ":${MEMC_PORT}" && \
-           ! ss -tnp  2>/dev/null | grep -q ":${MEMC_PORT}"; then
-            info "  port ${MEMC_PORT} is free"
-            break
-        fi
-        [ "$i" -eq 20 ] && warn "  port still in use after 10s — attempting start anyway"
-        sleep 0.5
-    done
-
-    # Start fresh, bound to cluster IP (not 127.0.0.1)
-    sudo memcached -u nobody -l "${MEMC_HOST}" -p "${MEMC_PORT}" -c 10000 -m 64 -d -P "${PID_FILE}" \
-        || sudo memcached -l "${MEMC_HOST}" -p "${MEMC_PORT}" -c 10000 -m 64 -d -P "${PID_FILE}"
+    # Start fresh as root via SSH
+    ssh -p ${SSH_PORT} -o ConnectTimeout=5 -o StrictHostKeyChecking=no \
+        root@${MEMC_HOST} \
+        "memcached -u root -l ${MEMC_HOST} -p ${MEMC_PORT} -c 10000 -m 64 -d -P /tmp/memcached.pid"
     sleep 1
 
     # Verify it's up

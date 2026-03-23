@@ -36,8 +36,10 @@ admit=0.1
 tune=0
 
 # ── memcached config ──────────────────────────────────────────────────────────
-MEMC_ADDR=$(head -1 memcached.conf)
-MEMC_PORT=$(awk 'NR==2{print}' memcached.conf)
+# memcached.conf is one level up when run from dex/build/, or same dir from dex/script/
+CONF=$([ -f memcached.conf ] && echo memcached.conf || echo ../memcached.conf)
+MEMC_ADDR=$(head -1 "$CONF")
+MEMC_PORT=$(awk 'NR==2{print}' "$CONF")
 SSH_PORT=404
 PID_FILE=/tmp/memcached.pid
 
