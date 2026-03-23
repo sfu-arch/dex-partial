@@ -1,0 +1,69 @@
+#!/bin/bash
+###############################################################################
+# DART Baseline — Node 1 (Compute Node, 10.30.1.6)
+#
+# Polls memcached for each signal from node0, then runs DART compute process.
+# Start at the same time as node0_memory.sh.
+#
+# USAGE:
+#   bash node1_compute.sh
+###############################################################################
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+DART_DIR="$REPO_ROOT/DART-main"
+RESULTS_DIR="$SCRIPT_DIR/results"
+mkdir -p "$RESULTS_DIR"
+
+MEMC_IP="10.30.1.9"
+MEMC_PORT="11211"
+
+WORKLOAD_RUNS=(
+    "uniform_run   uniform"
+    "zipf099_run   zipf099"
+)
+
+log() { echo "[$(date '+%H:%M:%S')] [DART-N1] $*"; }
+
+get_key() {
+    printf "get %s\r\nquit\r\n" "$1" \
+        | nc -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null \
+        | grep -v "^VALUE\|^END" | tr -d '\r\n '
+}
+
+wait_for_signal() {
+    local expected="$1"
+    local elapsed=0
+    log "Waiting for dart_ready=$expected ..."
+    while true; do
+        local val
+        val=$(get_key "dart_ready")
+        [ "$val" = "$expected" ] && { log "  Signal received: $expected"; return 0; }
+        (( elapsed % 10 == 0 )) && log "  dart_ready='$val' (want '$expected') — ${elapsed}s"
+        sleep 2; elapsed=$(( elapsed + 2 ))
+        [ "$elapsed" -ge 600 ] && { log "ERROR: timed out"; exit 1; }
+    done
+}
+
+log "DART Baseline — Compute Node"
+
+for wl_cfg in "${WORKLOAD_RUNS[@]}"; do
+    read -r WL_FILE WL_LABEL <<< "$wl_cfg"
+    LABEL="dart_${WL_LABEL}"
+
+    echo ""
+    log "=== RUN: $LABEL ==="
+    wait_for_signal "$LABEL"
+
+    cd "$DART_DIR"
+    log "Starting compute process..."
+    bin/compute --monitor_addr=${MEMC_IP}:9898 --nic_index=0 \
+        2>&1 | tee "$RESULTS_DIR/${LABEL}_compute.log"
+
+    log "Run $LABEL complete."
+    sleep 3
+done
+
+log "=== ALL DART RUNS COMPLETE ==="
+ls -lh "$RESULTS_DIR/"
