@@ -61,19 +61,19 @@ section() { echo -e "\n${CYAN}════════════════�
 restart_memcached() {
     info "Restarting memcached on localhost (${MEMC_HOST}:${MEMC_PORT})..."
 
-    # Kill existing instances
+    # Kill existing instances — sudo required when memcached runs as another user
     if [ -f "$PID_FILE" ]; then
         PID=$(cat "$PID_FILE")
-        kill "$PID" 2>/dev/null && info "  killed pid $PID" || warn "  stale pid file"
-        rm -f "$PID_FILE"
+        sudo kill "$PID" 2>/dev/null && info "  killed pid $PID" || warn "  stale pid file"
+        sudo rm -f "$PID_FILE"
     fi
     if pgrep memcached >/dev/null 2>&1; then
-        pkill memcached && info "  pkill done" || true
+        sudo pkill memcached && info "  pkill done" || true
     fi
-    sleep 0.5
+    sleep 1
 
     # Start fresh, bound to cluster IP (not 127.0.0.1)
-    memcached -u root -l "${MEMC_HOST}" -p "${MEMC_PORT}" -c 10000 -m 64 -d -P "${PID_FILE}"
+    sudo memcached -u nobody -l "${MEMC_HOST}" -p "${MEMC_PORT}" -c 10000 -m 64 -d -P "${PID_FILE}"
     sleep 1
 
     # Verify it's up
