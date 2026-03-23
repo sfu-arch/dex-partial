@@ -2,15 +2,15 @@
 ###############################################################################
 # DART Baseline — Node 0 (Memory Node, 10.30.1.9)
 #
-# Covers DEX_DART_CROSSOVER.md section "DART flatness":
-#   Runs uniform + zipf (0.6, 0.8, 0.9, 0.99) to confirm ~1.67 Mops/s flat.
+# Confirms DART flatness (~1.67 Mops/s) across all skew levels:
+#   uniform, zipf 0.6, 0.8, 0.9, 0.99
 #
-# After EVERY run: full memcached restart + counter reset.
-# 30 threads on both nodes.
+# 30 threads. Full memcached restart after every run.
+# No rebuild needed — DART has no compile-time page-size constants.
 #
 # USAGE:
-#   1. Start this on Node 0 (10.30.1.9)
-#   2. Start node1_compute.sh on Node 1 (10.30.1.6) at the same time
+#   Node 0 (10.30.1.9): bash node0_memory.sh
+#   Node 1 (10.30.1.6): bash node1_compute.sh   (start at same time)
 ###############################################################################
 set -e
 
@@ -23,13 +23,13 @@ mkdir -p "$RESULTS_DIR"
 MEMC_IP="10.30.1.9"
 MEMC_PORT="11211"
 
-# DART flatness sweep — all zipf levels + uniform (30 threads each)
+# Flatness sweep — all skew levels (expect ~1.67 Mops/s for ALL)
 WORKLOAD_RUNS=(
-    "uniform_run   uniform"
-    "zipf06_run    zipf06"
-    "zipf08_run    zipf08"
-    "zipf09_run    zipf09"
-    "zipf099_run   zipf099"
+    "uniform_run  uniform"
+    "zipf06_run   zipf06"
+    "zipf08_run   zipf08"
+    "zipf09_run   zipf09"
+    "zipf099_run  zipf099"
 )
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -45,51 +45,71 @@ restart_memcached() {
     printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 "$MEMC_IP" "$MEMC_PORT" > /dev/null
     local reply
     reply=$(printf "get serverNum\r\nquit\r\n" | nc -w 2 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null | head -1)
-    if [[ "$reply" != *"VALUE"* ]]; then
-        log "ERROR: memcached not responding after restart"; exit 1
-    fi
-    log "  memcached OK — serverNum=0 clientNum=0"
+    [[ "$reply" != *"VALUE"* ]] && { log "ERROR: memcached not up after restart"; exit 1; }
+    log "  memcached OK"
 }
 
-signal_ready() {
-    local label="$1"
-    printf "set dart_ready 0 0 %d\r\n%s\r\nquit\r\n" "${#label}" "$label" \
+memc_set() {
+    printf "set %s 0 0 %d\r\n%s\r\nquit\r\n" "$1" "${#2}" "$2" \
         | nc -w 2 "$MEMC_IP" "$MEMC_PORT" > /dev/null
-    log "  signalled node1: dart_ready=$label"
 }
 
-# Generate workloads if not already present
+memc_get() {
+    printf "get %s\r\nquit\r\n" "$1" \
+        | nc -w 3 "$MEMC_IP" "$MEMC_PORT" 2>/dev/null \
+        | grep -v "^VALUE\|^END\|^$" | tr -d '\r\n '
+}
+
+wait_for_node1_ready() {
+    local expected="$1"
+    local elapsed=0
+    log "  Waiting for node1 compute to finish: $expected ..."
+    while true; do
+        local val
+        val=$(memc_get "dart_node1_done")
+        [ "$val" = "$expected" ] && { log "  node1 done: $expected"; return 0; }
+        sleep 3; elapsed=$(( elapsed + 3 ))
+        [ "$elapsed" -ge 900 ] && { log "ERROR: timed out waiting for node1 $expected"; exit 1; }
+    done
+}
+
+# Generate YCSB workloads if not present
 if [ ! -f "$DART_DIR/workloads/uniform_run" ]; then
     log "Generating YCSB workloads..."
     cd "$DART_DIR"
     bash benchmark_run/gen_workloads.sh
 fi
 
-log "================================================================"
+log "════════════════════════════════════════════════════"
 log "DART Flatness Sweep — Memory Node"
-log "Workloads: ${WORKLOAD_RUNS[*]}"
-log "Expected: ~1.67 Mops/s for ALL workloads (confirms skew insensitivity)"
-log "================================================================"
+log "Expected: ~1.67 Mops/s for ALL workloads"
+log "════════════════════════════════════════════════════"
 
 for wl_cfg in "${WORKLOAD_RUNS[@]}"; do
     read -r WL_FILE WL_LABEL <<< "$wl_cfg"
     LABEL="dart_${WL_LABEL}"
     echo ""
-    log "══════════════════════════════════════════"
+    log "──────────────────────────────────────────────────"
     log "RUN: $LABEL  workload=$WL_FILE"
-    log "══════════════════════════════════════════"
+    log "──────────────────────────────────────────────────"
 
     restart_memcached
-    signal_ready "$LABEL"
+
+    # Signal node1 which run is starting
+    memc_set "dart_ready" "$LABEL"
+    log "  signalled dart_ready=$LABEL"
 
     cd "$DART_DIR"
+
+    # Start memory process in background
     log "Starting memory process..."
     bin/memory --monitor_addr=${MEMC_IP}:9898 --nic_index=0 \
         2>&1 | tee "$RESULTS_DIR/${LABEL}_memory.log" &
     MEMORY_PID=$!
     sleep 2
 
-    log "Starting monitor (30 threads)..."
+    # Start monitor (blocks until run completes)
+    log "Starting monitor (30 load + 30 run threads)..."
     bin/monitor \
         --test_func=0 \
         --memory_num=1 \
@@ -106,12 +126,15 @@ for wl_cfg in "${WORKLOAD_RUNS[@]}"; do
         2>&1 | tee "$RESULTS_DIR/${LABEL}_monitor.log"
 
     wait $MEMORY_PID 2>/dev/null || true
+    wait_for_node1_ready "$LABEL"
     log "Run $LABEL DONE."
     sleep 5
 done
 
-log "================================================================"
+memc_set "dart_ready" "done"
+
+log "════════════════════════════════════════════════════"
 log "ALL DART RUNS COMPLETE"
 log "Results in: $RESULTS_DIR/"
 ls -lh "$RESULTS_DIR/"
-log "================================================================"
+log "════════════════════════════════════════════════════"
