@@ -26,3 +26,8 @@ rpc=0 (was 1) — pure one-sided RDMA
 admit=1.0 (was 0.1) — admit all pages, fill cache greedily
 early=0 (was 1) — don't stop early, run full 50M ops
 uniform=1, theta=0.0 — uniform workload
+
+
+bin/monitor --test_func=0 --memory_num=1 --compute_num=1 --load_thread_num=56 --run_thread_num=56 --coro_num=1 --mem_mb=8192 --th_mb=10 --workload_load=c_load --workload_run=c_run --bucket=256 --run_max_request=6000000
+bin/memory --monitor_addr=10.30.1.9:9898  
+bin/compute --monitor_addr=10.30.1.9:9898  

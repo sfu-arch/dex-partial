@@ -73,8 +73,8 @@ run_exp() {
     echo "──────────────────────────────────────────"
 
     # Kill anything still holding port 9898 from a previous run
-    fuser -k ${MONITOR_PORT}/tcp 2>/dev/null || true
-    sleep 2
+    killall -9 monitor memory 2>/dev/null || true
+    sleep 3
 
     # Monitor: start in background first (must bind port before memory connects)
     bin/monitor \
@@ -89,9 +89,22 @@ run_exp() {
         --bucket=${BUCKET} \
         --workload_load=unused \
         --workload_run=unused \
-        2>&1 | tee "$outfile" &
+        > "$outfile" 2>&1 &
     local mon_pid=$!
-    sleep 2   # give monitor time to bind port 9898
+
+    # Wait until monitor has bound port 9898
+    echo "  [MEM] waiting for monitor to bind port ${MONITOR_PORT}..."
+    local waited=0
+    while ! fuser ${MONITOR_PORT}/tcp >/dev/null 2>&1; do
+        sleep 1
+        (( waited += 1 ))
+        if (( waited > 30 )); then
+            echo "  [MEM] ERROR: monitor did not start within 30s"
+            kill "$mon_pid" 2>/dev/null || true
+            return 1
+        fi
+    done
+    echo "  [MEM] monitor ready (waited ${waited}s)"
 
     # Memory node: start in background, connects to monitor
     bin/memory \
