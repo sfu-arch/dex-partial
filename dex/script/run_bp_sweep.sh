@@ -34,8 +34,8 @@ CORRECT=0
 # ── Node sizes (must match btree_node.h at compile time) ──────────────────
 # Edit innerNodeSize / leafNodeSize in include/cache/btree_node.h, rebuild,
 # then update these for correct labelling in output.
-INNER_NODE_SIZE=192   # → inner fanout  = (innerNodeSize-72)/16  e.g. 192→7
-LEAF_NODE_SIZE=192    # → leaf capacity = (leafNodeSize-96)/16   e.g. 192→6
+INNER_NODE_SIZE=256   # → inner fanout  = (256-72)/16 = 11
+LEAF_NODE_SIZE=512    # → leaf capacity = (512-96)/16 = 26   (fat leaf)
 
 # Cache sizes to sweep (MB) — this is the main independent variable for
 # remote-load tracking.  More cache → fewer RDMA reads per op.
@@ -53,7 +53,7 @@ DISTRIBUTIONS=(
 )
 
 echo "======================================================="
-echo " DEX B+ Tree | pageSize=192B | depth≈10 | bulk=50M"
+echo " DEX B+ Tree | inner=256B(f=11) leaf=512B(cap=26) | depth≈10 | bulk=50M"
 echo " Cache sweep: ${CACHES[*]} MB"
 echo " Distributions: uniform → zipf 0.30 → 0.50 → 0.60 → 0.99"
 echo " Index=DEX, rpc_rate=${RPC_RATE}, admit_rate=${ADMIT_RATE}"

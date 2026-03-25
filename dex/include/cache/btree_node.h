@@ -34,13 +34,20 @@ static const uint64_t swizzle_hide = (1ULL << 63) - 1;
 // The smaller node type wastes (pageSize - nodeSize) bytes per frame but the
 // allocator and RDMA layer stay unchanged.
 //
-// Depth reference (50M bulk-loaded keys):
-//   inner=192 (f=7)  leaf=192 (cap=6)  → depth ≈ 10   ← current
-//   inner=256 (f=11) leaf=192 (cap=6)  → depth ≈ 8
-//   inner=192 (f=7)  leaf=256 (cap=10) → depth ≈ 10  (fewer leaf nodes)
+// Depth reference (50M bulk-loaded keys, sequential insert → ~50% fill):
+//   Height formula: log₍f/2₎(100M/leaf_cap) + 1  where f = inner_fanout
+//   inner=256 (f=11) leaf=512 (cap=26) → depth ≈ 10  ← current (small inner, fat leaf)
+//   inner=192 (f=7)  leaf=192 (cap=6)  → depth ≈ 16  (both small — too tall)
 //   inner=1024(f=59) leaf=1024(cap=58) → depth ≈ 5   (original paper config)
-static const uint64_t innerNodeSize = 192;
-static const uint64_t leafNodeSize  = 192;
+//
+// "Small inner, fat leaf" design intent:
+//   - Fat leaves (512B, cap=26) → fewer leaf nodes → manageable tree depth
+//   - Small inner (256B, fanout=11) → height ≈ 10, inner tree fits in small cache
+//   - Under uniform workload: DEX admission_rate=0.1 for leaves means 90% of
+//     leaf accesses are remote RDMA reads → very high remote load
+//   - Under zipf: hot leaves get admitted and cached → remote load drops sharply
+static const uint64_t innerNodeSize = 256;
+static const uint64_t leafNodeSize  = 512;
 static const uint64_t pageSize =
     (innerNodeSize >= leafNodeSize) ? innerNodeSize : leafNodeSize;
 static const uint64_t megaLevel =

@@ -503,6 +503,7 @@ public:
                                  NodeBase *parent, unsigned child_idx,
                                  bool &refresh, Key k, Value &result,
                                  bool &success, RPC_type rpc_type) {
+    leaf_miss_++;   // every call here is a leaf cache miss (admitted or not)
     static thread_local std::mt19937 *generator = nullptr;
     if (!generator)
       generator = new std::mt19937(clock() + pthread_self());
@@ -601,6 +602,7 @@ public:
                                           Key k,
                                           std::pair<Key, Value> *&kv_buffer,
                                           int &scan_num, Key &max_key) {
+    leaf_miss_++;   // range scan leaf cache miss
     static thread_local std::mt19937 *generator = nullptr;
     if (!generator)
       generator = new std::mt19937(clock() + pthread_self());
@@ -773,6 +775,11 @@ public:
   // 0 means cold to hot succeeds
   int cold_to_hot(GlobalAddress global_node, void **ret_page, NodeBase *parent,
                   unsigned child_idx, bool &refresh) {
+    // parent->level == 1 means the child being fetched is a leaf (level 0).
+    // parent->level > 1 means we are fetching an inner node during traversal.
+    // cold_to_hot_with_admission already counted the leaf_miss_ for level-1 parents,
+    // so only count inner_miss_ here for the inner-node traversal calls.
+    if (parent != nullptr && parent->level > 1) inner_miss_++;
     // No sync read is needed because leaf nodes are exclusive
     bool sync_read =
         sync_or_not(reinterpret_cast<BTreeInner<Key> *>(parent), child_idx);
