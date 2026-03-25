@@ -72,15 +72,11 @@ run_exp() {
     echo " [MEM][START] ${label}  th_mb=${th_mb} MB"
     echo "──────────────────────────────────────────"
 
-    # Memory node: start in background, exits when monitor signals done
-    bin/memory \
-        --monitor_addr=${MONITOR_IP}:${MONITOR_PORT} \
-        --nic_index=${NIC_INDEX} \
-        &
-    local mem_pid=$!
-    sleep 1   # give memory time to register with monitor
+    # Kill anything still holding port 9898 from a previous run
+    fuser -k ${MONITOR_PORT}/tcp 2>/dev/null || true
+    sleep 2
 
-    # Monitor: foreground — blocks until all nodes have reported results
+    # Monitor: start in background first (must bind port before memory connects)
     bin/monitor \
         --test_func=1 \
         --memory_num=1 \
@@ -93,7 +89,19 @@ run_exp() {
         --bucket=${BUCKET} \
         --workload_load=unused \
         --workload_run=unused \
-        2>&1 | tee "$outfile"
+        2>&1 | tee "$outfile" &
+    local mon_pid=$!
+    sleep 2   # give monitor time to bind port 9898
+
+    # Memory node: start in background, connects to monitor
+    bin/memory \
+        --monitor_addr=${MONITOR_IP}:${MONITOR_PORT} \
+        --nic_index=${NIC_INDEX} \
+        &
+    local mem_pid=$!
+
+    # Wait for monitor to finish (it blocks until experiment completes)
+    wait "$mon_pid" 2>/dev/null || true
 
     # Reap memory node
     wait "$mem_pid" 2>/dev/null || true

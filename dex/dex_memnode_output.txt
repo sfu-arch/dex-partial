@@ -1,0 +1,6675 @@
+$ ./run_memnode_sweep.sh
+=======================================================
+ Memory node sweep | 30 experiments
+ MEMC_HOST=10.30.1.9  binary=newbench_latency
+=======================================================
+
+===== POINT LOOKUPS =====
+  >> uniform
+[MEM][START] op=point/uniform cache=128MB uni=1 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 1, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x70db29800000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 1 [252.127.0.0]
+I connect server 0
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+Before barrier finish
+Avg. rdma read time(ms) = -nan
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = -nan
+Avg. rdma write / op = -nan
+Avg. rdma cas / op = -nan
+Avg. rdma rpc / op = -nan
+Avg. all rdma / op = -nan
+Avg. rdma read size/ op = -nan
+Avg. rdma write size / op = -nan
+Avg. rdma RW size / op = -nan
+[MEM][END]   op=point/uniform cache=128MB
+[MEM][START] op=point/uniform cache=256MB uni=1 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 1, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7255cdc00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [253.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 256
+-----Cache initial addr = 0x7255b4800000
+page num = 524288
+alloc_unit = 512
+entry_num: 524288
+bucket_num: 174763
+Bucket size = 64
+entry_num: 52428
+bucket_num: 8738
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 2
+I am 3
+I am 4
+I am 1
+I am 5
+I am 35
+I am 9
+I am 10
+I am 12
+I am 7
+I am 14
+I am 16
+I am 17
+I am 21
+I am 13
+I am 19
+I am 20
+I am 32
+I am 15
+I am 23
+I am 6
+I am 26
+I am 8
+I am 22
+I am 31
+I am 33
+I am 25
+I am 27
+I am 11
+I am 29
+I am 30
+I am 24
+I am 28
+I am 34
+I am 18
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 2.8195
+cluster throughput 2.819
+[DEX] inner_miss=1548516 leaf_miss=2072666 dirty_wb=0 total_remote=3621182
+0, throughput 2.8163
+cluster throughput 2.816
+[DEX] inner_miss=3097210 leaf_miss=4132640 dirty_wb=0 total_remote=7229850
+0, throughput 2.8229
+cluster throughput 2.822
+[DEX] inner_miss=4645796 leaf_miss=6201237 dirty_wb=0 total_remote=10847033
+0, throughput 2.8219
+cluster throughput 2.821
+[DEX] inner_miss=6195066 leaf_miss=8268213 dirty_wb=0 total_remote=14463279
+0, throughput 2.8238
+cluster throughput 2.823
+[DEX] inner_miss=7743730 leaf_miss=10335633 dirty_wb=0 total_remote=18079363
+0, throughput 2.8226
+cluster throughput 2.822
+[DEX] inner_miss=9296088 leaf_miss=12403533 dirty_wb=0 total_remote=21699621
+0, throughput 2.8159
+cluster throughput 2.815
+[DEX] inner_miss=10846176 leaf_miss=14462925 dirty_wb=0 total_remote=25309101
+0, throughput 2.8235
+cluster throughput 2.823
+[DEX] inner_miss=12395514 leaf_miss=16532648 dirty_wb=0 total_remote=28928162
+0, throughput 2.4301
+cluster throughput 2.430
+[DEX] inner_miss=14509901 leaf_miss=19577301 dirty_wb=0 total_remote=34087202
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 20 seconds
+Round 0 (max_throughput): 2.92001 Mops/s
+Round 0 (straggler_throughput): 2.92 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.61708
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.61708
+Avg. rdma read size/ op = 827.946
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 827.946
+------------------------------------------
+Node 0 average throughput = 2.77678
+Node 0 total throughput = 2.92001
+All CN throughput (Max) = 2.92001
+All CN throughput (Straggler) = 2.92
+Final throughput = 2.92
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=11958 ns
+P50=11500  P90=19500  P95=22000  P99=27000  P99.9=34000  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/uniform cache=256MB
+[MEM][START] op=point/uniform cache=512MB uni=1 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 1, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7611a7e00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [253.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x76117ec00000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 1048576
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 4
+I am 3
+I am 2
+I am 1
+I am 30
+I am 8
+I am 9
+I am 11
+I am 15
+I am 10
+I am 7
+I am 13
+I am 14
+I am 17
+I am 6
+I am 18
+I am 22
+I am 25
+I am 27
+I am 19
+I am 20
+I am 23
+I am 24
+I am 16
+I am 26
+I am 28
+I am 12
+I am 31
+I am 32
+I am 33
+I am 34
+I am 35
+I am 29
+I am 5
+I am 21
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 3.9062
+cluster throughput 3.906
+[DEX] inner_miss=724715 leaf_miss=2020939 dirty_wb=0 total_remote=2745654
+0, throughput 3.9147
+cluster throughput 3.914
+[DEX] inner_miss=1451941 leaf_miss=4045030 dirty_wb=0 total_remote=5496971
+0, throughput 3.9159
+cluster throughput 3.915
+[DEX] inner_miss=2179551 leaf_miss=6071424 dirty_wb=0 total_remote=8250975
+0, throughput 3.9168
+cluster throughput 3.916
+[DEX] inner_miss=2906935 leaf_miss=8096832 dirty_wb=0 total_remote=11003767
+0, throughput 3.9086
+cluster throughput 3.908
+[DEX] inner_miss=3633255 leaf_miss=10117018 dirty_wb=0 total_remote=13750273
+0, throughput 3.9013
+cluster throughput 3.901
+[DEX] inner_miss=4361594 leaf_miss=12167539 dirty_wb=0 total_remote=16529133
+0, throughput 1.5333
+cluster throughput 1.533
+[DEX] inner_miss=4733264 leaf_miss=14260034 dirty_wb=0 total_remote=18993298
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 16 seconds
+Round 0 (max_throughput): 4.05406 Mops/s
+Round 0 (straggler_throughput): 4.05403 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.07558
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.07558
+Avg. rdma read size/ op = 550.697
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 550.697
+------------------------------------------
+Node 0 average throughput = 3.57043
+Node 0 total throughput = 4.05406
+All CN throughput (Max) = 4.05406
+All CN throughput (Straggler) = 4.05403
+Final throughput = 4.05403
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=8510 ns
+P50=7500  P90=15000  P95=18000  P99=24000  P99.9=31000  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/uniform cache=512MB
+  >> zipf0.30
+[MEM][START] op=point/zipf0.30 cache=128MB uni=0 theta=0.30
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 0, zipfian 0.300000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7d973e200000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [252.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x7d972d000000
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 262144
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 1
+I am 2
+I am 27
+I am 7
+I am 8
+I am 12
+I am 9
+I am 11
+I am 4
+I am 16
+I am 6
+I am 15
+I am 22
+I am 13
+I am 17
+I am 24
+I am 10
+I am 18
+I am 25
+I am 26
+I am 14
+I am 19
+I am 33
+I am 29
+I am 20
+I am 21
+I am 30
+I am 31
+I am 32
+I am 5
+I am 28
+I am 3
+I am 34
+I am 23
+I am 35
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 2.0527
+cluster throughput 2.052
+[DEX] inner_miss=1610179 leaf_miss=1810999 dirty_wb=0 total_remote=3421178
+0, throughput 2.0612
+cluster throughput 2.061
+[DEX] inner_miss=3222631 leaf_miss=3635110 dirty_wb=0 total_remote=6857741
+0, throughput 2.0621
+cluster throughput 2.062
+[DEX] inner_miss=4835264 leaf_miss=5460666 dirty_wb=0 total_remote=10295930
+0, throughput 2.0634
+cluster throughput 2.063
+[DEX] inner_miss=6448129 leaf_miss=7290040 dirty_wb=0 total_remote=13738169
+0, throughput 2.0634
+cluster throughput 2.063
+[DEX] inner_miss=8060723 leaf_miss=9119986 dirty_wb=0 total_remote=17180709
+0, throughput 2.0589
+cluster throughput 2.058
+[DEX] inner_miss=9675395 leaf_miss=10941234 dirty_wb=0 total_remote=20616629
+0, throughput 2.0629
+cluster throughput 2.062
+[DEX] inner_miss=11287408 leaf_miss=12769445 dirty_wb=0 total_remote=24056853
+0, throughput 2.0635
+cluster throughput 2.063
+[DEX] inner_miss=12901144 leaf_miss=14598426 dirty_wb=0 total_remote=27499570
+0, throughput 2.0629
+cluster throughput 2.062
+[DEX] inner_miss=14513243 leaf_miss=16427100 dirty_wb=0 total_remote=30940343
+0, throughput 2.0541
+cluster throughput 2.054
+[DEX] inner_miss=16122741 leaf_miss=18239141 dirty_wb=0 total_remote=34361882
+0, throughput 2.0497
+cluster throughput 2.049
+[DEX] inner_miss=17729497 leaf_miss=20047008 dirty_wb=0 total_remote=37776505
+0, throughput 2.3052
+cluster throughput 2.305
+[DEX] inner_miss=21010310 leaf_miss=23209743 dirty_wb=0 total_remote=44220053
+0, throughput 0.0368
+cluster throughput 0.036
+[DEX] inner_miss=21089461 leaf_miss=23279844 dirty_wb=0 total_remote=44369305
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 28 seconds
+Round 0 (max_throughput): 2.13099 Mops/s
+Round 0 (straggler_throughput): 2.13098 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 2.13187
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 2.13187
+Avg. rdma read size/ op = 1091.51
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 1091.51
+------------------------------------------
+Node 0 average throughput = 1.92231
+Node 0 total throughput = 2.13099
+All CN throughput (Max) = 2.13099
+All CN throughput (Straggler) = 2.13098
+Final throughput = 2.13098
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=16521 ns
+P50=16000  P90=26000  P95=28500  P99=34000  P99.9=41500  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.30 cache=128MB
+[MEM][START] op=point/zipf0.30 cache=256MB uni=0 theta=0.30
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 0, zipfian 0.300000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x79ec6a200000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [254.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 256
+-----Cache initial addr = 0x79ec51000000
+page num = 524288
+alloc_unit = 512
+entry_num: 524288
+bucket_num: 174763
+Bucket size = 64
+entry_num: 52428
+bucket_num: 8738
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 2
+I am 3
+I am 1
+I am 35
+I am 4
+I am 17
+I am 10
+I am 5
+I am 11
+I am 12
+I am 9
+I am 13
+I am 7
+I am 15
+I am 16
+I am 20
+I am 24
+I am 33
+I am 31
+I am 22
+I am 23
+I am 6
+I am 26
+I am 27
+I am 18
+I am 19
+I am 32
+I am 34
+I am 8
+I am 21
+I am 28
+I am 25
+I am 29
+I am 14
+I am 30
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 2.7036
+cluster throughput 2.703
+[DEX] inner_miss=1458605 leaf_miss=1926744 dirty_wb=0 total_remote=3385349
+0, throughput 2.7067
+cluster throughput 2.706
+[DEX] inner_miss=2915401 leaf_miss=3851732 dirty_wb=0 total_remote=6767133
+0, throughput 2.7079
+cluster throughput 2.707
+[DEX] inner_miss=4377345 leaf_miss=5779436 dirty_wb=0 total_remote=10156781
+0, throughput 2.7075
+cluster throughput 2.707
+[DEX] inner_miss=5837933 leaf_miss=7706267 dirty_wb=0 total_remote=13544200
+0, throughput 2.7042
+cluster throughput 2.704
+[DEX] inner_miss=7298544 leaf_miss=9630775 dirty_wb=0 total_remote=16929319
+0, throughput 2.7077
+cluster throughput 2.707
+[DEX] inner_miss=8755460 leaf_miss=11559495 dirty_wb=0 total_remote=20314955
+0, throughput 2.7090
+cluster throughput 2.709
+[DEX] inner_miss=10215308 leaf_miss=13488563 dirty_wb=0 total_remote=23703871
+0, throughput 2.7066
+cluster throughput 2.706
+[DEX] inner_miss=11672492 leaf_miss=15414273 dirty_wb=0 total_remote=27086765
+0, throughput 2.7967
+cluster throughput 2.796
+[DEX] inner_miss=13593469 leaf_miss=18078373 dirty_wb=0 total_remote=31671842
+0, throughput 0.5465
+cluster throughput 0.546
+[DEX] inner_miss=14200618 leaf_miss=18988877 dirty_wb=0 total_remote=33189495
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 22 seconds
+Round 0 (max_throughput): 2.79358 Mops/s
+Round 0 (straggler_throughput): 2.79356 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.61424
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.61424
+Avg. rdma read size/ op = 826.491
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 826.491
+------------------------------------------
+Node 0 average throughput = 2.4991
+Node 0 total throughput = 2.79358
+All CN throughput (Max) = 2.79358
+All CN throughput (Straggler) = 2.79356
+Final throughput = 2.79356
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=12512 ns
+P50=12000  P90=20500  P95=23000  P99=28500  P99.9=36000  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.30 cache=256MB
+[MEM][START] op=point/zipf0.30 cache=512MB uni=0 theta=0.30
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.300000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x796111e00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [252.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x7960e8c00000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 1048576
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 1
+I am 3
+I am 2
+I am 4
+I am 33
+I am 8
+I am 7
+I am 34
+I am 5
+I am 12
+I am 9
+I am 6
+I am 10
+I am 13
+I am 17
+I am 16
+I am 23
+I am 21
+I am 18
+I am 25
+I am 31
+I am 24
+I am 11
+I am 27
+I am 28
+I am 20
+I am 32
+I am 35
+I am 29
+I am 14
+I am 26
+I am 19
+I am 15
+I am 22
+I am 30
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 3.7333
+cluster throughput 3.733
+[DEX] inner_miss=690191 leaf_miss=1917792 dirty_wb=0 total_remote=2607983
+0, throughput 3.8886
+cluster throughput 3.888
+[DEX] inner_miss=1409402 leaf_miss=3923620 dirty_wb=0 total_remote=5333022
+0, throughput 3.9510
+cluster throughput 3.951
+[DEX] inner_miss=2139097 leaf_miss=5957026 dirty_wb=0 total_remote=8096123
+0, throughput 3.9579
+cluster throughput 3.957
+[DEX] inner_miss=2869650 leaf_miss=7996107 dirty_wb=0 total_remote=10865757
+0, throughput 3.9686
+cluster throughput 3.968
+[DEX] inner_miss=3600829 leaf_miss=10039586 dirty_wb=0 total_remote=13640415
+0, throughput 3.9678
+cluster throughput 3.967
+[DEX] inner_miss=4351225 leaf_miss=12329365 dirty_wb=0 total_remote=16680590
+0, throughput 1.5296
+cluster throughput 1.529
+[DEX] inner_miss=4727031 leaf_miss=14587896 dirty_wb=0 total_remote=19314927
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 16 seconds
+Round 0 (max_throughput): 4.08838 Mops/s
+Round 0 (straggler_throughput): 4.08838 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.07222
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.07222
+Avg. rdma read size/ op = 548.974
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 548.974
+------------------------------------------
+Node 0 average throughput = 3.57043
+Node 0 total throughput = 4.08838
+All CN throughput (Max) = 4.08838
+All CN throughput (Straggler) = 4.08838
+Final throughput = 4.08838
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=8438 ns
+P50=7500  P90=15000  P95=18000  P99=24500  P99.9=31500  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.30 cache=512MB
+  >> zipf0.50
+[MEM][START] op=point/zipf0.50 cache=128MB uni=0 theta=0.50
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 0, zipfian 0.500000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x703e0f200000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [254.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x703dfe000000
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 262144
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 1
+I am 35
+I am 3
+I am 18
+I am 2
+I am 17
+I am 20
+I am 7
+I am 24
+I am 10
+I am 12
+I am 33
+I am 30
+I am 32
+I am 6
+I am 13
+I am 16
+I am 9
+I am 25
+I am 15
+I am 14
+I am 19
+I am 26
+I am 28
+I am 31
+I am 23
+I am 21
+I am 34
+I am 8
+I am 22
+I am 27
+I am 5
+I am 29
+I am 4
+I am 11
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 1.9407
+cluster throughput 1.940
+[DEX] inner_miss=1451566 leaf_miss=1670511 dirty_wb=0 total_remote=3122077
+0, throughput 1.9428
+cluster throughput 1.942
+[DEX] inner_miss=2904333 leaf_miss=3340217 dirty_wb=0 total_remote=6244550
+0, throughput 1.9407
+cluster throughput 1.940
+[DEX] inner_miss=4356899 leaf_miss=5004525 dirty_wb=0 total_remote=9361424
+0, throughput 1.9417
+cluster throughput 1.941
+[DEX] inner_miss=5807927 leaf_miss=6672822 dirty_wb=0 total_remote=12480749
+0, throughput 1.9430
+cluster throughput 1.942
+[DEX] inner_miss=7258404 leaf_miss=8344164 dirty_wb=0 total_remote=15602568
+0, throughput 1.9431
+cluster throughput 1.943
+[DEX] inner_miss=8708437 leaf_miss=10012432 dirty_wb=0 total_remote=18720869
+0, throughput 1.9363
+cluster throughput 1.936
+[DEX] inner_miss=10161943 leaf_miss=11665503 dirty_wb=0 total_remote=21827446
+0, throughput 1.9372
+cluster throughput 1.937
+[DEX] inner_miss=11605005 leaf_miss=13328894 dirty_wb=0 total_remote=24933899
+0, throughput 1.9355
+cluster throughput 1.935
+[DEX] inner_miss=13048892 leaf_miss=14987115 dirty_wb=0 total_remote=28036007
+0, throughput 1.9386
+cluster throughput 1.938
+[DEX] inner_miss=14493714 leaf_miss=16653429 dirty_wb=0 total_remote=31147143
+0, throughput 1.9371
+cluster throughput 1.937
+[DEX] inner_miss=15937389 leaf_miss=18315523 dirty_wb=0 total_remote=34252912
+0, throughput 1.9371
+cluster throughput 1.937
+[DEX] inner_miss=17379871 leaf_miss=19978049 dirty_wb=0 total_remote=37357920
+0, throughput 1.7229
+cluster throughput 1.722
+[DEX] inner_miss=19912815 leaf_miss=22420028 dirty_wb=0 total_remote=42332843
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 28 seconds
+Round 0 (max_throughput): 1.99646 Mops/s
+Round 0 (straggler_throughput): 1.99645 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 2.12643
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 2.12643
+Avg. rdma read size/ op = 1088.73
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 1088.73
+------------------------------------------
+Node 0 average throughput = 1.92231
+Node 0 total throughput = 1.99646
+All CN throughput (Max) = 1.99646
+All CN throughput (Straggler) = 1.99645
+Final throughput = 1.99645
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=17660 ns
+P50=17500  P90=27500  P95=30500  P99=36500  P99.9=44000  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.50 cache=128MB
+[MEM][START] op=point/zipf0.50 cache=256MB uni=0 theta=0.50
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 0, zipfian 0.500000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x757b14c00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [254.127.0.0]
+I connect server 1
+dir 1 launch!
+
+dir 3 launch!
+
+dir 2 launch!
+
+dir 0 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 256
+-----Cache initial addr = 0x757afba00000
+page num = 524288
+alloc_unit = 512
+entry_num: 524288
+bucket_num: 174763
+Bucket size = 64
+entry_num: 52428
+bucket_num: 8738
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 6
+I am 1
+I am 4
+I am 3
+I am 2
+I am 5
+I am 35
+I am 10
+I am 7
+I am 12
+I am 17
+I am 11
+I am 13
+I am 14
+I am 15
+I am 16
+I am 18
+I am 33
+I am 29
+I am 32
+I am 25
+I am 23
+I am 8
+I am 20
+I am 19
+I am 21
+I am 27
+I am 28
+I am 22
+I am 34
+I am 24
+I am 30
+I am 31
+I am 9
+I am 26
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 2.7282
+cluster throughput 2.728
+[DEX] inner_miss=1474668 leaf_miss=1962049 dirty_wb=0 total_remote=3436717
+0, throughput 2.7322
+cluster throughput 2.732
+[DEX] inner_miss=2950516 leaf_miss=3927378 dirty_wb=0 total_remote=6877894
+0, throughput 2.7274
+cluster throughput 2.727
+[DEX] inner_miss=4424920 leaf_miss=5886631 dirty_wb=0 total_remote=10311551
+0, throughput 2.7335
+cluster throughput 2.733
+[DEX] inner_miss=5902228 leaf_miss=7853033 dirty_wb=0 total_remote=13755261
+0, throughput 2.7330
+cluster throughput 2.732
+[DEX] inner_miss=7379229 leaf_miss=9819615 dirty_wb=0 total_remote=17198844
+0, throughput 2.7310
+cluster throughput 2.731
+[DEX] inner_miss=8855778 leaf_miss=11779672 dirty_wb=0 total_remote=20635450
+0, throughput 2.7330
+cluster throughput 2.732
+[DEX] inner_miss=10331784 leaf_miss=13745015 dirty_wb=0 total_remote=24076799
+0, throughput 2.7300
+cluster throughput 2.730
+[DEX] inner_miss=11810313 leaf_miss=15710749 dirty_wb=0 total_remote=27521062
+0, throughput 3.0853
+cluster throughput 3.085
+[DEX] inner_miss=14738198 leaf_miss=20012234 dirty_wb=0 total_remote=34750432
+0, throughput 0.0574
+cluster throughput 0.057
+[DEX] inner_miss=14804819 leaf_miss=20115607 dirty_wb=0 total_remote=34920426
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 22 seconds
+Round 0 (max_throughput): 2.89489 Mops/s
+Round 0 (straggler_throughput): 2.89487 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.6065
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.6065
+Avg. rdma read size/ op = 822.525
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 822.525
+------------------------------------------
+Node 0 average throughput = 2.4987
+Node 0 total throughput = 2.89489
+All CN throughput (Max) = 2.89489
+All CN throughput (Straggler) = 2.89487
+Final throughput = 2.89487
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=12078 ns
+P50=11500  P90=20500  P95=23500  P99=29500  P99.9=37500  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.50 cache=256MB
+[MEM][START] op=point/zipf0.50 cache=512MB uni=0 theta=0.50
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.500000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x77c0a2400000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [255.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x77c079200000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 6
+I am 1
+I am 4
+I am 3
+I am 2
+I am 5
+I am 35
+I am 10
+I am 7
+I am 12
+I am 17
+I am 11
+I am 13
+I am 14
+I am 15
+I am 16
+I am 18
+I am 33
+I am 29
+I am 32
+I am 25
+I am 23
+I am 8
+I am 20
+I am 19
+I am 21
+I am 27
+I am 28
+I am 22
+I am 34
+I am 24
+I am 30
+I am 31
+I am 9
+I am 26
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 2.7282
+cluster throughput 2.728
+[DEX] inner_miss=1474668 leaf_miss=1962049 dirty_wb=0 total_remote=3436717
+0, throughput 2.7322
+cluster throughput 2.732
+[DEX] inner_miss=2950516 leaf_miss=3927378 dirty_wb=0 total_remote=6877894
+0, throughput 2.7274
+cluster throughput 2.727
+[DEX] inner_miss=4424920 leaf_miss=5886631 dirty_wb=0 total_remote=10311551
+0, throughput 2.7335
+cluster throughput 2.733
+[DEX] inner_miss=5902228 leaf_miss=7853033 dirty_wb=0 total_remote=13755261
+0, throughput 2.7330
+cluster throughput 2.732
+[DEX] inner_miss=7379229 leaf_miss=9819615 dirty_wb=0 total_remote=17198844
+0, throughput 2.7310
+cluster throughput 2.731
+[DEX] inner_miss=8855778 leaf_miss=11779672 dirty_wb=0 total_remote=20635450
+0, throughput 2.7330
+cluster throughput 2.732
+[DEX] inner_miss=10331784 leaf_miss=13745015 dirty_wb=0 total_remote=24076799
+0, throughput 2.7300
+cluster throughput 2.730
+[DEX] inner_miss=11810313 leaf_miss=15710749 dirty_wb=0 total_remote=27521062
+0, throughput 3.0853
+cluster throughput 3.085
+[DEX] inner_miss=14738198 leaf_miss=20012234 dirty_wb=0 total_remote=34750432
+0, throughput 0.0574
+cluster throughput 0.057
+[DEX] inner_miss=14804819 leaf_miss=20115607 dirty_wb=0 total_remote=34920426
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 22 seconds
+Round 0 (max_throughput): 2.89489 Mops/s
+Round 0 (straggler_throughput): 2.89487 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.6065
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.6065
+Avg. rdma read size/ op = 822.525
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 822.525
+------------------------------------------
+Node 0 average throughput = 2.4987
+Node 0 total throughput = 2.89489
+All CN throughput (Max) = 2.89489
+All CN throughput (Straggler) = 2.89487
+Final throughput = 2.89487
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=12078 ns
+P50=11500  P90=20500  P95=23500  P99=29500  P99.9=37500  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.50 cache=256MB
+[MEM][START] op=point/zipf0.50 cache=512MB uni=0 theta=0.50
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.500000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x77c0a2400000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [255.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x77c079200000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 1048576
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 2
+I am 1
+I am 32
+I am 3
+I am 7
+I am 8
+I am 17
+I am 15
+I am 28
+I am 5
+I am 14
+I am 19
+I am 22
+I am 26
+I am 4
+I am 18
+I am 23
+I am 16
+I am 9
+I am 6
+I am 12
+I am 13
+I am 10
+I am 11
+I am 29
+I am 30
+I am 31
+I am 24
+I am 20
+I am 33
+I am 25
+I am 27
+I am 34
+I am 21
+I am 35
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 3.9381
+cluster throughput 3.938
+[DEX] inner_miss=720233 leaf_miss=2010860 dirty_wb=0 total_remote=2731093
+0, throughput 3.9433
+cluster throughput 3.943
+[DEX] inner_miss=1440371 leaf_miss=4018522 dirty_wb=0 total_remote=5458893
+0, throughput 3.9437
+cluster throughput 3.943
+[DEX] inner_miss=2163124 leaf_miss=6029167 dirty_wb=0 total_remote=8192291
+0, throughput 3.9438
+cluster throughput 3.943
+[DEX] inner_miss=2883213 leaf_miss=8038150 dirty_wb=0 total_remote=10921363
+0, throughput 3.9404
+cluster throughput 3.940
+[DEX] inner_miss=3603600 leaf_miss=10046571 dirty_wb=0 total_remote=13650171
+0, throughput 3.9329
+cluster throughput 3.932
+[DEX] inner_miss=4323065 leaf_miss=12052720 dirty_wb=0 total_remote=16375785
+0, throughput 1.3504
+cluster throughput 1.350
+[DEX] inner_miss=4646946 leaf_miss=13926092 dirty_wb=0 total_remote=18573038
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 16 seconds
+Round 0 (max_throughput): 4.06095 Mops/s
+Round 0 (straggler_throughput): 4.06094 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.0626
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.0626
+Avg. rdma read size/ op = 544.051
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 544.051
+------------------------------------------
+Node 0 average throughput = 3.56986
+Node 0 total throughput = 4.06095
+All CN throughput (Max) = 4.06095
+All CN throughput (Straggler) = 4.06094
+Final throughput = 4.06094
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=8491 ns
+P50=7500  P90=15000  P95=18500  P99=24000  P99.9=31000  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.50 cache=512MB
+  >> zipf0.60
+[MEM][START] op=point/zipf0.60 cache=128MB uni=0 theta=0.60
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 0, zipfian 0.600000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x78e7e1400000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [254.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x78e7d0200000
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 262144
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 3
+I am 1
+I am 14
+I am 2
+I am 7
+I am 4
+I am 8
+I am 17
+I am 11
+I am 12
+I am 16
+I am 13
+I am 18
+I am 20
+I am 9
+I am 19
+I am 15
+I am 6
+I am 5
+I am 21
+I am 10
+I am 23
+I am 22
+I am 24
+I am 35
+I am 26
+I am 31
+I am 32
+I am 27
+I am 33
+I am 28
+I am 29
+I am 34
+I am 25
+I am 30
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 2.0738
+cluster throughput 2.073
+[DEX] inner_miss=1594640 leaf_miss=1810253 dirty_wb=0 total_remote=3404893
+0, throughput 2.0801
+cluster throughput 2.080
+[DEX] inner_miss=3186042 leaf_miss=3633333 dirty_wb=0 total_remote=6819375
+0, throughput 2.0811
+cluster throughput 2.081
+[DEX] inner_miss=4781507 leaf_miss=5453727 dirty_wb=0 total_remote=10235234
+0, throughput 2.0804
+cluster throughput 2.080
+[DEX] inner_miss=6375132 leaf_miss=7274542 dirty_wb=0 total_remote=13649674
+0, throughput 2.0805
+cluster throughput 2.080
+[DEX] inner_miss=7971390 leaf_miss=9095702 dirty_wb=0 total_remote=17067092
+0, throughput 2.0761
+cluster throughput 2.076
+[DEX] inner_miss=9568030 leaf_miss=10908396 dirty_wb=0 total_remote=20476426
+0, throughput 2.0807
+cluster throughput 2.080
+[DEX] inner_miss=11163401 leaf_miss=12730767 dirty_wb=0 total_remote=23894168
+0, throughput 2.0811
+cluster throughput 2.081
+[DEX] inner_miss=12758063 leaf_miss=14550573 dirty_wb=0 total_remote=27308636
+0, throughput 2.0803
+cluster throughput 2.080
+[DEX] inner_miss=14352013 leaf_miss=16369775 dirty_wb=0 total_remote=30721788
+0, throughput 2.0811
+cluster throughput 2.081
+[DEX] inner_miss=15945971 leaf_miss=18189541 dirty_wb=0 total_remote=34135512
+0, throughput 2.0876
+cluster throughput 2.087
+[DEX] inner_miss=17662990 leaf_miss=20104033 dirty_wb=0 total_remote=37767023
+0, throughput 2.1140
+cluster throughput 2.114
+[DEX] inner_miss=21629500 leaf_miss=23750168 dirty_wb=0 total_remote=45379668
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 26 seconds
+Round 0 (max_throughput): 2.19999 Mops/s
+Round 0 (straggler_throughput): 2.19996 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 2.10671
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 2.10671
+Avg. rdma read size/ op = 1078.64
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 1078.64
+------------------------------------------
+Node 0 average throughput = 2.08275
+Node 0 total throughput = 2.19999
+All CN throughput (Max) = 2.19999
+All CN throughput (Straggler) = 2.19996
+Final throughput = 2.19996
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=16010 ns
+P50=15500  P90=26000  P95=29000  P99=35000  P99.9=43000  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.60 cache=128MB
+[MEM][START] op=point/zipf0.60 cache=256MB uni=0 theta=0.60
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 0, zipfian 0.600000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7a9d74000000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [253.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 256
+-----Cache initial addr = 0x7a9d5ae00000
+page num = 524288
+alloc_unit = 512
+entry_num: 524288
+bucket_num: 174763
+Bucket size = 64
+entry_num: 52428
+bucket_num: 8738
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 4
+I am 2
+I am 3
+I am 1
+I am 19
+I am 29
+I am 5
+I am 8
+I am 6
+I am 11
+I am 12
+I am 10
+I am 13
+I am 17
+I am 7
+I am 18
+I am 16
+I am 28
+I am 26
+I am 27
+I am 22
+I am 14
+I am 23
+I am 30
+I am 31
+I am 20
+I am 21
+I am 32
+I am 24
+I am 9
+I am 34
+I am 25
+I am 35
+I am 33
+I am 15
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 2.8128
+cluster throughput 2.812
+[DEX] inner_miss=1478012 leaf_miss=1975100 dirty_wb=0 total_remote=3453112
+0, throughput 2.8111
+cluster throughput 2.811
+[DEX] inner_miss=2961208 leaf_miss=3954001 dirty_wb=0 total_remote=6915209
+0, throughput 2.8159
+cluster throughput 2.815
+[DEX] inner_miss=4441308 leaf_miss=5934087 dirty_wb=0 total_remote=10375395
+0, throughput 2.8162
+cluster throughput 2.816
+[DEX] inner_miss=5920897 leaf_miss=7916210 dirty_wb=0 total_remote=13837107
+0, throughput 2.8172
+cluster throughput 2.817
+[DEX] inner_miss=7399650 leaf_miss=9898967 dirty_wb=0 total_remote=17298617
+0, throughput 2.8183
+cluster throughput 2.818
+[DEX] inner_miss=8880869 leaf_miss=11880259 dirty_wb=0 total_remote=20761128
+0, throughput 2.8108
+cluster throughput 2.810
+[DEX] inner_miss=10361928 leaf_miss=13853980 dirty_wb=0 total_remote=24215908
+0, throughput 2.8171
+cluster throughput 2.817
+[DEX] inner_miss=11840412 leaf_miss=15835621 dirty_wb=0 total_remote=27676033
+0, throughput 2.4731
+cluster throughput 2.473
+[DEX] inner_miss=13793413 leaf_miss=18686183 dirty_wb=0 total_remote=32479596
+0, throughput 0.0008
+cluster throughput 0.000
+The time duration = 20 seconds
+Round 0 (max_throughput): 2.89828 Mops/s
+Round 0 (straggler_throughput): 2.89825 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.58295
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.58295
+Avg. rdma read size/ op = 810.469
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 810.469
+------------------------------------------
+Node 0 average throughput = 2.77656
+Node 0 total throughput = 2.89828
+All CN throughput (Max) = 2.89828
+All CN throughput (Straggler) = 2.89825
+Final throughput = 2.89825
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=12053 ns
+P50=11500  P90=20000  P95=22500  P99=27500  P99.9=34500  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.60 cache=256MB
+[MEM][START] op=point/zipf0.60 cache=512MB uni=0 theta=0.60
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.600000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x78abfc000000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [253.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x78abd2c00000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 4
+I am 2
+I am 3
+I am 1
+I am 19
+I am 29
+I am 5
+I am 8
+I am 6
+I am 11
+I am 12
+I am 10
+I am 13
+I am 17
+I am 7
+I am 18
+I am 16
+I am 28
+I am 26
+I am 27
+I am 22
+I am 14
+I am 23
+I am 30
+I am 31
+I am 20
+I am 21
+I am 32
+I am 24
+I am 9
+I am 34
+I am 25
+I am 35
+I am 33
+I am 15
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 2.8128
+cluster throughput 2.812
+[DEX] inner_miss=1478012 leaf_miss=1975100 dirty_wb=0 total_remote=3453112
+0, throughput 2.8111
+cluster throughput 2.811
+[DEX] inner_miss=2961208 leaf_miss=3954001 dirty_wb=0 total_remote=6915209
+0, throughput 2.8159
+cluster throughput 2.815
+[DEX] inner_miss=4441308 leaf_miss=5934087 dirty_wb=0 total_remote=10375395
+0, throughput 2.8162
+cluster throughput 2.816
+[DEX] inner_miss=5920897 leaf_miss=7916210 dirty_wb=0 total_remote=13837107
+0, throughput 2.8172
+cluster throughput 2.817
+[DEX] inner_miss=7399650 leaf_miss=9898967 dirty_wb=0 total_remote=17298617
+0, throughput 2.8183
+cluster throughput 2.818
+[DEX] inner_miss=8880869 leaf_miss=11880259 dirty_wb=0 total_remote=20761128
+0, throughput 2.8108
+cluster throughput 2.810
+[DEX] inner_miss=10361928 leaf_miss=13853980 dirty_wb=0 total_remote=24215908
+0, throughput 2.8171
+cluster throughput 2.817
+[DEX] inner_miss=11840412 leaf_miss=15835621 dirty_wb=0 total_remote=27676033
+0, throughput 2.4731
+cluster throughput 2.473
+[DEX] inner_miss=13793413 leaf_miss=18686183 dirty_wb=0 total_remote=32479596
+0, throughput 0.0008
+cluster throughput 0.000
+The time duration = 20 seconds
+Round 0 (max_throughput): 2.89828 Mops/s
+Round 0 (straggler_throughput): 2.89825 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.58295
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.58295
+Avg. rdma read size/ op = 810.469
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 810.469
+------------------------------------------
+Node 0 average throughput = 2.77656
+Node 0 total throughput = 2.89828
+All CN throughput (Max) = 2.89828
+All CN throughput (Straggler) = 2.89825
+Final throughput = 2.89825
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=12053 ns
+P50=11500  P90=20000  P95=22500  P99=27500  P99.9=34500  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.60 cache=256MB
+[MEM][START] op=point/zipf0.60 cache=512MB uni=0 theta=0.60
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.600000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x78abfc000000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [253.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x78abd2c00000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 1048576
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 2
+I am 9
+I am 12
+I am 33
+I am 5
+I am 6
+I am 35
+I am 4
+I am 3
+I am 31
+I am 21
+I am 13
+I am 24
+I am 11
+I am 27
+I am 16
+I am 18
+I am 23
+I am 1
+I am 7
+I am 20
+I am 26
+I am 30
+I am 8
+I am 32
+I am 28
+I am 15
+I am 34
+I am 14
+I am 25
+I am 19
+I am 22
+I am 10
+I am 29
+I am 17
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 3.9784
+cluster throughput 3.978
+[DEX] inner_miss=724743 leaf_miss=2058766 dirty_wb=0 total_remote=2783509
+0, throughput 4.1632
+cluster throughput 4.163
+[DEX] inner_miss=1480679 leaf_miss=4215118 dirty_wb=0 total_remote=5695797
+0, throughput 4.2775
+cluster throughput 4.277
+[DEX] inner_miss=2255886 leaf_miss=6418473 dirty_wb=0 total_remote=8674359
+0, throughput 4.2819
+cluster throughput 4.281
+[DEX] inner_miss=3030682 leaf_miss=8623641 dirty_wb=0 total_remote=11654323
+0, throughput 4.2926
+cluster throughput 4.292
+[DEX] inner_miss=3806812 leaf_miss=10832997 dirty_wb=0 total_remote=14639809
+0, throughput 4.0032
+cluster throughput 4.003
+[DEX] inner_miss=4640239 leaf_miss=14580780 dirty_wb=0 total_remote=19221019
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 14 seconds
+Round 0 (max_throughput): 4.40023 Mops/s
+Round 0 (straggler_throughput): 4.40021 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.03626
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.03626
+Avg. rdma read size/ op = 530.565
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 530.565
+------------------------------------------
+Node 0 average throughput = 4.16567
+Node 0 total throughput = 4.40023
+All CN throughput (Max) = 4.40023
+All CN throughput (Straggler) = 4.40021
+Final throughput = 4.40021
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=7813 ns
+P50=7000  P90=14000  P95=17000  P99=23000  P99.9=29500  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.60 cache=512MB
+  >> zipf0.99
+[MEM][START] op=point/zipf0.99 cache=128MB uni=0 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 0, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x77a123a00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [253.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x77a112800000
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 262144
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 3
+I am 1
+I am 6
+I am 2
+I am 4
+I am 7
+I am 5
+I am 8
+I am 10
+I am 9
+I am 11
+I am 30
+I am 14
+I am 13
+I am 12
+I am 17
+I am 22
+I am 21
+I am 20
+I am 16
+I am 28
+I am 29
+I am 27
+I am 24
+I am 18
+I am 23
+I am 19
+I am 31
+I am 32
+I am 25
+I am 33
+I am 26
+I am 35
+I am 15
+I am 34
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 3.7553
+cluster throughput 3.755
+[DEX] inner_miss=1509308 leaf_miss=1772916 dirty_wb=0 total_remote=3282224
+0, throughput 3.7584
+cluster throughput 3.758
+[DEX] inner_miss=3022623 leaf_miss=3550928 dirty_wb=0 total_remote=6573551
+0, throughput 3.7589
+cluster throughput 3.758
+[DEX] inner_miss=4535227 leaf_miss=5326695 dirty_wb=0 total_remote=9861922
+0, throughput 3.7546
+cluster throughput 3.754
+[DEX] inner_miss=6048358 leaf_miss=7096124 dirty_wb=0 total_remote=13144482
+0, throughput 3.7575
+cluster throughput 3.757
+[DEX] inner_miss=7558847 leaf_miss=8873725 dirty_wb=0 total_remote=16432572
+0, throughput 3.7575
+cluster throughput 3.757
+[DEX] inner_miss=9071380 leaf_miss=10647629 dirty_wb=0 total_remote=19719009
+0, throughput 2.4547
+cluster throughput 2.454
+[DEX] inner_miss=10682222 leaf_miss=12428680 dirty_wb=0 total_remote=23110902
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 16 seconds
+Round 0 (max_throughput): 3.87213 Mops/s
+Round 0 (straggler_throughput): 3.87212 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 1.10196
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 1.10196
+Avg. rdma read size/ op = 564.202
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 564.202
+------------------------------------------
+Node 0 average throughput = 3.57043
+Node 0 total throughput = 3.87213
+All CN throughput (Max) = 3.87213
+All CN throughput (Straggler) = 3.87212
+Final throughput = 3.87212
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=8953 ns
+P50=6500  P90=23000  P95=26500  P99=32500  P99.9=40500  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.99 cache=128MB
+[MEM][START] op=point/zipf0.99 cache=256MB uni=0 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 0, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x76a41b800000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [254.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 256
+-----Cache initial addr = 0x76a402600000
+page num = 524288
+alloc_unit = 512
+entry_num: 524288
+bucket_num: 174763
+Bucket size = 64
+entry_num: 52428
+bucket_num: 8738
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 4
+I am 5
+I am 3
+I am 2
+I am 1
+I am 33
+I am 8
+I am 12
+I am 9
+I am 17
+I am 10
+I am 7
+I am 14
+I am 15
+I am 16
+I am 18
+I am 19
+I am 21
+I am 22
+I am 6
+I am 11
+I am 28
+I am 24
+I am 27
+I am 13
+I am 30
+I am 23
+I am 31
+I am 32
+I am 26
+I am 35
+I am 29
+I am 34
+I am 25
+I am 20
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 5.7906
+cluster throughput 5.790
+[DEX] inner_miss=1474477 leaf_miss=2098249 dirty_wb=0 total_remote=3572726
+0, throughput 5.7964
+cluster throughput 5.796
+[DEX] inner_miss=2953041 leaf_miss=4200278 dirty_wb=0 total_remote=7153319
+0, throughput 5.7943
+cluster throughput 5.794
+[DEX] inner_miss=4431321 leaf_miss=6301702 dirty_wb=0 total_remote=10733023
+0, throughput 5.8117
+cluster throughput 5.811
+[DEX] inner_miss=6008699 leaf_miss=8609597 dirty_wb=0 total_remote=14618296
+0, throughput 1.8042
+cluster throughput 1.804
+[DEX] inner_miss=6837852 leaf_miss=10074688 dirty_wb=0 total_remote=16912540
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 12 seconds
+Round 0 (max_throughput): 6.11077 Mops/s
+Round 0 (straggler_throughput): 6.11075 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 0.743948
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 0.743948
+Avg. rdma read size/ op = 380.901
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 380.901
+------------------------------------------
+Node 0 average throughput = 4.999
+Node 0 total throughput = 6.11077
+All CN throughput (Max) = 6.11077
+All CN throughput (Straggler) = 6.11075
+Final throughput = 6.11075
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=5557 ns
+P50=2500  P90=15500  P95=19000  P99=25000  P99.9=33000  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.99 cache=256MB
+[MEM][START] op=point/zipf0.99 cache=512MB uni=0 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7aae1ae00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [253.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x7aadf1c00000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 1048576
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 6
+I am 4
+I am 5
+I am 1
+I am 2
+I am 3
+I am 7
+I am 8
+I am 12
+I am 23
+I am 33
+I am 16
+I am 10
+I am 9
+I am 13
+I am 17
+I am 14
+I am 18
+I am 11
+I am 19
+I am 15
+I am 20
+I am 21
+I am 27
+I am 25
+I am 24
+I am 26
+I am 34
+I am 29
+I am 35
+I am 30
+I am 31
+I am 32
+I am 28
+I am 22
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 9.4824
+cluster throughput 9.482
+[DEX] inner_miss=763560 leaf_miss=2281854 dirty_wb=0 total_remote=3045414
+0, throughput 9.5413
+cluster throughput 9.541
+[DEX] inner_miss=1530938 leaf_miss=4587692 dirty_wb=0 total_remote=6118630
+0, throughput 5.9739
+cluster throughput 5.973
+[DEX] inner_miss=2029136 leaf_miss=6339487 dirty_wb=0 total_remote=8368623
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 8 seconds
+Round 0 (max_throughput): 9.6949 Mops/s
+Round 0 (straggler_throughput): 9.69487 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 0.421476
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 0.421476
+Avg. rdma read size/ op = 215.796
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 215.796
+------------------------------------------
+Node 0 average throughput = 8.332
+Node 0 total throughput = 9.6949
+All CN throughput (Max) = 9.6949
+All CN throughput (Straggler) = 9.69487
+Final throughput = 9.69487
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=3356 ns
+P50=500  P90=9500  P95=12500  P99=19000  P99.9=25500  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[MEM][END]   op=point/zipf0.99 cache=512MB
+===== RANGE QUERIES (scan=100) =====
+  >> uniform
+[MEM][START] op=range/uniform cache=128MB uni=1 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 1, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7d7af3000000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [255.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 2 launch!
+
+dir 1 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x7d7ae1e00000
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+[MEM][START] op=range/uniform cache=128MB uni=1 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 1, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7d7af3000000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [255.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 2 launch!
+
+dir 1 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x7d7ae1e00000
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 262144
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 6
+I am 4
+I am 1
+I am 7
+I am 25
+I am 2
+I am 26
+I am 3
+I am 21
+I am 31
+I am 27
+I am 28
+I am 29
+I am 20
+I am 13
+I am 14
+I am 9
+I am 22
+I am 16
+I am 17
+I am 18
+I am 8
+I am 11
+I am 19
+I am 12
+I am 24
+I am 30
+I am 23
+I am 5
+I am 10
+I am 15
+I am 32
+I am 33
+I am 34
+I am 35
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.4250
+cluster throughput 0.424
+[DEX] inner_miss=1356735 leaf_miss=2093546 dirty_wb=0 total_remote=3450281
+0, throughput 0.4259
+cluster throughput 0.425
+[DEX] inner_miss=2716371 leaf_miss=4188961 dirty_wb=0 total_remote=6905332
+0, throughput 0.4258
+cluster throughput 0.425
+[DEX] inner_miss=4074493 leaf_miss=6282457 dirty_wb=0 total_remote=10356950
+0, throughput 0.4252
+cluster throughput 0.425
+[DEX] inner_miss=5429666 leaf_miss=8371871 dirty_wb=0 total_remote=13801537
+0, throughput 0.4259
+cluster throughput 0.425
+[DEX] inner_miss=6785449 leaf_miss=10464777 dirty_wb=0 total_remote=17250226
+0, throughput 0.4256
+cluster throughput 0.425
+[DEX] inner_miss=8143912 leaf_miss=12558839 dirty_wb=0 total_remote=20702751
+0, throughput 0.4257
+cluster throughput 0.425
+[DEX] inner_miss=9501416 leaf_miss=14653030 dirty_wb=0 total_remote=24154446
+0, throughput 0.4256
+cluster throughput 0.425
+[DEX] inner_miss=10859253 leaf_miss=16744785 dirty_wb=0 total_remote=27604038
+0, throughput 0.4252
+cluster throughput 0.425
+[DEX] inner_miss=12215182 leaf_miss=18833514 dirty_wb=0 total_remote=31048696
+0, throughput 0.4259
+cluster throughput 0.425
+[DEX] inner_miss=13573832 leaf_miss=20930072 dirty_wb=0 total_remote=34503904
+0, throughput 0.4258
+cluster throughput 0.425
+[DEX] inner_miss=14932439 leaf_miss=23023763 dirty_wb=0 total_remote=37956202
+0, throughput 0.4257
+cluster throughput 0.425
+[DEX] inner_miss=16290814 leaf_miss=25113727 dirty_wb=0 total_remote=41404541
+0, throughput 0.4258
+cluster throughput 0.425
+[DEX] inner_miss=17650157 leaf_miss=27210516 dirty_wb=0 total_remote=44860673
+0, throughput 0.4248
+cluster throughput 0.424
+[DEX] inner_miss=19005231 leaf_miss=29300681 dirty_wb=0 total_remote=48305912
+0, throughput 0.4257
+cluster throughput 0.425
+[DEX] inner_miss=20364187 leaf_miss=31395996 dirty_wb=0 total_remote=51760183
+0, throughput 0.4256
+cluster throughput 0.425
+[DEX] inner_miss=21721514 leaf_miss=33493150 dirty_wb=0 total_remote=55214664
+0, throughput 0.4260
+cluster throughput 0.426
+[DEX] inner_miss=23080239 leaf_miss=35589371 dirty_wb=0 total_remote=58669610
+0, throughput 0.4257
+cluster throughput 0.425
+[DEX] inner_miss=24438607 leaf_miss=37681497 dirty_wb=0 total_remote=62120104
+0, throughput 0.4251
+cluster throughput 0.425
+[DEX] inner_miss=25792944 leaf_miss=39770535 dirty_wb=0 total_remote=65563479
+0, throughput 0.4258
+cluster throughput 0.425
+[DEX] inner_miss=27150030 leaf_miss=41864997 dirty_wb=0 total_remote=69015027
+0, throughput 0.4258
+cluster throughput 0.425
+[DEX] inner_miss=28507908 leaf_miss=43960830 dirty_wb=0 total_remote=72468738
+0, throughput 0.4258
+cluster throughput 0.425
+[DEX] inner_miss=29866520 leaf_miss=46054269 dirty_wb=0 total_remote=75920789
+0, throughput 0.4256
+cluster throughput 0.425
+[DEX] inner_miss=31225313 leaf_miss=48150037 dirty_wb=0 total_remote=79375350
+0, throughput 0.4248
+cluster throughput 0.424
+[DEX] inner_miss=32580768 leaf_miss=50238360 dirty_wb=0 total_remote=82819128
+0, throughput 0.4257
+cluster throughput 0.425
+[DEX] inner_miss=33940438 leaf_miss=52330487 dirty_wb=0 total_remote=86270925
+0, throughput 0.4230
+cluster throughput 0.423
+[DEX] inner_miss=35286934 leaf_miss=54403486 dirty_wb=0 total_remote=89690420
+0, throughput 0.4241
+cluster throughput 0.424
+[DEX] inner_miss=36638348 leaf_miss=56483186 dirty_wb=0 total_remote=93121534
+0, throughput 0.4243
+cluster throughput 0.424
+[DEX] inner_miss=37989504 leaf_miss=58559262 dirty_wb=0 total_remote=96548766
+0, throughput 0.4236
+cluster throughput 0.423
+[DEX] inner_miss=39336890 leaf_miss=60632124 dirty_wb=0 total_remote=99969014
+0, throughput 0.4247
+cluster throughput 0.424
+[DEX] inner_miss=40686200 leaf_miss=62709154 dirty_wb=0 total_remote=103395354
+0, throughput 0.4244
+cluster throughput 0.424
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.425277 Mops/s
+Round 0 (straggler_throughput): 0.425268 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 11.3044
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 11.3044
+Avg. rdma read size/ op = 5787.83
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 5787.83
+------------------------------------------
+Node 0 average throughput = 0.424677
+Node 0 total throughput = 0.425277
+All CN throughput (Max) = 0.425277
+All CN throughput (Straggler) = 0.425268
+Final throughput = 0.425268
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=26371195  avg=84267 ns
+P50=83500  P90=104500  P95=110500  P99=124000  P99.9=146000  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/uniform cache=128MB
+[MEM][START] op=range/uniform cache=256MB uni=1 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 1, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x719e03200000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [255.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 256
+-----Cache initial addr = 0x719dea000000
+page num = 524288
+alloc_unit = 512
+entry_num: 524288
+bucket_num: 174763
+Bucket size = 64
+entry_num: 52428
+bucket_num: 8738
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 2
+I am 1
+I am 3
+I am 4
+I am 5
+I am 6
+I am 7
+I am 9
+I am 8
+I am 10
+I am 11
+I am 12
+I am 31
+I am 29
+I am 26
+I am 16
+I am 20
+I am 15
+I am 27
+I am 21
+I am 28
+I am 25
+I am 17
+I am 34
+I am 24
+I am 35
+I am 33
+I am 30
+I am 23
+I am 14
+I am 22
+I am 18
+I am 32
+I am 13
+I am 19
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.4360
+cluster throughput 0.435
+[DEX] inner_miss=1000827 leaf_miss=1892065 dirty_wb=0 total_remote=2892892
+0, throughput 0.4360
+cluster throughput 0.435
+[DEX] inner_miss=1998758 leaf_miss=3780218 dirty_wb=0 total_remote=5778976
+0, throughput 0.4367
+cluster throughput 0.436
+[DEX] inner_miss=3001547 leaf_miss=5674101 dirty_wb=0 total_remote=8675648
+0, throughput 0.4365
+cluster throughput 0.436
+[DEX] inner_miss=4002081 leaf_miss=7566230 dirty_wb=0 total_remote=11568311
+0, throughput 0.4368
+cluster throughput 0.436
+[DEX] inner_miss=5003572 leaf_miss=9455943 dirty_wb=0 total_remote=14459515
+0, throughput 0.4368
+cluster throughput 0.436
+[DEX] inner_miss=6005571 leaf_miss=11346113 dirty_wb=0 total_remote=17351684
+0, throughput 0.4358
+cluster throughput 0.435
+[DEX] inner_miss=7003265 leaf_miss=13233043 dirty_wb=0 total_remote=20236308
+0, throughput 0.4367
+cluster throughput 0.436
+[DEX] inner_miss=8005020 leaf_miss=15119710 dirty_wb=0 total_remote=23124730
+0, throughput 0.4367
+cluster throughput 0.436
+[DEX] inner_miss=9005707 leaf_miss=17010673 dirty_wb=0 total_remote=26016380
+0, throughput 0.4365
+cluster throughput 0.436
+[DEX] inner_miss=10007328 leaf_miss=18901102 dirty_wb=0 total_remote=28908430
+0, throughput 0.4359
+cluster throughput 0.435
+[DEX] inner_miss=11007316 leaf_miss=20791154 dirty_wb=0 total_remote=31798470
+0, throughput 0.4357
+cluster throughput 0.435
+[DEX] inner_miss=12005665 leaf_miss=22678987 dirty_wb=0 total_remote=34684652
+0, throughput 0.4366
+cluster throughput 0.436
+[DEX] inner_miss=13008360 leaf_miss=24571493 dirty_wb=0 total_remote=37579853
+0, throughput 0.4366
+cluster throughput 0.436
+[DEX] inner_miss=14009938 leaf_miss=26463131 dirty_wb=0 total_remote=40473069
+0, throughput 0.4364
+cluster throughput 0.436
+[DEX] inner_miss=15010846 leaf_miss=28354018 dirty_wb=0 total_remote=43364864
+0, throughput 0.4362
+cluster throughput 0.436
+[DEX] inner_miss=16012137 leaf_miss=30244532 dirty_wb=0 total_remote=46256669
+0, throughput 0.4358
+cluster throughput 0.435
+[DEX] inner_miss=17011361 leaf_miss=32134778 dirty_wb=0 total_remote=49146139
+0, throughput 0.4365
+cluster throughput 0.436
+[DEX] inner_miss=18013866 leaf_miss=34028556 dirty_wb=0 total_remote=52042422
+0, throughput 0.4366
+cluster throughput 0.436
+[DEX] inner_miss=19015312 leaf_miss=35919320 dirty_wb=0 total_remote=54934632
+0, throughput 0.4364
+cluster throughput 0.436
+[DEX] inner_miss=20016870 leaf_miss=37811436 dirty_wb=0 total_remote=57828306
+0, throughput 0.4368
+cluster throughput 0.436
+[DEX] inner_miss=21018610 leaf_miss=39701572 dirty_wb=0 total_remote=60720182
+0, throughput 0.4361
+cluster throughput 0.436
+[DEX] inner_miss=22019036 leaf_miss=41588798 dirty_wb=0 total_remote=63607834
+0, throughput 0.4361
+cluster throughput 0.436
+[DEX] inner_miss=23020506 leaf_miss=43481963 dirty_wb=0 total_remote=66502469
+0, throughput 0.4368
+cluster throughput 0.436
+[DEX] inner_miss=24021436 leaf_miss=45376927 dirty_wb=0 total_remote=69398363
+0, throughput 0.4368
+cluster throughput 0.436
+[DEX] inner_miss=25023259 leaf_miss=47267979 dirty_wb=0 total_remote=72291238
+0, throughput 0.4362
+cluster throughput 0.436
+[DEX] inner_miss=26023110 leaf_miss=49159668 dirty_wb=0 total_remote=75182778
+0, throughput 0.4362
+cluster throughput 0.436
+[DEX] inner_miss=27023817 leaf_miss=51054103 dirty_wb=0 total_remote=78077920
+0, throughput 0.4350
+cluster throughput 0.434
+[DEX] inner_miss=28021192 leaf_miss=52941595 dirty_wb=0 total_remote=80962787
+0, throughput 0.4344
+cluster throughput 0.434
+[DEX] inner_miss=29015796 leaf_miss=54815036 dirty_wb=0 total_remote=83830832
+0, throughput 0.4348
+cluster throughput 0.434
+[DEX] inner_miss=30011851 leaf_miss=56688647 dirty_wb=0 total_remote=86700498
+0, throughput 0.4351
+cluster throughput 0.435
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.436182 Mops/s
+Round 0 (straggler_throughput): 0.436176 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 10.2247
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 10.2247
+Avg. rdma read size/ op = 5235.03
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 5235.03
+------------------------------------------
+Node 0 average throughput = 0.435581
+Node 0 total throughput = 0.436182
+All CN throughput (Max) = 0.436182
+All CN throughput (Straggler) = 0.436176
+Final throughput = 0.436176
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=27047915  avg=82151 ns
+P50=81000  P90=104000  P95=111000  P99=125000  P99.9=145500  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/uniform cache=256MB
+[MEM][START] op=range/uniform cache=512MB uni=1 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 1, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7600a8200000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [254.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 2 launch!
+
+dir 1 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x76007f000000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 1048576
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 3
+I am 1
+I am 5
+I am 4
+I am 2
+I am 33
+I am 12
+I am 19
+I am 9
+I am 13
+I am 7
+I am 11
+I am 14
+I am 15
+I am 6
+I am 16
+I am 17
+I am 18
+I am 20
+I am 21
+I am 23
+I am 24
+I am 8
+I am 25
+I am 34
+I am 35
+I am 22
+I am 10
+I am 28
+I am 29
+I am 30
+I am 27
+I am 32
+I am 31
+I am 26
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.5217
+cluster throughput 0.521
+[DEX] inner_miss=573165 leaf_miss=1955506 dirty_wb=0 total_remote=2528671
+0, throughput 0.5207
+cluster throughput 0.520
+[DEX] inner_miss=1143953 leaf_miss=3902331 dirty_wb=0 total_remote=5046284
+0, throughput 0.5219
+cluster throughput 0.521
+[DEX] inner_miss=1717268 leaf_miss=5860869 dirty_wb=0 total_remote=7578137
+0, throughput 0.5230
+cluster throughput 0.522
+[DEX] inner_miss=2291370 leaf_miss=7817906 dirty_wb=0 total_remote=10109276
+0, throughput 0.5229
+cluster throughput 0.522
+[DEX] inner_miss=2865121 leaf_miss=9776056 dirty_wb=0 total_remote=12641177
+0, throughput 0.5231
+cluster throughput 0.523
+[DEX] inner_miss=3438519 leaf_miss=11735532 dirty_wb=0 total_remote=15174051
+0, throughput 0.5217
+cluster throughput 0.521
+[DEX] inner_miss=4009763 leaf_miss=13684060 dirty_wb=0 total_remote=17693823
+0, throughput 0.5227
+cluster throughput 0.522
+[DEX] inner_miss=4583708 leaf_miss=15644513 dirty_wb=0 total_remote=20228221
+0, throughput 0.5230
+cluster throughput 0.522
+[DEX] inner_miss=5157487 leaf_miss=17600604 dirty_wb=0 total_remote=22758091
+0, throughput 0.5224
+cluster throughput 0.522
+[DEX] inner_miss=5730262 leaf_miss=19555458 dirty_wb=0 total_remote=25285720
+0, throughput 0.5224
+cluster throughput 0.522
+[DEX] inner_miss=6303908 leaf_miss=21513198 dirty_wb=0 total_remote=27817106
+0, throughput 0.5213
+cluster throughput 0.521
+[DEX] inner_miss=6876507 leaf_miss=23461178 dirty_wb=0 total_remote=30337685
+0, throughput 0.5218
+cluster throughput 0.521
+[DEX] inner_miss=7448649 leaf_miss=25419190 dirty_wb=0 total_remote=32867839
+0, throughput 0.5224
+cluster throughput 0.522
+[DEX] inner_miss=8022114 leaf_miss=27376904 dirty_wb=0 total_remote=35399018
+0, throughput 0.5228
+cluster throughput 0.522
+[DEX] inner_miss=8596319 leaf_miss=29335283 dirty_wb=0 total_remote=37931602
+0, throughput 0.5233
+cluster throughput 0.523
+[DEX] inner_miss=9170387 leaf_miss=31293060 dirty_wb=0 total_remote=40463447
+0, throughput 0.5221
+cluster throughput 0.522
+[DEX] inner_miss=9743492 leaf_miss=33249322 dirty_wb=0 total_remote=42992814
+0, throughput 0.5207
+cluster throughput 0.520
+[DEX] inner_miss=10313944 leaf_miss=35195799 dirty_wb=0 total_remote=45509743
+0, throughput 0.5228
+cluster throughput 0.522
+[DEX] inner_miss=10887177 leaf_miss=37152617 dirty_wb=0 total_remote=48039794
+0, throughput 0.5207
+cluster throughput 0.520
+[DEX] inner_miss=11457586 leaf_miss=39097520 dirty_wb=0 total_remote=50555106
+0, throughput 0.5201
+cluster throughput 0.520
+[DEX] inner_miss=12028599 leaf_miss=41038869 dirty_wb=0 total_remote=53067468
+0, throughput 0.5202
+cluster throughput 0.520
+[DEX] inner_miss=12598108 leaf_miss=42981460 dirty_wb=0 total_remote=55579568
+0, throughput 0.5189
+cluster throughput 0.518
+[DEX] inner_miss=13168020 leaf_miss=44912677 dirty_wb=0 total_remote=58080697
+0, throughput 0.5211
+cluster throughput 0.521
+[DEX] inner_miss=13740026 leaf_miss=46849737 dirty_wb=0 total_remote=60589763
+0, throughput 0.5212
+cluster throughput 0.521
+[DEX] inner_miss=14311096 leaf_miss=48785982 dirty_wb=0 total_remote=63097078
+0, throughput 0.5211
+cluster throughput 0.521
+[DEX] inner_miss=14883307 leaf_miss=50726730 dirty_wb=0 total_remote=65610037
+0, throughput 0.5214
+cluster throughput 0.521
+[DEX] inner_miss=15454008 leaf_miss=52663617 dirty_wb=0 total_remote=68117625
+0, throughput 0.5165
+cluster throughput 0.516
+[DEX] inner_miss=16019449 leaf_miss=54583511 dirty_wb=0 total_remote=70602960
+0, throughput 0.5034
+cluster throughput 0.503
+[DEX] inner_miss=16566581 leaf_miss=56432532 dirty_wb=0 total_remote=72999113
+0, throughput 0.5100
+cluster throughput 0.510
+[DEX] inner_miss=17123262 leaf_miss=58323815 dirty_wb=0 total_remote=75447077
+0, throughput 0.5074
+cluster throughput 0.507
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.52016 Mops/s
+Round 0 (straggler_throughput): 0.520128 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 8.63136
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 8.63136
+Avg. rdma read size/ op = 4419.26
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 4419.26
+------------------------------------------
+Node 0 average throughput = 0.519645
+Node 0 total throughput = 0.52016
+All CN throughput (Max) = 0.52016
+All CN throughput (Straggler) = 0.520128
+Final throughput = 0.520128
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=32255494  avg=68828 ns
+P50=68000  P90=88000  P95=94000  P99=106500  P99.9=124000  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/uniform cache=512MB
+  >> zipf0.30
+[MEM][START] op=range/zipf0.30 cache=128MB uni=0 theta=0.30
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 0, zipfian 0.300000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7b64d2200000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [254.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x7b64c1000000
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 262144
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 26
+I am 4
+I am 5
+I am 3
+I am 17
+I am 21
+I am 8
+I am 2
+I am 24
+I am 7
+I am 14
+I am 16
+I am 1
+I am 12
+I am 22
+I am 23
+I am 19
+I am 25
+I am 15
+I am 18
+I am 13
+I am 11
+I am 9
+I am 27
+I am 10
+I am 20
+I am 6
+I am 28
+I am 29
+I am 32
+I am 30
+I am 31
+I am 34
+I am 35
+I am 33
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.4168
+cluster throughput 0.416
+[DEX] inner_miss=1314517 leaf_miss=2014471 dirty_wb=0 total_remote=3328988
+0, throughput 0.4182
+cluster throughput 0.418
+[DEX] inner_miss=2632066 leaf_miss=4034249 dirty_wb=0 total_remote=6666315
+0, throughput 0.4185
+cluster throughput 0.418
+[DEX] inner_miss=3950657 leaf_miss=6052843 dirty_wb=0 total_remote=10003500
+0, throughput 0.4184
+cluster throughput 0.418
+[DEX] inner_miss=5269547 leaf_miss=8073893 dirty_wb=0 total_remote=13343440
+0, throughput 0.4182
+cluster throughput 0.418
+[DEX] inner_miss=6588413 leaf_miss=10091451 dirty_wb=0 total_remote=16679864
+0, throughput 0.4177
+cluster throughput 0.417
+[DEX] inner_miss=7903014 leaf_miss=12106304 dirty_wb=0 total_remote=20009318
+0, throughput 0.4183
+cluster throughput 0.418
+[DEX] inner_miss=9220757 leaf_miss=14123845 dirty_wb=0 total_remote=23344602
+0, throughput 0.4182
+cluster throughput 0.418
+[DEX] inner_miss=10540037 leaf_miss=16142673 dirty_wb=0 total_remote=26682710
+0, throughput 0.4184
+cluster throughput 0.418
+[DEX] inner_miss=11859556 leaf_miss=18159112 dirty_wb=0 total_remote=30018668
+0, throughput 0.4184
+cluster throughput 0.418
+[DEX] inner_miss=13178280 leaf_miss=20177794 dirty_wb=0 total_remote=33356074
+0, throughput 0.4177
+cluster throughput 0.417
+[DEX] inner_miss=14493878 leaf_miss=22191310 dirty_wb=0 total_remote=36685188
+0, throughput 0.4183
+cluster throughput 0.418
+[DEX] inner_miss=15811238 leaf_miss=24209009 dirty_wb=0 total_remote=40020247
+0, throughput 0.4183
+cluster throughput 0.418
+[DEX] inner_miss=17130546 leaf_miss=26226117 dirty_wb=0 total_remote=43356663
+0, throughput 0.4185
+cluster throughput 0.418
+[DEX] inner_miss=18449439 leaf_miss=28245157 dirty_wb=0 total_remote=46694596
+0, throughput 0.4182
+cluster throughput 0.418
+[DEX] inner_miss=19767708 leaf_miss=30262475 dirty_wb=0 total_remote=50030183
+0, throughput 0.4176
+cluster throughput 0.417
+[DEX] inner_miss=21081848 leaf_miss=32277728 dirty_wb=0 total_remote=53359576
+0, throughput 0.4181
+cluster throughput 0.418
+[DEX] inner_miss=22399972 leaf_miss=34297287 dirty_wb=0 total_remote=56697259
+0, throughput 0.4182
+cluster throughput 0.418
+[DEX] inner_miss=23719146 leaf_miss=36312478 dirty_wb=0 total_remote=60031624
+0, throughput 0.4181
+cluster throughput 0.418
+[DEX] inner_miss=25038803 leaf_miss=38331364 dirty_wb=0 total_remote=63370167
+0, throughput 0.4180
+cluster throughput 0.418
+[DEX] inner_miss=26355982 leaf_miss=40350784 dirty_wb=0 total_remote=66706766
+0, throughput 0.4175
+cluster throughput 0.417
+[DEX] inner_miss=27670908 leaf_miss=42364801 dirty_wb=0 total_remote=70035709
+0, throughput 0.4181
+cluster throughput 0.418
+[DEX] inner_miss=28988668 leaf_miss=44381453 dirty_wb=0 total_remote=73370121
+0, throughput 0.4182
+cluster throughput 0.418
+[DEX] inner_miss=30308129 leaf_miss=46398766 dirty_wb=0 total_remote=76706895
+0, throughput 0.4181
+cluster throughput 0.418
+[DEX] inner_miss=31625940 leaf_miss=48416545 dirty_wb=0 total_remote=80042485
+0, throughput 0.4179
+cluster throughput 0.417
+[DEX] inner_miss=32943869 leaf_miss=50431650 dirty_wb=0 total_remote=83375519
+0, throughput 0.4181
+cluster throughput 0.418
+[DEX] inner_miss=34261271 leaf_miss=52448241 dirty_wb=0 total_remote=86709512
+0, throughput 0.4153
+cluster throughput 0.415
+[DEX] inner_miss=35566601 leaf_miss=54442601 dirty_wb=0 total_remote=90009202
+0, throughput 0.4170
+cluster throughput 0.416
+[DEX] inner_miss=36879312 leaf_miss=56449484 dirty_wb=0 total_remote=93328796
+0, throughput 0.4169
+cluster throughput 0.416
+[DEX] inner_miss=38193201 leaf_miss=58456112 dirty_wb=0 total_remote=96649313
+0, throughput 0.4167
+cluster throughput 0.416
+[DEX] inner_miss=39507568 leaf_miss=60464856 dirty_wb=0 total_remote=99972424
+0, throughput 0.4169
+cluster throughput 0.416
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.417829 Mops/s
+Round 0 (straggler_throughput): 0.417816 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 11.3028
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 11.3028
+Avg. rdma read size/ op = 5787.04
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 5787.04
+------------------------------------------
+Node 0 average throughput = 0.417419
+Node 0 total throughput = 0.417829
+All CN throughput (Max) = 0.417829
+All CN throughput (Straggler) = 0.417816
+Final throughput = 0.417816
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=25910143  avg=85777 ns
+P50=85500  P90=105500  P95=111500  P99=124000  P99.9=147000  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.30 cache=128MB
+[MEM][START] op=range/zipf0.30 cache=256MB uni=0 theta=0.30
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 0, zipfian 0.300000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7ebe66e00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [252.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 256
+-----Cache initial addr = 0x7ebe4dc00000
+page num = 524288
+alloc_unit = 512
+entry_num: 524288
+bucket_num: 174763
+Bucket size = 64
+entry_num: 52428
+bucket_num: 8738
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 3
+I am 2
+I am 1
+I am 4
+I am 5
+I am 6
+I am 7
+I am 8
+I am 9
+I am 10
+I am 11
+I am 12
+I am 13
+I am 14
+I am 35
+I am 18
+I am 23
+I am 15
+I am 22
+I am 21
+I am 30
+I am 29
+I am 34
+I am 25
+I am 20
+I am 24
+I am 19
+I am 31
+I am 28
+I am 17
+I am 16
+I am 26
+I am 32
+I am 27
+I am 33
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.4362
+cluster throughput 0.436
+[DEX] inner_miss=1000228 leaf_miss=1900689 dirty_wb=0 total_remote=2900917
+0, throughput 0.4369
+cluster throughput 0.436
+[DEX] inner_miss=2000859 leaf_miss=3800816 dirty_wb=0 total_remote=5801675
+0, throughput 0.4368
+cluster throughput 0.436
+[DEX] inner_miss=3002571 leaf_miss=5698910 dirty_wb=0 total_remote=8701481
+0, throughput 0.4367
+cluster throughput 0.436
+[DEX] inner_miss=4004016 leaf_miss=7599035 dirty_wb=0 total_remote=11603051
+0, throughput 0.4360
+cluster throughput 0.436
+[DEX] inner_miss=5003138 leaf_miss=9495932 dirty_wb=0 total_remote=14499070
+0, throughput 0.4371
+cluster throughput 0.437
+[DEX] inner_miss=6004518 leaf_miss=11396293 dirty_wb=0 total_remote=17400811
+0, throughput 0.4369
+cluster throughput 0.436
+[DEX] inner_miss=7006110 leaf_miss=13296232 dirty_wb=0 total_remote=20302342
+0, throughput 0.4366
+cluster throughput 0.436
+[DEX] inner_miss=8007849 leaf_miss=15196355 dirty_wb=0 total_remote=23204204
+0, throughput 0.4372
+cluster throughput 0.437
+[DEX] inner_miss=9008174 leaf_miss=17097977 dirty_wb=0 total_remote=26106151
+0, throughput 0.4361
+cluster throughput 0.436
+[DEX] inner_miss=10006709 leaf_miss=18995793 dirty_wb=0 total_remote=29002502
+0, throughput 0.4371
+cluster throughput 0.437
+[DEX] inner_miss=11007445 leaf_miss=20895108 dirty_wb=0 total_remote=31902553
+0, throughput 0.4372
+cluster throughput 0.437
+[DEX] inner_miss=12009340 leaf_miss=22795564 dirty_wb=0 total_remote=34804904
+0, throughput 0.4366
+cluster throughput 0.436
+[DEX] inner_miss=13011456 leaf_miss=24697544 dirty_wb=0 total_remote=37709000
+0, throughput 0.4371
+cluster throughput 0.437
+[DEX] inner_miss=14012507 leaf_miss=26596929 dirty_wb=0 total_remote=40609436
+0, throughput 0.4364
+cluster throughput 0.436
+[DEX] inner_miss=15011229 leaf_miss=28491669 dirty_wb=0 total_remote=43502898
+0, throughput 0.4368
+cluster throughput 0.436
+[DEX] inner_miss=16012105 leaf_miss=30391858 dirty_wb=0 total_remote=46403963
+0, throughput 0.4364
+cluster throughput 0.436
+[DEX] inner_miss=17014379 leaf_miss=32293769 dirty_wb=0 total_remote=49308148
+0, throughput 0.4348
+cluster throughput 0.434
+[DEX] inner_miss=18010119 leaf_miss=34180754 dirty_wb=0 total_remote=52190873
+0, throughput 0.4351
+cluster throughput 0.435
+[DEX] inner_miss=19006273 leaf_miss=36064626 dirty_wb=0 total_remote=55070899
+0, throughput 0.4341
+cluster throughput 0.434
+[DEX] inner_miss=19999221 leaf_miss=37945413 dirty_wb=0 total_remote=57944634
+0, throughput 0.4349
+cluster throughput 0.434
+[DEX] inner_miss=20995276 leaf_miss=39831473 dirty_wb=0 total_remote=60826749
+0, throughput 0.4345
+cluster throughput 0.434
+[DEX] inner_miss=21991084 leaf_miss=41715976 dirty_wb=0 total_remote=63707060
+0, throughput 0.4345
+cluster throughput 0.434
+[DEX] inner_miss=22986477 leaf_miss=43600326 dirty_wb=0 total_remote=66586803
+0, throughput 0.4346
+cluster throughput 0.434
+[DEX] inner_miss=23982722 leaf_miss=45481856 dirty_wb=0 total_remote=69464578
+0, throughput 0.4335
+cluster throughput 0.433
+[DEX] inner_miss=24976463 leaf_miss=47357370 dirty_wb=0 total_remote=72333833
+0, throughput 0.4345
+cluster throughput 0.434
+[DEX] inner_miss=25972563 leaf_miss=49240551 dirty_wb=0 total_remote=75213114
+0, throughput 0.4276
+cluster throughput 0.427
+[DEX] inner_miss=26942264 leaf_miss=51073053 dirty_wb=0 total_remote=78015317
+0, throughput 0.4218
+cluster throughput 0.421
+[DEX] inner_miss=27890516 leaf_miss=52862004 dirty_wb=0 total_remote=80752520
+0, throughput 0.4295
+cluster throughput 0.429
+[DEX] inner_miss=28868271 leaf_miss=54714234 dirty_wb=0 total_remote=83582505
+0, throughput 0.4129
+cluster throughput 0.412
+[DEX] inner_miss=29798560 leaf_miss=56467580 dirty_wb=0 total_remote=86266140
+0, throughput 0.4130
+cluster throughput 0.413
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.433519 Mops/s
+Round 0 (straggler_throughput): 0.433512 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 10.2211
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 10.2211
+Avg. rdma read size/ op = 5233.19
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 5233.19
+------------------------------------------
+Node 0 average throughput = 0.433065
+Node 0 total throughput = 0.433519
+All CN throughput (Max) = 0.433519
+All CN throughput (Straggler) = 0.433512
+Final throughput = 0.433512
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=26882877  avg=82655 ns
+P50=81500  P90=105000  P95=112000  P99=126500  P99.9=145500  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.30 cache=256MB
+[MEM][START] op=range/zipf0.30 cache=512MB uni=0 theta=0.30
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.300000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7e336ae00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [254.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x7e3341c00000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 1048576
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 3
+I am 20
+I am 21
+I am 5
+I am 19
+I am 24
+I am 23
+I am 4
+I am 1
+I am 13
+I am 9
+I am 35
+I am 14
+I am 8
+I am 12
+I am 11
+I am 22
+I am 31
+I am 25
+I am 34
+I am 29
+I am 30
+I am 32
+I am 2
+I am 18
+I am 28
+I am 33
+I am 7
+I am 27
+I am 26
+I am 15
+I am 6
+I am 16
+I am 17
+I am 10
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.5118
+cluster throughput 0.511
+[DEX] inner_miss=559496 leaf_miss=1907842 dirty_wb=0 total_remote=2467338
+0, throughput 0.5126
+cluster throughput 0.512
+[DEX] inner_miss=1119305 leaf_miss=3811765 dirty_wb=0 total_remote=4931070
+0, throughput 0.5124
+cluster throughput 0.512
+[DEX] inner_miss=1679161 leaf_miss=5717155 dirty_wb=0 total_remote=7396316
+0, throughput 0.5129
+cluster throughput 0.512
+[DEX] inner_miss=2239729 leaf_miss=7623371 dirty_wb=0 total_remote=9863100
+0, throughput 0.5112
+cluster throughput 0.511
+[DEX] inner_miss=2797935 leaf_miss=9526269 dirty_wb=0 total_remote=12324204
+0, throughput 0.5127
+cluster throughput 0.512
+[DEX] inner_miss=3358076 leaf_miss=11431841 dirty_wb=0 total_remote=14789917
+0, throughput 0.5127
+cluster throughput 0.512
+[DEX] inner_miss=3919460 leaf_miss=13337714 dirty_wb=0 total_remote=17257174
+0, throughput 0.5122
+cluster throughput 0.512
+[DEX] inner_miss=4479963 leaf_miss=15244426 dirty_wb=0 total_remote=19724389
+0, throughput 0.5111
+cluster throughput 0.511
+[DEX] inner_miss=5039196 leaf_miss=17149530 dirty_wb=0 total_remote=22188726
+0, throughput 0.5083
+cluster throughput 0.508
+[DEX] inner_miss=5594073 leaf_miss=19033209 dirty_wb=0 total_remote=24627282
+0, throughput 0.5109
+cluster throughput 0.510
+[DEX] inner_miss=6152242 leaf_miss=20926748 dirty_wb=0 total_remote=27078990
+0, throughput 0.5113
+cluster throughput 0.511
+[DEX] inner_miss=6711056 leaf_miss=22815990 dirty_wb=0 total_remote=29527046
+0, throughput 0.5113
+cluster throughput 0.511
+[DEX] inner_miss=7269105 leaf_miss=24703559 dirty_wb=0 total_remote=31972664
+0, throughput 0.5113
+cluster throughput 0.511
+[DEX] inner_miss=7827407 leaf_miss=26592096 dirty_wb=0 total_remote=34419503
+0, throughput 0.5106
+cluster throughput 0.510
+[DEX] inner_miss=8384610 leaf_miss=28480029 dirty_wb=0 total_remote=36864639
+0, throughput 0.5112
+cluster throughput 0.511
+[DEX] inner_miss=8942965 leaf_miss=30367994 dirty_wb=0 total_remote=39310959
+0, throughput 0.5118
+cluster throughput 0.511
+[DEX] inner_miss=9501916 leaf_miss=32256348 dirty_wb=0 total_remote=41758264
+0, throughput 0.5002
+cluster throughput 0.500
+[DEX] inner_miss=10044094 leaf_miss=34088085 dirty_wb=0 total_remote=44132179
+0, throughput 0.4970
+cluster throughput 0.497
+[DEX] inner_miss=10583143 leaf_miss=35912222 dirty_wb=0 total_remote=46495365
+0, throughput 0.5045
+cluster throughput 0.504
+[DEX] inner_miss=11133446 leaf_miss=37777935 dirty_wb=0 total_remote=48911381
+0, throughput 0.4871
+cluster throughput 0.487
+[DEX] inner_miss=11662946 leaf_miss=39572042 dirty_wb=0 total_remote=51234988
+0, throughput 0.4780
+cluster throughput 0.478
+[DEX] inner_miss=12181091 leaf_miss=41323313 dirty_wb=0 total_remote=53504404
+0, throughput 0.4951
+cluster throughput 0.495
+[DEX] inner_miss=12719325 leaf_miss=43147204 dirty_wb=0 total_remote=55866529
+0, throughput 0.5097
+cluster throughput 0.509
+[DEX] inner_miss=13275414 leaf_miss=45032767 dirty_wb=0 total_remote=58308181
+0, throughput 0.5119
+cluster throughput 0.511
+[DEX] inner_miss=13834417 leaf_miss=46926654 dirty_wb=0 total_remote=60761071
+0, throughput 0.5114
+cluster throughput 0.511
+[DEX] inner_miss=14392552 leaf_miss=48814933 dirty_wb=0 total_remote=63207485
+0, throughput 0.5132
+cluster throughput 0.513
+[DEX] inner_miss=14953548 leaf_miss=50710471 dirty_wb=0 total_remote=65664019
+0, throughput 0.5130
+cluster throughput 0.512
+[DEX] inner_miss=15514961 leaf_miss=52606113 dirty_wb=0 total_remote=68121074
+0, throughput 0.5133
+cluster throughput 0.513
+[DEX] inner_miss=16076048 leaf_miss=54496329 dirty_wb=0 total_remote=70572377
+0, throughput 0.5133
+cluster throughput 0.513
+[DEX] inner_miss=16635813 leaf_miss=56390138 dirty_wb=0 total_remote=73025951
+0, throughput 0.5119
+cluster throughput 0.511
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.508255 Mops/s
+Round 0 (straggler_throughput): 0.508248 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 8.6251
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 8.6251
+Avg. rdma read size/ op = 4416.05
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 4416.05
+------------------------------------------
+Node 0 average throughput = 0.507806
+Node 0 total throughput = 0.508255
+All CN throughput (Max) = 0.508255
+All CN throughput (Straggler) = 0.508248
+Final throughput = 0.508248
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=31516196  avg=70441 ns
+P50=69500  P90=91000  P95=98000  P99=111500  P99.9=128500  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.30 cache=512MB
+  >> zipf0.50
+[MEM][START] op=range/zipf0.50 cache=128MB uni=0 theta=0.50
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 0, zipfian 0.500000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x79b92ce00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [253.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x79b91bc00000
+dir 3 launch!
+
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 262144
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 1
+I am 6
+I am 8
+I am 2
+I am 4
+I am 5
+I am 10
+I am 21
+I am 20
+I am 9
+I am 23
+I am 18
+I am 11
+I am 26
+I am 15
+I am 3
+I am 35
+I am 22
+I am 28
+I am 30
+I am 24
+I am 19
+I am 29
+I am 31
+I am 27
+I am 17
+I am 16
+I am 12
+I am 14
+I am 34
+I am 32
+I am 33
+I am 7
+I am 25
+I am 13
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.3967
+cluster throughput 0.396
+[DEX] inner_miss=1219708 leaf_miss=1825294 dirty_wb=0 total_remote=3045002
+0, throughput 0.3896
+cluster throughput 0.389
+[DEX] inner_miss=2394676 leaf_miss=3609021 dirty_wb=0 total_remote=6003697
+0, throughput 0.3927
+cluster throughput 0.392
+[DEX] inner_miss=3592023 leaf_miss=5416535 dirty_wb=0 total_remote=9008558
+0, throughput 0.3920
+cluster throughput 0.391
+[DEX] inner_miss=4791043 leaf_miss=7222009 dirty_wb=0 total_remote=12013052
+0, throughput 0.3825
+cluster throughput 0.382
+[DEX] inner_miss=5957985 leaf_miss=8993607 dirty_wb=0 total_remote=14951592
+0, throughput 0.3850
+cluster throughput 0.385
+[DEX] inner_miss=7132995 leaf_miss=10774644 dirty_wb=0 total_remote=17907639
+0, throughput 0.3947
+cluster throughput 0.394
+[DEX] inner_miss=8348635 leaf_miss=12604386 dirty_wb=0 total_remote=20953021
+0, throughput 0.3999
+cluster throughput 0.399
+[DEX] inner_miss=9579788 leaf_miss=14448303 dirty_wb=0 total_remote=24028091
+0, throughput 0.3997
+cluster throughput 0.399
+[DEX] inner_miss=10813123 leaf_miss=16288872 dirty_wb=0 total_remote=27101995
+0, throughput 0.4004
+cluster throughput 0.400
+[DEX] inner_miss=12049072 leaf_miss=18134806 dirty_wb=0 total_remote=30183878
+0, throughput 0.4004
+cluster throughput 0.400
+[DEX] inner_miss=13284675 leaf_miss=19980614 dirty_wb=0 total_remote=33265289
+0, throughput 0.4004
+cluster throughput 0.400
+[DEX] inner_miss=14521186 leaf_miss=21826648 dirty_wb=0 total_remote=36347834
+0, throughput 0.4002
+cluster throughput 0.400
+[DEX] inner_miss=15757371 leaf_miss=23671465 dirty_wb=0 total_remote=39428836
+0, throughput 0.4005
+cluster throughput 0.400
+[DEX] inner_miss=16994983 leaf_miss=25519859 dirty_wb=0 total_remote=42514842
+0, throughput 0.4001
+cluster throughput 0.400
+[DEX] inner_miss=18229557 leaf_miss=27365223 dirty_wb=0 total_remote=45594780
+0, throughput 0.4000
+cluster throughput 0.400
+[DEX] inner_miss=19465039 leaf_miss=29208657 dirty_wb=0 total_remote=48673696
+0, throughput 0.4004
+cluster throughput 0.400
+[DEX] inner_miss=20700634 leaf_miss=31053128 dirty_wb=0 total_remote=51753762
+0, throughput 0.4002
+cluster throughput 0.400
+[DEX] inner_miss=21935594 leaf_miss=32900814 dirty_wb=0 total_remote=54836408
+0, throughput 0.4002
+cluster throughput 0.400
+[DEX] inner_miss=23171868 leaf_miss=34748212 dirty_wb=0 total_remote=57920080
+0, throughput 0.4011
+cluster throughput 0.401
+[DEX] inner_miss=24409623 leaf_miss=36597732 dirty_wb=0 total_remote=61007355
+0, throughput 0.4009
+cluster throughput 0.400
+[DEX] inner_miss=25648407 leaf_miss=38446395 dirty_wb=0 total_remote=64094802
+0, throughput 0.4013
+cluster throughput 0.401
+[DEX] inner_miss=26888250 leaf_miss=40296301 dirty_wb=0 total_remote=67184551
+0, throughput 0.4016
+cluster throughput 0.401
+[DEX] inner_miss=28128483 leaf_miss=42148011 dirty_wb=0 total_remote=70276494
+0, throughput 0.3999
+cluster throughput 0.399
+[DEX] inner_miss=29364268 leaf_miss=43995866 dirty_wb=0 total_remote=73360134
+0, throughput 0.3999
+cluster throughput 0.399
+[DEX] inner_miss=30597492 leaf_miss=45839973 dirty_wb=0 total_remote=76437465
+0, throughput 0.3996
+cluster throughput 0.399
+[DEX] inner_miss=31830275 leaf_miss=47681905 dirty_wb=0 total_remote=79512180
+0, throughput 0.3996
+cluster throughput 0.399
+[DEX] inner_miss=33065756 leaf_miss=49525635 dirty_wb=0 total_remote=82591391
+0, throughput 0.3998
+cluster throughput 0.399
+[DEX] inner_miss=34301349 leaf_miss=51368510 dirty_wb=0 total_remote=85669859
+0, throughput 0.3994
+cluster throughput 0.399
+[DEX] inner_miss=35534769 leaf_miss=53210523 dirty_wb=0 total_remote=88745292
+0, throughput 0.3997
+cluster throughput 0.399
+[DEX] inner_miss=36769130 leaf_miss=55050947 dirty_wb=0 total_remote=91820077
+0, throughput 0.4001
+cluster throughput 0.400
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.398018 Mops/s
+Round 0 (straggler_throughput): 0.398016 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 11.2943
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 11.2943
+Avg. rdma read size/ op = 5782.7
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 5782.7
+------------------------------------------
+Node 0 average throughput = 0.397516
+Node 0 total throughput = 0.398018
+All CN throughput (Max) = 0.398018
+All CN throughput (Straggler) = 0.398016
+Final throughput = 0.398016
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=24681030  avg=90060 ns
+P50=89000  P90=114000  P95=121500  P99=135000  P99.9=150000  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.50 cache=128MB
+[MEM][START] op=range/zipf0.50 cache=256MB uni=0 theta=0.50
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 0, zipfian 0.500000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7c8016200000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [255.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 3 launch!
+
+dir 2 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 256
+-----Cache initial addr = 0x7c7ffd000000
+page num = 524288
+alloc_unit = 512
+entry_num: 524288
+bucket_num: 174763
+Bucket size = 64
+entry_num: 52428
+bucket_num: 8738
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 3
+I am 4
+I am 5
+I am 1
+I am 2
+I am 34
+I am 23
+I am 10
+I am 11
+I am 14
+I am 7
+I am 6
+I am 16
+I am 17
+I am 18
+I am 8
+I am 19
+I am 20
+I am 22
+I am 12
+I am 9
+I am 27
+I am 28
+I am 24
+I am 30
+I am 29
+I am 15
+I am 32
+I am 26
+I am 33
+I am 25
+I am 35
+I am 31
+I am 21
+I am 13
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.4609
+cluster throughput 0.460
+[DEX] inner_miss=1063689 leaf_miss=2037979 dirty_wb=0 total_remote=3101668
+0, throughput 0.4616
+cluster throughput 0.461
+[DEX] inner_miss=2127577 leaf_miss=4077434 dirty_wb=0 total_remote=6205011
+0, throughput 0.4594
+cluster throughput 0.459
+[DEX] inner_miss=3185664 leaf_miss=6102651 dirty_wb=0 total_remote=9288315
+0, throughput 0.4472
+cluster throughput 0.447
+[DEX] inner_miss=4200435 leaf_miss=8041220 dirty_wb=0 total_remote=12241655
+0, throughput 0.4536
+cluster throughput 0.453
+[DEX] inner_miss=5236205 leaf_miss=10020351 dirty_wb=0 total_remote=15256556
+0, throughput 0.4444
+cluster throughput 0.444
+[DEX] inner_miss=6249696 leaf_miss=11954257 dirty_wb=0 total_remote=18203953
+0, throughput 0.4424
+cluster throughput 0.442
+[DEX] inner_miss=7264706 leaf_miss=13896837 dirty_wb=0 total_remote=21161543
+0, throughput 0.4376
+cluster throughput 0.437
+[DEX] inner_miss=8266720 leaf_miss=15822124 dirty_wb=0 total_remote=24088844
+0, throughput 0.4560
+cluster throughput 0.455
+[DEX] inner_miss=9317995 leaf_miss=17837902 dirty_wb=0 total_remote=27155897
+0, throughput 0.4629
+cluster throughput 0.462
+[DEX] inner_miss=10384513 leaf_miss=19880052 dirty_wb=0 total_remote=30264565
+0, throughput 0.4629
+cluster throughput 0.462
+[DEX] inner_miss=11452746 leaf_miss=21922267 dirty_wb=0 total_remote=33375013
+0, throughput 0.4633
+cluster throughput 0.463
+[DEX] inner_miss=12523699 leaf_miss=23968709 dirty_wb=0 total_remote=36492408
+0, throughput 0.4630
+cluster throughput 0.463
+[DEX] inner_miss=13590977 leaf_miss=26011673 dirty_wb=0 total_remote=39602650
+0, throughput 0.4641
+cluster throughput 0.464
+[DEX] inner_miss=14661753 leaf_miss=28055055 dirty_wb=0 total_remote=42716808
+0, throughput 0.4642
+cluster throughput 0.464
+[DEX] inner_miss=15733240 leaf_miss=30103670 dirty_wb=0 total_remote=45836910
+0, throughput 0.4640
+cluster throughput 0.463
+[DEX] inner_miss=16803295 leaf_miss=32148625 dirty_wb=0 total_remote=48951920
+0, throughput 0.4640
+cluster throughput 0.464
+[DEX] inner_miss=17874063 leaf_miss=34194774 dirty_wb=0 total_remote=52068837
+0, throughput 0.4630
+cluster throughput 0.463
+[DEX] inner_miss=18942719 leaf_miss=36235922 dirty_wb=0 total_remote=55178641
+0, throughput 0.4639
+cluster throughput 0.463
+[DEX] inner_miss=20014014 leaf_miss=38286007 dirty_wb=0 total_remote=58300021
+0, throughput 0.4637
+cluster throughput 0.463
+[DEX] inner_miss=21084704 leaf_miss=40334770 dirty_wb=0 total_remote=61419474
+0, throughput 0.4637
+cluster throughput 0.463
+[DEX] inner_miss=22154176 leaf_miss=42383840 dirty_wb=0 total_remote=64538016
+0, throughput 0.4635
+cluster throughput 0.463
+[DEX] inner_miss=23225571 leaf_miss=44429183 dirty_wb=0 total_remote=67654754
+0, throughput 0.4631
+cluster throughput 0.463
+[DEX] inner_miss=24295031 leaf_miss=46473450 dirty_wb=0 total_remote=70768481
+0, throughput 0.4643
+cluster throughput 0.464
+[DEX] inner_miss=25368343 leaf_miss=48525937 dirty_wb=0 total_remote=73894280
+0, throughput 0.4646
+cluster throughput 0.464
+[DEX] inner_miss=26441373 leaf_miss=50575833 dirty_wb=0 total_remote=77017206
+0, throughput 0.4646
+cluster throughput 0.464
+[DEX] inner_miss=27514646 leaf_miss=52627323 dirty_wb=0 total_remote=80141969
+0, throughput 0.4643
+cluster throughput 0.464
+[DEX] inner_miss=28588589 leaf_miss=54678588 dirty_wb=0 total_remote=83267177
+0, throughput 0.4632
+cluster throughput 0.463
+[DEX] inner_miss=29659160 leaf_miss=56727259 dirty_wb=0 total_remote=86386419
+0, throughput 0.4641
+cluster throughput 0.464
+[DEX] inner_miss=30732073 leaf_miss=58780131 dirty_wb=0 total_remote=89512204
+0, throughput 0.4643
+cluster throughput 0.464
+[DEX] inner_miss=31805242 leaf_miss=60836464 dirty_wb=0 total_remote=92641706
+0, throughput 0.4644
+cluster throughput 0.464
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.460207 Mops/s
+Round 0 (straggler_throughput): 0.460188 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 10.207
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 10.207
+Avg. rdma read size/ op = 5225.97
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 5225.97
+------------------------------------------
+Node 0 average throughput = 0.459742
+Node 0 total throughput = 0.460207
+All CN throughput (Max) = 0.460207
+All CN throughput (Straggler) = 0.460188
+Final throughput = 0.460188
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=28538019  avg=77838 ns
+P50=77000  P90=99000  P95=105500  P99=118500  P99.9=133500  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.50 cache=256MB
+[MEM][START] op=range/zipf0.50 cache=512MB uni=0 theta=0.50
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.500000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x730c0a800000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [255.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x730be1600000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 1048576
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 5
+I am 6
+I am 1
+I am 2
+I am 29
+I am 11
+I am 17
+I am 23
+I am 30
+I am 32
+I am 28
+I am 25
+I am 26
+I am 34
+I am 20
+I am 10
+I am 3
+I am 16
+I am 4
+I am 18
+I am 9
+I am 24
+I am 35
+I am 8
+I am 13
+I am 7
+I am 19
+I am 14
+I am 15
+I am 22
+I am 31
+I am 33
+I am 12
+I am 27
+I am 21
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.5303
+cluster throughput 0.530
+[DEX] inner_miss=574309 leaf_miss=1948974 dirty_wb=0 total_remote=2523283
+0, throughput 0.5306
+cluster throughput 0.530
+[DEX] inner_miss=1150132 leaf_miss=3896126 dirty_wb=0 total_remote=5046258
+0, throughput 0.5304
+cluster throughput 0.530
+[DEX] inner_miss=1725509 leaf_miss=5844541 dirty_wb=0 total_remote=7570050
+0, throughput 0.5304
+cluster throughput 0.530
+[DEX] inner_miss=2302281 leaf_miss=7793412 dirty_wb=0 total_remote=10095693
+0, throughput 0.5302
+cluster throughput 0.530
+[DEX] inner_miss=2877434 leaf_miss=9739141 dirty_wb=0 total_remote=12616575
+0, throughput 0.5302
+cluster throughput 0.530
+[DEX] inner_miss=3453660 leaf_miss=11685530 dirty_wb=0 total_remote=15139190
+0, throughput 0.5204
+cluster throughput 0.520
+[DEX] inner_miss=4015740 leaf_miss=13594787 dirty_wb=0 total_remote=17610527
+0, throughput 0.5212
+cluster throughput 0.521
+[DEX] inner_miss=4579468 leaf_miss=15511549 dirty_wb=0 total_remote=20091017
+0, throughput 0.5249
+cluster throughput 0.524
+[DEX] inner_miss=5149722 leaf_miss=17439604 dirty_wb=0 total_remote=22589326
+0, throughput 0.5154
+cluster throughput 0.515
+[DEX] inner_miss=5709191 leaf_miss=19341799 dirty_wb=0 total_remote=25050990
+0, throughput 0.5095
+cluster throughput 0.509
+[DEX] inner_miss=6261385 leaf_miss=21226537 dirty_wb=0 total_remote=27487922
+0, throughput 0.5222
+cluster throughput 0.522
+[DEX] inner_miss=6828061 leaf_miss=23150601 dirty_wb=0 total_remote=29978662
+0, throughput 0.5321
+cluster throughput 0.532
+[DEX] inner_miss=7406366 leaf_miss=25097749 dirty_wb=0 total_remote=32504115
+0, throughput 0.5327
+cluster throughput 0.532
+[DEX] inner_miss=7984519 leaf_miss=27051112 dirty_wb=0 total_remote=35035631
+0, throughput 0.5337
+cluster throughput 0.533
+[DEX] inner_miss=8563661 leaf_miss=29003086 dirty_wb=0 total_remote=37566747
+0, throughput 0.5340
+cluster throughput 0.534
+[DEX] inner_miss=9143757 leaf_miss=30955103 dirty_wb=0 total_remote=40098860
+0, throughput 0.5341
+cluster throughput 0.534
+[DEX] inner_miss=9723146 leaf_miss=32906746 dirty_wb=0 total_remote=42629892
+0, throughput 0.5338
+cluster throughput 0.533
+[DEX] inner_miss=10302825 leaf_miss=34859032 dirty_wb=0 total_remote=45161857
+0, throughput 0.5324
+cluster throughput 0.532
+[DEX] inner_miss=10881056 leaf_miss=36811328 dirty_wb=0 total_remote=47692384
+0, throughput 0.5331
+cluster throughput 0.533
+[DEX] inner_miss=11459832 leaf_miss=38765903 dirty_wb=0 total_remote=50225735
+0, throughput 0.5329
+cluster throughput 0.532
+[DEX] inner_miss=12038538 leaf_miss=40717078 dirty_wb=0 total_remote=52755616
+0, throughput 0.5330
+cluster throughput 0.533
+[DEX] inner_miss=12617539 leaf_miss=42671429 dirty_wb=0 total_remote=55288968
+0, throughput 0.5328
+cluster throughput 0.532
+[DEX] inner_miss=13195757 leaf_miss=44624651 dirty_wb=0 total_remote=57820408
+0, throughput 0.5329
+cluster throughput 0.532
+[DEX] inner_miss=13774274 leaf_miss=46577605 dirty_wb=0 total_remote=60351879
+0, throughput 0.5336
+cluster throughput 0.533
+[DEX] inner_miss=14354550 leaf_miss=48534114 dirty_wb=0 total_remote=62888664
+0, throughput 0.5336
+cluster throughput 0.533
+[DEX] inner_miss=14933898 leaf_miss=50488058 dirty_wb=0 total_remote=65421956
+0, throughput 0.5336
+cluster throughput 0.533
+[DEX] inner_miss=15512935 leaf_miss=52439349 dirty_wb=0 total_remote=67952284
+0, throughput 0.5336
+cluster throughput 0.533
+[DEX] inner_miss=16092501 leaf_miss=54391824 dirty_wb=0 total_remote=70484325
+0, throughput 0.5336
+cluster throughput 0.533
+[DEX] inner_miss=16671718 leaf_miss=56343378 dirty_wb=0 total_remote=73015096
+0, throughput 0.5345
+cluster throughput 0.534
+[DEX] inner_miss=17251877 leaf_miss=58292720 dirty_wb=0 total_remote=75544597
+0, throughput 0.5350
+cluster throughput 0.534
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.530028 Mops/s
+Round 0 (straggler_throughput): 0.530028 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 8.6004
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 8.6004
+Avg. rdma read size/ op = 4403.4
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 4403.4
+------------------------------------------
+Node 0 average throughput = 0.529548
+Node 0 total throughput = 0.530028
+All CN throughput (Max) = 0.530028
+All CN throughput (Straggler) = 0.530028
+Final throughput = 0.530028
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=32866361  avg=67533 ns
+P50=66500  P90=86500  P95=92500  P99=104500  P99.9=119000  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.50 cache=512MB
+  >> zipf0.60
+[MEM][START] op=range/zipf0.60 cache=128MB uni=0 theta=0.60
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 0, zipfian 0.600000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7a728fa00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [252.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x7a727e800000
+dir 1 launch!
+
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 262144
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 1
+I am 2
+I am 35
+I am 7
+I am 4
+I am 30
+I am 31
+I am 3
+I am 16
+I am 29
+I am 34
+I am 8
+I am 28
+I am 21
+I am 32
+I am 13
+I am 23
+I am 17
+I am 26
+I am 27
+I am 22
+I am 15
+I am 18
+I am 14
+I am 25
+I am 19
+I am 9
+I am 20
+I am 11
+I am 24
+I am 33
+I am 5
+I am 10
+I am 12
+I am 6
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.4120
+cluster throughput 0.411
+[DEX] inner_miss=1314398 leaf_miss=2062036 dirty_wb=0 total_remote=3376434
+0, throughput 0.4115
+cluster throughput 0.411
+[DEX] inner_miss=2626026 leaf_miss=4115235 dirty_wb=0 total_remote=6741261
+0, throughput 0.4119
+cluster throughput 0.411
+[DEX] inner_miss=3941345 leaf_miss=6175223 dirty_wb=0 total_remote=10116568
+0, throughput 0.4125
+cluster throughput 0.412
+[DEX] inner_miss=5261002 leaf_miss=8238697 dirty_wb=0 total_remote=13499699
+0, throughput 0.4127
+cluster throughput 0.412
+[DEX] inner_miss=6575936 leaf_miss=10296994 dirty_wb=0 total_remote=16872930
+0, throughput 0.4116
+cluster throughput 0.411
+[DEX] inner_miss=7889350 leaf_miss=12348915 dirty_wb=0 total_remote=20238265
+0, throughput 0.4123
+cluster throughput 0.412
+[DEX] inner_miss=9201541 leaf_miss=14397831 dirty_wb=0 total_remote=23599372
+0, throughput 0.4125
+cluster throughput 0.412
+[DEX] inner_miss=10515752 leaf_miss=16447073 dirty_wb=0 total_remote=26962825
+0, throughput 0.4124
+cluster throughput 0.412
+[DEX] inner_miss=11830781 leaf_miss=18496762 dirty_wb=0 total_remote=30327543
+0, throughput 0.4109
+cluster throughput 0.410
+[DEX] inner_miss=13135077 leaf_miss=20529219 dirty_wb=0 total_remote=33664296
+0, throughput 0.4011
+cluster throughput 0.401
+[DEX] inner_miss=14370518 leaf_miss=22450223 dirty_wb=0 total_remote=36820741
+0, throughput 0.4053
+cluster throughput 0.405
+[DEX] inner_miss=15645453 leaf_miss=24445558 dirty_wb=0 total_remote=40091011
+0, throughput 0.4025
+cluster throughput 0.402
+[DEX] inner_miss=16914192 leaf_miss=26431414 dirty_wb=0 total_remote=43345606
+0, throughput 0.3876
+cluster throughput 0.387
+[DEX] inner_miss=18125828 leaf_miss=28337180 dirty_wb=0 total_remote=46463008
+0, throughput 0.3896
+cluster throughput 0.389
+[DEX] inner_miss=19346846 leaf_miss=30249035 dirty_wb=0 total_remote=49595881
+0, throughput 0.4078
+cluster throughput 0.407
+[DEX] inner_miss=20641289 leaf_miss=32269957 dirty_wb=0 total_remote=52911246
+0, throughput 0.4134
+cluster throughput 0.413
+[DEX] inner_miss=21955941 leaf_miss=34317579 dirty_wb=0 total_remote=56273520
+0, throughput 0.4140
+cluster throughput 0.414
+[DEX] inner_miss=23273738 leaf_miss=36370458 dirty_wb=0 total_remote=59644196
+0, throughput 0.4145
+cluster throughput 0.414
+[DEX] inner_miss=24594800 leaf_miss=38430051 dirty_wb=0 total_remote=63024851
+0, throughput 0.4147
+cluster throughput 0.414
+[DEX] inner_miss=25917132 leaf_miss=40491375 dirty_wb=0 total_remote=66408507
+0, throughput 0.4146
+cluster throughput 0.414
+[DEX] inner_miss=27238642 leaf_miss=42551184 dirty_wb=0 total_remote=69789826
+0, throughput 0.4140
+cluster throughput 0.414
+[DEX] inner_miss=28556786 leaf_miss=44604497 dirty_wb=0 total_remote=73161283
+0, throughput 0.4146
+cluster throughput 0.414
+[DEX] inner_miss=29879115 leaf_miss=46663759 dirty_wb=0 total_remote=76542874
+0, throughput 0.4147
+cluster throughput 0.414
+[DEX] inner_miss=31203215 leaf_miss=48727249 dirty_wb=0 total_remote=79930464
+0, throughput 0.4147
+cluster throughput 0.414
+[DEX] inner_miss=32527324 leaf_miss=50792108 dirty_wb=0 total_remote=83319432
+0, throughput 0.4145
+cluster throughput 0.414
+[DEX] inner_miss=33851062 leaf_miss=52862108 dirty_wb=0 total_remote=86713170
+0, throughput 0.4134
+cluster throughput 0.413
+[DEX] inner_miss=35175559 leaf_miss=54933665 dirty_wb=0 total_remote=90109224
+0, throughput 0.4142
+cluster throughput 0.414
+[DEX] inner_miss=36504733 leaf_miss=57015627 dirty_wb=0 total_remote=93520360
+0, throughput 0.4144
+cluster throughput 0.414
+[DEX] inner_miss=37831041 leaf_miss=59090525 dirty_wb=0 total_remote=96921566
+0, throughput 0.4145
+cluster throughput 0.414
+[DEX] inner_miss=39158673 leaf_miss=61163888 dirty_wb=0 total_remote=100322561
+0, throughput 0.4146
+cluster throughput 0.414
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.410613 Mops/s
+Round 0 (straggler_throughput): 0.41058 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 11.2521
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 11.2521
+Avg. rdma read size/ op = 5761.06
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 5761.06
+------------------------------------------
+Node 0 average throughput = 0.410097
+Node 0 total throughput = 0.410613
+All CN throughput (Max) = 0.410613
+All CN throughput (Straggler) = 0.41058
+Final throughput = 0.41058
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=25461735  avg=87292 ns
+P50=87000  P90=108000  P95=114500  P99=127000  P99.9=142500  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.60 cache=128MB
+[MEM][START] op=range/zipf0.60 cache=256MB uni=0 theta=0.60
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 0, zipfian 0.600000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7bd8dd000000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [252.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 256
+-----Cache initial addr = 0x7bd8c3e00000
+page num = 524288
+alloc_unit = 512
+entry_num: 524288
+bucket_num: 174763
+Bucket size = 64
+entry_num: 52428
+bucket_num: 8738
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 4
+I am 1
+I am 12
+I am 6
+I am 5
+I am 16
+I am 23
+I am 22
+I am 29
+I am 27
+I am 34
+I am 26
+I am 2
+I am 10
+I am 25
+I am 24
+I am 33
+I am 30
+I am 8
+I am 9
+I am 11
+I am 15
+I am 17
+I am 7
+I am 14
+I am 20
+I am 21
+I am 28
+I am 19
+I am 31
+I am 32
+I am 18
+I am 13
+I am 3
+I am 35
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.4426
+cluster throughput 0.442
+[DEX] inner_miss=999866 leaf_miss=1902733 dirty_wb=0 total_remote=2902599
+0, throughput 0.4433
+cluster throughput 0.443
+[DEX] inner_miss=2000677 leaf_miss=3804927 dirty_wb=0 total_remote=5805604
+0, throughput 0.4433
+cluster throughput 0.443
+[DEX] inner_miss=3001422 leaf_miss=5709221 dirty_wb=0 total_remote=8710643
+0, throughput 0.4434
+cluster throughput 0.443
+[DEX] inner_miss=4002309 leaf_miss=7614744 dirty_wb=0 total_remote=11617053
+0, throughput 0.4429
+cluster throughput 0.442
+[DEX] inner_miss=5002533 leaf_miss=9517118 dirty_wb=0 total_remote=14519651
+0, throughput 0.4436
+cluster throughput 0.443
+[DEX] inner_miss=6005056 leaf_miss=11423986 dirty_wb=0 total_remote=17429042
+0, throughput 0.4416
+cluster throughput 0.441
+[DEX] inner_miss=7001728 leaf_miss=13318281 dirty_wb=0 total_remote=20320009
+0, throughput 0.4321
+cluster throughput 0.432
+[DEX] inner_miss=7960555 leaf_miss=15142381 dirty_wb=0 total_remote=23102936
+0, throughput 0.4373
+cluster throughput 0.437
+[DEX] inner_miss=8942213 leaf_miss=17008952 dirty_wb=0 total_remote=25951165
+0, throughput 0.4321
+cluster throughput 0.432
+[DEX] inner_miss=9911911 leaf_miss=18850410 dirty_wb=0 total_remote=28762321
+0, throughput 0.4256
+cluster throughput 0.425
+[DEX] inner_miss=10870131 leaf_miss=20682661 dirty_wb=0 total_remote=31552792
+0, throughput 0.4235
+cluster throughput 0.423
+[DEX] inner_miss=11823507 leaf_miss=22508580 dirty_wb=0 total_remote=34332087
+0, throughput 0.4373
+cluster throughput 0.437
+[DEX] inner_miss=12811936 leaf_miss=24392394 dirty_wb=0 total_remote=37204330
+0, throughput 0.4455
+cluster throughput 0.445
+[DEX] inner_miss=13817880 leaf_miss=26300752 dirty_wb=0 total_remote=40118632
+0, throughput 0.4451
+cluster throughput 0.445
+[DEX] inner_miss=14824255 leaf_miss=28207398 dirty_wb=0 total_remote=43031653
+0, throughput 0.4464
+cluster throughput 0.446
+[DEX] inner_miss=15832361 leaf_miss=30116795 dirty_wb=0 total_remote=45949156
+0, throughput 0.4463
+cluster throughput 0.446
+[DEX] inner_miss=16839846 leaf_miss=32024786 dirty_wb=0 total_remote=48864632
+0, throughput 0.4465
+cluster throughput 0.446
+[DEX] inner_miss=17848331 leaf_miss=33931337 dirty_wb=0 total_remote=51779668
+0, throughput 0.4465
+cluster throughput 0.446
+[DEX] inner_miss=18854783 leaf_miss=35836928 dirty_wb=0 total_remote=54691711
+0, throughput 0.4466
+cluster throughput 0.446
+[DEX] inner_miss=19863363 leaf_miss=37743141 dirty_wb=0 total_remote=57606504
+0, throughput 0.4452
+cluster throughput 0.445
+[DEX] inner_miss=20867303 leaf_miss=39648131 dirty_wb=0 total_remote=60515434
+0, throughput 0.4461
+cluster throughput 0.446
+[DEX] inner_miss=21873619 leaf_miss=41558131 dirty_wb=0 total_remote=63431750
+0, throughput 0.4461
+cluster throughput 0.446
+[DEX] inner_miss=22880646 leaf_miss=43466532 dirty_wb=0 total_remote=66347178
+0, throughput 0.4461
+cluster throughput 0.446
+[DEX] inner_miss=23888911 leaf_miss=45375829 dirty_wb=0 total_remote=69264740
+0, throughput 0.4461
+cluster throughput 0.446
+[DEX] inner_miss=24894748 leaf_miss=47284170 dirty_wb=0 total_remote=72178918
+0, throughput 0.4455
+cluster throughput 0.445
+[DEX] inner_miss=25898562 leaf_miss=49190349 dirty_wb=0 total_remote=75088911
+0, throughput 0.4461
+cluster throughput 0.446
+[DEX] inner_miss=26906515 leaf_miss=51100040 dirty_wb=0 total_remote=78006555
+0, throughput 0.4461
+cluster throughput 0.446
+[DEX] inner_miss=27914010 leaf_miss=53006726 dirty_wb=0 total_remote=80920736
+0, throughput 0.4461
+cluster throughput 0.446
+[DEX] inner_miss=28921840 leaf_miss=54917922 dirty_wb=0 total_remote=83839762
+0, throughput 0.4462
+cluster throughput 0.446
+[DEX] inner_miss=29929170 leaf_miss=56829042 dirty_wb=0 total_remote=86758212
+0, throughput 0.4456
+cluster throughput 0.445
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.442483 Mops/s
+Round 0 (straggler_throughput): 0.442476 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 10.1455
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 10.1455
+Avg. rdma read size/ op = 5194.48
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 5194.48
+------------------------------------------
+Node 0 average throughput = 0.442129
+Node 0 total throughput = 0.442483
+All CN throughput (Max) = 0.442483
+All CN throughput (Straggler) = 0.442476
+Final throughput = 0.442476
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=27438360  avg=80978 ns
+P50=80500  P90=103000  P95=110000  P99=123000  P99.9=139000  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.60 cache=256MB
+[MEM][START] op=range/zipf0.60 cache=512MB uni=0 theta=0.60
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.600000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x73f838200000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [252.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x73f80f000000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 1048576
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 2
+I am 1
+I am 3
+I am 4
+I am 35
+I am 5
+I am 12
+I am 10
+I am 9
+I am 6
+I am 13
+I am 7
+I am 14
+I am 8
+I am 16
+I am 27
+I am 18
+I am 15
+I am 19
+I am 33
+I am 29
+I am 11
+I am 17
+I am 23
+I am 26
+I am 25
+I am 20
+I am 34
+I am 31
+I am 30
+I am 32
+I am 24
+I am 21
+I am 28
+I am 22
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.5415
+cluster throughput 0.541
+[DEX] inner_miss=584123 leaf_miss=2026129 dirty_wb=0 total_remote=2610252
+0, throughput 0.5429
+cluster throughput 0.542
+[DEX] inner_miss=1168899 leaf_miss=4054042 dirty_wb=0 total_remote=5222941
+0, throughput 0.5420
+cluster throughput 0.542
+[DEX] inner_miss=1751652 leaf_miss=6074239 dirty_wb=0 total_remote=7825891
+0, throughput 0.5295
+cluster throughput 0.529
+[DEX] inner_miss=2318500 leaf_miss=8038606 dirty_wb=0 total_remote=10357106
+0, throughput 0.5346
+cluster throughput 0.534
+[DEX] inner_miss=2892381 leaf_miss=10025459 dirty_wb=0 total_remote=12917840
+0, throughput 0.5352
+cluster throughput 0.535
+[DEX] inner_miss=3468753 leaf_miss=12025266 dirty_wb=0 total_remote=15494019
+0, throughput 0.5194
+cluster throughput 0.519
+[DEX] inner_miss=4026146 leaf_miss=13964833 dirty_wb=0 total_remote=17990979
+0, throughput 0.5175
+cluster throughput 0.517
+[DEX] inner_miss=4582393 leaf_miss=15897299 dirty_wb=0 total_remote=20479692
+0, throughput 0.5338
+cluster throughput 0.533
+[DEX] inner_miss=5158090 leaf_miss=17894902 dirty_wb=0 total_remote=23052992
+0, throughput 0.5451
+cluster throughput 0.545
+[DEX] inner_miss=5745849 leaf_miss=19925142 dirty_wb=0 total_remote=25670991
+0, throughput 0.5439
+cluster throughput 0.543
+[DEX] inner_miss=6332977 leaf_miss=21952671 dirty_wb=0 total_remote=28285648
+0, throughput 0.5453
+cluster throughput 0.545
+[DEX] inner_miss=6921044 leaf_miss=23983449 dirty_wb=0 total_remote=30904493
+0, throughput 0.5453
+cluster throughput 0.545
+[DEX] inner_miss=7508594 leaf_miss=26015572 dirty_wb=0 total_remote=33524166
+0, throughput 0.5453
+cluster throughput 0.545
+[DEX] inner_miss=8096357 leaf_miss=28045275 dirty_wb=0 total_remote=36141632
+0, throughput 0.5457
+cluster throughput 0.545
+[DEX] inner_miss=8683634 leaf_miss=30075844 dirty_wb=0 total_remote=38759478
+0, throughput 0.5445
+cluster throughput 0.544
+[DEX] inner_miss=9270765 leaf_miss=32108065 dirty_wb=0 total_remote=41378830
+0, throughput 0.5451
+cluster throughput 0.545
+[DEX] inner_miss=9858832 leaf_miss=34140541 dirty_wb=0 total_remote=43999373
+0, throughput 0.5454
+cluster throughput 0.545
+[DEX] inner_miss=10446979 leaf_miss=36172653 dirty_wb=0 total_remote=46619632
+0, throughput 0.5457
+cluster throughput 0.545
+[DEX] inner_miss=11035416 leaf_miss=38201450 dirty_wb=0 total_remote=49236866
+0, throughput 0.5454
+cluster throughput 0.545
+[DEX] inner_miss=11624328 leaf_miss=40231210 dirty_wb=0 total_remote=51855538
+0, throughput 0.5443
+cluster throughput 0.544
+[DEX] inner_miss=12211488 leaf_miss=42260541 dirty_wb=0 total_remote=54472029
+0, throughput 0.5452
+cluster throughput 0.545
+[DEX] inner_miss=12800350 leaf_miss=44296330 dirty_wb=0 total_remote=57096680
+0, throughput 0.5452
+cluster throughput 0.545
+[DEX] inner_miss=13388480 leaf_miss=46329434 dirty_wb=0 total_remote=59717914
+0, throughput 0.5450
+cluster throughput 0.545
+[DEX] inner_miss=13976427 leaf_miss=48360576 dirty_wb=0 total_remote=62337003
+0, throughput 0.5452
+cluster throughput 0.545
+[DEX] inner_miss=14565724 leaf_miss=50392150 dirty_wb=0 total_remote=64957874
+0, throughput 0.5447
+cluster throughput 0.544
+[DEX] inner_miss=15153148 leaf_miss=52422496 dirty_wb=0 total_remote=67575644
+0, throughput 0.5448
+cluster throughput 0.544
+[DEX] inner_miss=15741027 leaf_miss=54453318 dirty_wb=0 total_remote=70194345
+0, throughput 0.5452
+cluster throughput 0.545
+[DEX] inner_miss=16328784 leaf_miss=56485259 dirty_wb=0 total_remote=72814043
+0, throughput 0.5453
+cluster throughput 0.545
+[DEX] inner_miss=16917484 leaf_miss=58514463 dirty_wb=0 total_remote=75431947
+0, throughput 0.5454
+cluster throughput 0.545
+[DEX] inner_miss=17505547 leaf_miss=60543389 dirty_wb=0 total_remote=78048936
+0, throughput 0.5456
+cluster throughput 0.545
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.541573 Mops/s
+Round 0 (straggler_throughput): 0.541548 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 8.50769
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 8.50769
+Avg. rdma read size/ op = 4355.94
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 4355.94
+------------------------------------------
+Node 0 average throughput = 0.541161
+Node 0 total throughput = 0.541573
+All CN throughput (Max) = 0.541573
+All CN throughput (Straggler) = 0.541548
+Final throughput = 0.541548
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=33583400  avg=66086 ns
+P50=65000  P90=86500  P95=93500  P99=106500  P99.9=122000  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.60 cache=512MB
+  >> zipf0.99
+[MEM][START] op=range/zipf0.99 cache=128MB uni=0 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 0, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7c0d72200000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [254.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x7c0d61000000
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 262144
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 34
+I am 1
+I am 3
+I am 7
+I am 5
+I am 19
+I am 25
+I am 21
+I am 10
+I am 8
+I am 28
+I am 20
+I am 22
+I am 11
+I am 26
+I am 30
+I am 4
+I am 24
+I am 29
+I am 23
+I am 27
+I am 9
+I am 2
+I am 15
+I am 12
+I am 13
+I am 17
+I am 18
+I am 31
+I am 32
+I am 33
+I am 16
+I am 35
+I am 14
+I am 6
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.6933
+cluster throughput 0.693
+[DEX] inner_miss=1195207 leaf_miss=2043691 dirty_wb=0 total_remote=3238898
+0, throughput 0.6946
+cluster throughput 0.694
+[DEX] inner_miss=2388070 leaf_miss=4087014 dirty_wb=0 total_remote=6475084
+0, throughput 0.6943
+cluster throughput 0.694
+[DEX] inner_miss=3581598 leaf_miss=6128464 dirty_wb=0 total_remote=9710062
+0, throughput 0.6885
+cluster throughput 0.688
+[DEX] inner_miss=4762594 leaf_miss=8149791 dirty_wb=0 total_remote=12912385
+0, throughput 0.6727
+cluster throughput 0.672
+[DEX] inner_miss=5915990 leaf_miss=10132582 dirty_wb=0 total_remote=16048572
+0, throughput 0.6853
+cluster throughput 0.685
+[DEX] inner_miss=7091341 leaf_miss=12149200 dirty_wb=0 total_remote=19240541
+0, throughput 0.6677
+cluster throughput 0.667
+[DEX] inner_miss=8236067 leaf_miss=14112196 dirty_wb=0 total_remote=22348263
+0, throughput 0.6619
+cluster throughput 0.661
+[DEX] inner_miss=9371809 leaf_miss=16064092 dirty_wb=0 total_remote=25435901
+0, throughput 0.6578
+cluster throughput 0.657
+[DEX] inner_miss=10499890 leaf_miss=17993493 dirty_wb=0 total_remote=28493383
+0, throughput 0.6882
+cluster throughput 0.688
+[DEX] inner_miss=11682933 leaf_miss=20014475 dirty_wb=0 total_remote=31697408
+0, throughput 0.6977
+cluster throughput 0.697
+[DEX] inner_miss=12884124 leaf_miss=22061523 dirty_wb=0 total_remote=34945647
+0, throughput 0.6996
+cluster throughput 0.699
+[DEX] inner_miss=14085495 leaf_miss=24107179 dirty_wb=0 total_remote=38192674
+0, throughput 0.6999
+cluster throughput 0.699
+[DEX] inner_miss=15286335 leaf_miss=26157989 dirty_wb=0 total_remote=41444324
+0, throughput 0.6975
+cluster throughput 0.697
+[DEX] inner_miss=16487165 leaf_miss=28207688 dirty_wb=0 total_remote=44694853
+0, throughput 0.6987
+cluster throughput 0.698
+[DEX] inner_miss=17690370 leaf_miss=30262803 dirty_wb=0 total_remote=47953173
+0, throughput 0.6983
+cluster throughput 0.698
+[DEX] inner_miss=18892944 leaf_miss=32316407 dirty_wb=0 total_remote=51209351
+0, throughput 0.6974
+cluster throughput 0.697
+[DEX] inner_miss=20096606 leaf_miss=34374923 dirty_wb=0 total_remote=54471529
+0, throughput 0.6980
+cluster throughput 0.698
+[DEX] inner_miss=21299289 leaf_miss=36431193 dirty_wb=0 total_remote=57730482
+0, throughput 0.6978
+cluster throughput 0.697
+[DEX] inner_miss=22498667 leaf_miss=38484800 dirty_wb=0 total_remote=60983467
+0, throughput 0.6980
+cluster throughput 0.698
+[DEX] inner_miss=23700131 leaf_miss=40533828 dirty_wb=0 total_remote=64233959
+0, throughput 0.6998
+cluster throughput 0.699
+[DEX] inner_miss=24903313 leaf_miss=42584390 dirty_wb=0 total_remote=67487703
+0, throughput 0.6997
+cluster throughput 0.699
+[DEX] inner_miss=26105399 leaf_miss=44635992 dirty_wb=0 total_remote=70741391
+0, throughput 0.7002
+cluster throughput 0.700
+[DEX] inner_miss=27308572 leaf_miss=46684389 dirty_wb=0 total_remote=73992961
+0, throughput 0.6985
+cluster throughput 0.698
+[DEX] inner_miss=28509151 leaf_miss=48732702 dirty_wb=0 total_remote=77241853
+0, throughput 0.6992
+cluster throughput 0.699
+[DEX] inner_miss=29710488 leaf_miss=50786200 dirty_wb=0 total_remote=80496688
+0, throughput 0.6978
+cluster throughput 0.697
+[DEX] inner_miss=30909094 leaf_miss=52840006 dirty_wb=0 total_remote=83749100
+0, throughput 0.6967
+cluster throughput 0.696
+[DEX] inner_miss=32108997 leaf_miss=54895078 dirty_wb=0 total_remote=87004075
+0, throughput 0.6965
+cluster throughput 0.696
+[DEX] inner_miss=33310833 leaf_miss=56961331 dirty_wb=0 total_remote=90272164
+0, throughput 0.6945
+cluster throughput 0.694
+[DEX] inner_miss=34511229 leaf_miss=59025987 dirty_wb=0 total_remote=93537216
+0, throughput 0.6976
+cluster throughput 0.697
+[DEX] inner_miss=35713909 leaf_miss=61088751 dirty_wb=0 total_remote=96802660
+0, throughput 0.6976
+cluster throughput 0.697
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.692452 Mops/s
+Round 0 (straggler_throughput): 0.692424 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 6.76952
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 6.76952
+Avg. rdma read size/ op = 3465.99
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 3465.99
+------------------------------------------
+Node 0 average throughput = 0.691903
+Node 0 total throughput = 0.692452
+All CN throughput (Max) = 0.692452
+All CN throughput (Straggler) = 0.692424
+Final throughput = 0.692424
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=42937282  avg=51628 ns
+P50=62500  P90=96500  P95=104000  P99=117500  P99.9=133000  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.99 cache=128MB
+[MEM][START] op=range/zipf0.99 cache=256MB uni=0 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 0, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x718b97a00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [254.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 256
+-----Cache initial addr = 0x718b7e800000
+page num = 524288
+alloc_unit = 512
+entry_num: 524288
+bucket_num: 174763
+Bucket size = 64
+entry_num: 52428
+bucket_num: 8738
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 524288
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 2
+I am 26
+I am 4
+I am 1
+I am 3
+I am 5
+I am 21
+I am 14
+I am 8
+I am 15
+I am 7
+I am 35
+I am 9
+I am 34
+I am 22
+I am 27
+I am 11
+I am 23
+I am 32
+I am 19
+I am 13
+I am 20
+I am 29
+I am 18
+I am 28
+I am 25
+I am 10
+I am 17
+I am 30
+I am 31
+I am 12
+I am 16
+I am 33
+I am 24
+I am 6
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.7860
+cluster throughput 0.786
+[DEX] inner_miss=929079 leaf_miss=1984702 dirty_wb=0 total_remote=2913781
+0, throughput 0.7888
+cluster throughput 0.788
+[DEX] inner_miss=1860438 leaf_miss=3971309 dirty_wb=0 total_remote=5831747
+0, throughput 0.7887
+cluster throughput 0.788
+[DEX] inner_miss=2790488 leaf_miss=5956491 dirty_wb=0 total_remote=8746979
+0, throughput 0.7873
+cluster throughput 0.787
+[DEX] inner_miss=3720959 leaf_miss=7945820 dirty_wb=0 total_remote=11666779
+0, throughput 0.7891
+cluster throughput 0.789
+[DEX] inner_miss=4651162 leaf_miss=9932360 dirty_wb=0 total_remote=14583522
+0, throughput 0.7889
+cluster throughput 0.788
+[DEX] inner_miss=5581529 leaf_miss=11919853 dirty_wb=0 total_remote=17501382
+0, throughput 0.7902
+cluster throughput 0.790
+[DEX] inner_miss=6513161 leaf_miss=13904016 dirty_wb=0 total_remote=20417177
+0, throughput 0.7876
+cluster throughput 0.787
+[DEX] inner_miss=7442563 leaf_miss=15891680 dirty_wb=0 total_remote=23334243
+0, throughput 0.7888
+cluster throughput 0.788
+[DEX] inner_miss=8373116 leaf_miss=17878506 dirty_wb=0 total_remote=26251622
+0, throughput 0.7872
+cluster throughput 0.787
+[DEX] inner_miss=9303178 leaf_miss=19869647 dirty_wb=0 total_remote=29172825
+0, throughput 0.7873
+cluster throughput 0.787
+[DEX] inner_miss=10232882 leaf_miss=21856267 dirty_wb=0 total_remote=32089149
+0, throughput 0.7883
+cluster throughput 0.788
+[DEX] inner_miss=11163308 leaf_miss=23846781 dirty_wb=0 total_remote=35010089
+0, throughput 0.7848
+cluster throughput 0.784
+[DEX] inner_miss=12089719 leaf_miss=25829608 dirty_wb=0 total_remote=37919327
+0, throughput 0.7845
+cluster throughput 0.784
+[DEX] inner_miss=13015279 leaf_miss=27804957 dirty_wb=0 total_remote=40820236
+0, throughput 0.7854
+cluster throughput 0.785
+[DEX] inner_miss=13941899 leaf_miss=29782212 dirty_wb=0 total_remote=43724111
+0, throughput 0.7858
+cluster throughput 0.785
+[DEX] inner_miss=14867843 leaf_miss=31757428 dirty_wb=0 total_remote=46625271
+0, throughput 0.7853
+cluster throughput 0.785
+[DEX] inner_miss=15795643 leaf_miss=33729796 dirty_wb=0 total_remote=49525439
+0, throughput 0.7863
+cluster throughput 0.786
+[DEX] inner_miss=16721341 leaf_miss=35704262 dirty_wb=0 total_remote=52425603
+0, throughput 0.7879
+cluster throughput 0.787
+[DEX] inner_miss=17649737 leaf_miss=37674491 dirty_wb=0 total_remote=55324228
+0, throughput 0.7891
+cluster throughput 0.789
+[DEX] inner_miss=18579001 leaf_miss=39646213 dirty_wb=0 total_remote=58225214
+0, throughput 0.7876
+cluster throughput 0.787
+[DEX] inner_miss=19508349 leaf_miss=41619420 dirty_wb=0 total_remote=61127769
+0, throughput 0.7681
+cluster throughput 0.768
+[DEX] inner_miss=20408810 leaf_miss=43550344 dirty_wb=0 total_remote=63959154
+0, throughput 0.7731
+cluster throughput 0.773
+[DEX] inner_miss=21316175 leaf_miss=45496547 dirty_wb=0 total_remote=66812722
+0, throughput 0.7751
+cluster throughput 0.775
+[DEX] inner_miss=22230483 leaf_miss=47453496 dirty_wb=0 total_remote=69683979
+0, throughput 0.7572
+cluster throughput 0.757
+[DEX] inner_miss=23127396 leaf_miss=49392204 dirty_wb=0 total_remote=72519600
+0, throughput 0.7605
+cluster throughput 0.760
+[DEX] inner_miss=24027288 leaf_miss=51338844 dirty_wb=0 total_remote=75366132
+0, throughput 0.7778
+cluster throughput 0.777
+[DEX] inner_miss=24946438 leaf_miss=53310736 dirty_wb=0 total_remote=78257174
+0, throughput 0.7880
+cluster throughput 0.788
+[DEX] inner_miss=25875226 leaf_miss=55285668 dirty_wb=0 total_remote=81160894
+0, throughput 0.7890
+cluster throughput 0.789
+[DEX] inner_miss=26805152 leaf_miss=57255544 dirty_wb=0 total_remote=84060696
+0, throughput 0.7910
+cluster throughput 0.791
+[DEX] inner_miss=27737423 leaf_miss=59228043 dirty_wb=0 total_remote=86965466
+0, throughput 0.7841
+cluster throughput 0.784
+Running time is larger than 60seconds
+Round 0 (max_throughput): 0.786414 Mops/s
+Round 0 (straggler_throughput): 0.786384 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 5.59845
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 5.59845
+Avg. rdma read size/ op = 2866.4
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 2866.4
+------------------------------------------
+Node 0 average throughput = 0.783452
+Node 0 total throughput = 0.786414
+All CN throughput (Max) = 0.786414
+All CN throughput (Straggler) = 0.786384
+Final throughput = 0.786384
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=48605804  avg=45412 ns
+P50=52000  P90=89500  P95=96500  P99=109500  P99.9=125500  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.99 cache=256MB
+[MEM][START] op=range/zipf0.99 cache=512MB uni=0 theta=0.99
+Compute node count = 1
+kNodeCount 2, kReadRatio 0, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 100, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7009c1400000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [252.127.0.0]
+I connect server 1
+dir 0 launch!
+
+dir 1 launch!
+
+dir 2 launch!
+
+dir 3 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 512
+-----Cache initial addr = 0x700998200000
+page num = 1048576
+alloc_unit = 512
+entry_num: 1048576
+bucket_num: 349526
+Bucket size = 64
+entry_num: 104857
+bucket_num: 17477
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =0
+insertmark =0
+updatemark =0
+deletemark =0
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 1048576
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 0
+Fetched new height = 10
+I am 3
+I am 1
+I am 35
+I am 7
+I am 4
+I am 5
+I am 9
+I am 29
+I am 12
+I am 2
+I am 15
+I am 14
+I am 25
+I am 13
+I am 10
+I am 6
+I am 24
+I am 34
+I am 11
+I am 32
+I am 18
+I am 16
+I am 23
+I am 27
+I am 30
+I am 19
+I am 17
+I am 26
+I am 28
+I am 33
+I am 22
+I am 20
+I am 31
+I am 21
+I am 8
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 0.9588
+cluster throughput 0.958
+[DEX] inner_miss=522188 leaf_miss=1924138 dirty_wb=0 total_remote=2446326
+0, throughput 0.9588
+cluster throughput 0.958
+[DEX] inner_miss=1044136 leaf_miss=3846382 dirty_wb=0 total_remote=4890518
+0, throughput 0.9592
+cluster throughput 0.959
+[DEX] inner_miss=1567003 leaf_miss=5771226 dirty_wb=0 total_remote=7338229
+0, throughput 0.9624
+cluster throughput 0.962
+[DEX] inner_miss=2090115 leaf_miss=7696559 dirty_wb=0 total_remote=9786674
+0, throughput 0.9645
+cluster throughput 0.964
+[DEX] inner_miss=2612668 leaf_miss=9621603 dirty_wb=0 total_remote=12234271
+0, throughput 0.9620
+cluster throughput 0.961
+[DEX] inner_miss=3136052 leaf_miss=11543245 dirty_wb=0 total_remote=14679297
+0, throughput 0.9583
+cluster throughput 0.958
+[DEX] inner_miss=3657216 leaf_miss=13467280 dirty_wb=0 total_remote=17124496
+0, throughput 0.9607
+cluster throughput 0.960
+[DEX] inner_miss=4180557 leaf_miss=15391461 dirty_wb=0 total_remote=19572018
+0, throughput 0.9620
+cluster throughput 0.961
+[DEX] inner_miss=4703465 leaf_miss=17317050 dirty_wb=0 total_remote=22020515
+0, throughput 0.9614
+cluster throughput 0.961
+[DEX] inner_miss=5225148 leaf_miss=19243600 dirty_wb=0 total_remote=24468748
+0, throughput 0.9612
+cluster throughput 0.961
+[DEX] inner_miss=5748137 leaf_miss=21167580 dirty_wb=0 total_remote=26915717
+0, throughput 0.9602
+cluster throughput 0.960
+[DEX] inner_miss=6270281 leaf_miss=23091210 dirty_wb=0 total_remote=29361491
+0, throughput 0.9606
+cluster throughput 0.960
+[DEX] inner_miss=6792602 leaf_miss=25014152 dirty_wb=0 total_remote=31806754
+0, throughput 0.9568
+cluster throughput 0.956
+[DEX] inner_miss=7313303 leaf_miss=26940184 dirty_wb=0 total_remote=34253487
+0, throughput 0.9559
+cluster throughput 0.955
+[DEX] inner_miss=7833587 leaf_miss=28867805 dirty_wb=0 total_remote=36701392
+0, throughput 0.9578
+cluster throughput 0.957
+[DEX] inner_miss=8355403 leaf_miss=30795594 dirty_wb=0 total_remote=39150997
+0, throughput 0.9538
+cluster throughput 0.953
+[DEX] inner_miss=8874993 leaf_miss=32721067 dirty_wb=0 total_remote=41596060
+0, throughput 0.9593
+cluster throughput 0.959
+[DEX] inner_miss=9398335 leaf_miss=34646102 dirty_wb=0 total_remote=44044437
+0, throughput 0.9590
+cluster throughput 0.958
+[DEX] inner_miss=9920296 leaf_miss=36570265 dirty_wb=0 total_remote=46490561
+0, throughput 0.9612
+cluster throughput 0.961
+[DEX] inner_miss=10444175 leaf_miss=38492231 dirty_wb=0 total_remote=48936406
+0, throughput 0.9609
+cluster throughput 0.960
+[DEX] inner_miss=10965590 leaf_miss=40417517 dirty_wb=0 total_remote=51383107
+0, throughput 0.9617
+cluster throughput 0.961
+[DEX] inner_miss=11488542 leaf_miss=42342460 dirty_wb=0 total_remote=53831002
+0, throughput 0.9609
+cluster throughput 0.960
+[DEX] inner_miss=12011063 leaf_miss=44257194 dirty_wb=0 total_remote=56268257
+0, throughput 0.9617
+cluster throughput 0.961
+[DEX] inner_miss=12533418 leaf_miss=46161634 dirty_wb=0 total_remote=58695052
+0, throughput 1.0049
+cluster throughput 1.004
+[DEX] inner_miss=13120255 leaf_miss=49505496 dirty_wb=0 total_remote=62625751
+0, throughput 0.9518
+cluster throughput 0.951
+[DEX] inner_miss=13743933 leaf_miss=55184318 dirty_wb=0 total_remote=68928251
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 54 seconds
+Round 0 (max_throughput): 0.991068 Mops/s
+Round 0 (straggler_throughput): 0.991044 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 4.19587
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 4.19587
+Avg. rdma read size/ op = 2148.28
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 2148.28
+------------------------------------------
+Node 0 average throughput = 0.960731
+Node 0 total throughput = 0.991068
+All CN throughput (Max) = 0.991068
+All CN throughput (Straggler) = 0.991044
+Final throughput = 0.991044
+------------------------------------------
+No Read samples
+
+===== DEX Range LATENCY =====
+ops=49999968  avg=35983 ns
+P50=27000  P90=79000  P95=87500  P99=102500  P99.9=120000  (ns)
+==========================
+
+Saved: dex_range_latency.dat
+[MEM][END]   op=range/zipf0.99 cache=512MB
+=======================================================
+ Memory node sweep complete.
+ Log: memnode_sweep_20260325_0619.log
+=======================================================
+$

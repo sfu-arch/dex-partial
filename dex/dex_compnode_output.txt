@@ -1,0 +1,420 @@
+[apa222@cs-dis-srv09s build]$ ./run_bp_sweep.sh
+Logging to: sweep_20260325_0616.log
+=======================================================
+ DEX | inner=256B(f=11) leaf=512B(cap=26) | depth=10 | bulk=50M
+ Cache sweep: 128 256 512 MB
+ Distributions: uniform 0.30 0.50 0.60 0.99
+ Binary: newbench_latency (throughput + latency + RDMA stats per run)
+=======================================================
+
+===== POINT LOOKUPS =====
+  >> uniform (uni=1 theta=0.99)
+[SWEEP] op=point/uniform cache=128MB inner=256B leaf=512B uni=1 theta=0.99
+STORED
+STORED
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 1, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7f12be200000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 0 [20.127.0.0]
+I connect server 1
+dir 3 launch!
+
+dir 2 launch!
+
+dir 1 launch!
+
+dir 0 launch!
+
+CNode 0, left bound = 0, right bound = 18446744073709551615
+Pushdown (RPC) Rate: 0
+Admission Rate: 0.1
+Cache size(MB) = 128
+-----Cache initial addr = 0x7f12ace00000
+page num = 262144
+alloc_unit = 512
+entry_num: 262144
+bucket_num: 87382
+Bucket size = 64
+entry_num: 26214
+bucket_num: 4369
+start generating tree
+num_partitions = 1
+Success: tree root pointer value [0, 33554432]
+finish generating tree
+Bulkload num in node 0 = 50000000
+First key of bulkloading = 7325973
+Last key of bulkloading = 26738230
+node warmup num = 9999972
+kReadRatio =100
+insertmark =100
+updatemark =100
+deletemark =100
+rangemark =100
+Finish warmup workload generation
+node op_num = 49999968
+Finish all workload generation
+Fetched new height = 1
+Success: tree root pointer value [0, 33555456]
+Height = 2
+Success: tree root pointer value [0, 33561088]
+Height = 3
+Success: tree root pointer value [0, 33589760]
+Height = 4
+Success: tree root pointer value [1, 2181038592]
+Height = 5
+Success: tree root pointer value [1, 2181932544]
+Height = 6
+Success: tree root pointer value [1, 2185968640]
+Height = 7
+Success: tree root pointer value [1, 2206089728]
+Height = 8
+Success: tree root pointer value [0, 6500961280]
+Height = 9
+entering dynamic phase
+Success: tree root pointer value [0, 2440137216]
+Height = 10
+#leaf nodes = 3846153
+leaf size(MB) = 1878
+#inner nodes = 961520
+inner size(MB) = 469.492
+Tree height = 10
+Cache capacity = 262144
+max. leaf entries = 26
+max. inner entries = 11
+Inner page size = 256
+Leaf page size = 512
+node 0 finish its bulkload
+IMPORTANT: my root is 159916832587776
+0 is ready for the benchmark
+I am 6
+I am 8
+Fetched new height = 10
+I am 11
+I am 35
+I am 7
+I am 10
+I am 27
+I am 12
+I am 0
+I am 15
+I am 1
+I am 19
+I am 13
+I am 2
+I am 14
+I am 5
+I am 17
+I am 23
+I am 16
+I am 26
+I am 25
+I am 29
+I am 18
+I am 20
+I am 28
+I am 4
+I am 33
+I am 32
+I am 24
+I am 34
+I am 30
+I am 31
+I am 3
+I am 21
+I am 9
+I am 22
+entering dynamic phase
+Thread_op_num = 1388888
+node 0 finish warmup
+Start collecting the statistic
+0, throughput 2.2860
+cluster throughput 2.285
+[DEX] inner_miss=1846210 leaf_miss=1681344 dirty_wb=0 total_remote=3527554
+0, throughput 2.2873
+cluster throughput 2.287
+[DEX] inner_miss=3696201 leaf_miss=3362648 dirty_wb=0 total_remote=7058849
+0, throughput 2.2865
+cluster throughput 2.286
+[DEX] inner_miss=5544632 leaf_miss=5043425 dirty_wb=0 total_remote=10588057
+0, throughput 2.2869
+cluster throughput 2.286
+[DEX] inner_miss=7394542 leaf_miss=6725694 dirty_wb=0 total_remote=14120236
+0, throughput 2.2877
+cluster throughput 2.287
+[DEX] inner_miss=9243186 leaf_miss=8408995 dirty_wb=0 total_remote=17652181
+0, throughput 2.2872
+cluster throughput 2.287
+[DEX] inner_miss=11093751 leaf_miss=10089260 dirty_wb=0 total_remote=21183011
+0, throughput 2.2867
+cluster throughput 2.286
+[DEX] inner_miss=12940197 leaf_miss=11769137 dirty_wb=0 total_remote=24709334
+0, throughput 2.2864
+cluster throughput 2.286
+[DEX] inner_miss=14788206 leaf_miss=13449870 dirty_wb=0 total_remote=28238076
+0, throughput 2.2876
+cluster throughput 2.287
+[DEX] inner_miss=16638753 leaf_miss=15132734 dirty_wb=0 total_remote=31771487
+0, throughput 2.2872
+cluster throughput 2.287
+[DEX] inner_miss=18486933 leaf_miss=16814217 dirty_wb=0 total_remote=35301150
+0, throughput 2.1283
+cluster throughput 2.128
+[DEX] inner_miss=22315330 leaf_miss=20233561 dirty_wb=0 total_remote=42548891
+0, throughput 0.0000
+cluster throughput 0.000
+The time duration = 24 seconds
+Round 0 (max_throughput): 2.39183 Mops/s
+Round 0 (straggler_throughput): 2.3918 Mops/s
+Before barrier finish
+Avg. rdma read time(ms) = 0
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = 2.13366
+Avg. rdma write / op = 0
+Avg. rdma cas / op = 0
+Avg. rdma rpc / op = 0
+Avg. all rdma / op = 2.13366
+Avg. rdma read size/ op = 1092.43
+Avg. rdma write size / op = 0
+Avg. rdma RW size / op = 1092.43
+------------------------------------------
+Node 0 average throughput = 2.272
+Node 0 total throughput = 2.39183
+All CN throughput (Max) = 2.39183
+All CN throughput (Straggler) = 2.3918
+Final throughput = 2.3918
+------------------------------------------
+
+===== DEX Read LATENCY =====
+ops=49999968  avg=14691 ns
+P50=14500  P90=23000  P95=25500  P99=30500  P99.9=37000  (ns)
+==========================
+
+Saved: dex_read_latency.dat
+No Range samples
+[SWEEP_END] op=point/uniform cache=128MB
+STORED
+STORED
+
+[SWEEP] op=point/uniform cache=256MB inner=256B leaf=512B uni=1 theta=0.99
+STORED
+STORED
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 1, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7f38d5000000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 1 [59.127.0.0]
+I connect server 0
+dir 3 launch!
+
+dir 2 launch!
+
+dir 1 launch!
+
+dir 0 launch!
+
+Before barrier finish
+Avg. rdma read time(ms) = -nan
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = -nan
+Avg. rdma write / op = -nan
+Avg. rdma cas / op = -nan
+Avg. rdma rpc / op = -nan
+Avg. all rdma / op = -nan
+Avg. rdma read size/ op = -nan
+Avg. rdma write size / op = -nan
+Avg. rdma RW size / op = -nan
+[SWEEP_END] op=point/uniform cache=256MB
+STORED
+STORED
+
+[SWEEP] op=point/uniform cache=512MB inner=256B leaf=512B uni=1 theta=0.99
+STORED
+STORED
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 1, zipfian 0.990000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7f7764600000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 1 [121.127.0.0]
+I connect server 0
+dir 3 launch!
+
+dir 1 launch!
+
+dir 0 launch!
+
+dir 2 launch!
+
+Before barrier finish
+Avg. rdma read time(ms) = -nan
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = -nan
+Avg. rdma write / op = -nan
+Avg. rdma cas / op = -nan
+Avg. rdma rpc / op = -nan
+Avg. all rdma / op = -nan
+Avg. rdma read size/ op = -nan
+Avg. rdma write size / op = -nan
+Avg. rdma RW size / op = -nan
+[SWEEP_END] op=point/uniform cache=512MB
+STORED
+STORED
+
+  >> zipf0.30 (uni=0 theta=0.30)
+[SWEEP] op=point/zipf0.30 cache=128MB inner=256B leaf=512B uni=0 theta=0.30
+STORED
+STORED
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 0, zipfian 0.300000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7fc8d2c00000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 1 [203.127.0.0]
+I connect server 0
+dir 3 launch!
+
+dir 2 launch!
+
+dir 1 launch!
+
+dir 0 launch!
+
+Before barrier finish
+Avg. rdma read time(ms) = -nan
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = -nan
+Avg. rdma write / op = -nan
+Avg. rdma cas / op = -nan
+Avg. rdma rpc / op = -nan
+Avg. all rdma / op = -nan
+Avg. rdma read size/ op = -nan
+Avg. rdma write size / op = -nan
+Avg. rdma RW size / op = -nan
+[SWEEP_END] op=point/zipf0.30 cache=128MB
+STORED
+STORED
+
+[SWEEP] op=point/zipf0.30 cache=256MB inner=256B leaf=512B uni=0 theta=0.30
+STORED
+STORED
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 256, uniform_workload 0, zipfian 0.300000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7f6ee7000000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 1 [113.127.0.0]
+I connect server 0
+dir 3 launch!
+
+dir 2 launch!
+
+dir 1 launch!
+
+dir 0 launch!
+
+Before barrier finish
+Avg. rdma read time(ms) = -nan
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = -nan
+Avg. rdma write / op = -nan
+Avg. rdma cas / op = -nan
+Avg. rdma rpc / op = -nan
+Avg. all rdma / op = -nan
+Avg. rdma read size/ op = -nan
+Avg. rdma write size / op = -nan
+Avg. rdma RW size / op = -nan
+[SWEEP_END] op=point/zipf0.30 cache=256MB
+STORED
+STORED
+
+[SWEEP] op=point/zipf0.30 cache=512MB inner=256B leaf=512B uni=0 theta=0.30
+STORED
+STORED
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 512, uniform_workload 0, zipfian 0.300000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7f6662600000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 1 [104.127.0.0]
+I connect server 0
+dir 3 launch!
+
+dir 2 launch!
+
+dir 1 launch!
+
+dir 0 launch!
+
+Before barrier finish
+Avg. rdma read time(ms) = -nan
+Avg. rdma write time(ms) = -nan
+Avg. rdma read / op = -nan
+Avg. rdma write / op = -nan
+Avg. rdma cas / op = -nan
+Avg. rdma rpc / op = -nan
+Avg. all rdma / op = -nan
+Avg. rdma read size/ op = -nan
+Avg. rdma write size / op = -nan
+Avg. rdma RW size / op = -nan
+[SWEEP_END] op=point/zipf0.30 cache=512MB
+STORED
+STORED
+
+  >> zipf0.50 (uni=0 theta=0.50)
+[SWEEP] op=point/zipf0.50 cache=128MB inner=256B leaf=512B uni=0 theta=0.50
+STORED
+STORED
+Compute node count = 1
+kNodeCount 2, kReadRatio 100, kInsertRatio 0, kUpdateRatio 0, kDeleteRatio 0, kRangeRatio 0, totalThreadCount 36, memThreadCount 4 cache_size 128, uniform_workload 0, zipfian 0.500000, bulk_load_num 50000000, warmup_num 10000000, op_num 50000000, check_correctness 0, time_based 1, early_stop 0, index 0, rpc_rate 0.000000, admission_rate 0.100000, auto_tune 0
+kMaxThread = 36
+KeySpace = 50001000
+shared memory size: 8GB, 0x7f946d000000
+cache size: 1GB
+Machine NR: 2
+Max_APP_THREAD: 36
+NR_DIRECTORY: 4
+Start Build the DSMKeeper
+I am servers 1 [150.127.0.0]
+I connect server 0
+dir 3 launch!
+
+dir 2 launch!
+
+dir 1 launch!
+
+dir 0 launch!
+
+Before barrier finish
