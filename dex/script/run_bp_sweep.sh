@@ -61,7 +61,6 @@ run_one() {
     local tag="$7"
 
     echo "[SWEEP] op=${label} cache=${cache}MB inner=${INNER_NODE_SIZE}B leaf=${LEAF_NODE_SIZE}B uni=${uni} theta=${theta}"
-    ./restartMemc.sh
     sudo ./newbench_latency \
         $NODENUM \
         $read_r 0 0 0 $range_r \
