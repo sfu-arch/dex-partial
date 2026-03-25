@@ -94,7 +94,7 @@ run_exp() {
     wait_for_reset
 
     echo "[MEM][START] op=${label} cache=${cache}MB uni=${uni} theta=${theta}"
-    sudo ./newbench_latency \
+    sudo ./newbench \
         $NODENUM \
         $read_r 0 0 0 $range_r \
         $THREADS $MEM_THREADS $cache \

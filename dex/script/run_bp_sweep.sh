@@ -22,6 +22,7 @@ RPC_RATE=0
 ADMIT_RATE=0.1
 AUTOTUNE=0
 TIMEBASED=1
+EARLYSTOP=0   # 0 = all threads run to completion → unbiased latency histograms
 CORRECT=0
 
 INNER_NODE_SIZE=256
@@ -64,13 +65,13 @@ run_one() {
     # Reset memcached counters so memory node's wait_for_reset() fires
     flush_memc
     sleep 2
-    sudo ./newbench_latency \
+    sudo ./newbench \
         $NODENUM \
         $read_r 0 0 0 $range_r \
         $THREADS $MEM_THREADS $cache \
         $uni $theta \
         $BULK_M $WARMUP_M $RUN_M \
-        $CORRECT $TIMEBASED 0 \
+        $CORRECT $TIMEBASED $EARLYSTOP \
         $INDEX $RPC_RATE $ADMIT_RATE $AUTOTUNE $MAX_THREADS
 
     [ -f dex_read_latency.dat  ] && mv dex_read_latency.dat  "latency_results/${tag}_read.dat"

@@ -20,6 +20,8 @@
 #include <thread>
 #include <time.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <fstream>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -309,11 +311,18 @@ void thread_run(int id) {
   // Start the real execution of the workload
   counter = 0;
   success_counter = 0;
+  // Reset per-thread latency histograms for the measurement phase
+  memset(read_latency_histogram[id],  0, sizeof(uint64_t) * LATENCY_BUCKETS);
+  memset(range_latency_histogram[id], 0, sizeof(uint64_t) * LATENCY_BUCKETS);
+  thread_read_count[id]  = 0;
+  thread_range_count[id] = 0;
+  Timer op_timer;
   auto start = std::chrono::high_resolution_clock::now();
   while (counter < thread_op_num) {
     uint64_t key = thread_workload_array[counter];
     op_type cur_op = static_cast<op_type>(key >> 56);
     key = key & op_mask;
+    op_timer.begin();
     switch (cur_op) {
     case op_type::Lookup: {
       Value v = key;
@@ -351,6 +360,11 @@ void thread_run(int id) {
     default:
       std::cout << "OP Type NOT MATCH!" << std::endl;
     }
+    uint64_t lat = op_timer.end();
+    if (cur_op == op_type::Range)
+      record_range_latency(id, lat);
+    else
+      record_read_latency(id, lat);
 
     tp[id][0]++;
     ++counter;
@@ -1229,6 +1243,15 @@ int main(int argc, char *argv[]) {
                   << straggler_cluster_tp / std::pow(10, 6) << std::endl;
       }
       std::cout << "------------------------------------------" << std::endl;
+
+      // Latency histograms — node 0 only, after all threads joined
+      if (node_id == 0) {
+        mkdir("latency_results", 0755);
+        save_latency_histogram("dex_read_latency.dat",
+                               read_latency_histogram, kThreadCount, "Read");
+        save_latency_histogram("dex_range_latency.dat",
+                               range_latency_histogram, kThreadCount, "Range");
+      }
     }
   }
   return 0;
