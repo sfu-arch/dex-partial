@@ -1,5 +1,4 @@
 #include "Rdma.h"
-#include "RdmaCompat.h"
 
 
 bool modifyQPtoInit(struct ibv_qp *qp, RdmaContext *context) {
@@ -22,11 +21,9 @@ bool modifyQPtoInit(struct ibv_qp *qp, RdmaContext *context) {
             attr.qp_access_flags = IBV_ACCESS_REMOTE_WRITE;
             break;
 
-#if USE_DC_TRANSPORT
         case IBV_EXP_QPT_DC_INI:
             Debug::notifyError("implement me:)");
             break;
-#endif
 
         default:
             Debug::notifyError("implement me:)");

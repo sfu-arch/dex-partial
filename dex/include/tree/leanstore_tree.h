@@ -2608,7 +2608,21 @@ public:
 
   double get_rpc_ratio() { return cache.get_rpc_ratio(); }
 
-  void clear_statistic() {}
+  void clear_statistic() override {
+    // Reset cache-level stats after warmup so they only capture real workload
+    cache.inner_miss_ = 0;
+    cache.leaf_miss_ = 0;
+    cache.full_page_miss_ = 0;
+    cache.rdma_write = 0;
+  }
+
+  void get_statistic() override {
+    uint64_t im = get_inner_miss();
+    uint64_t lm = get_leaf_miss();
+    uint64_t dw = get_write_rdma();
+    printf("[DEX] inner_miss=%lu leaf_miss=%lu dirty_wb=%lu total_remote=%lu\n",
+           im, lm, dw, im + lm + dw);
+  }
 };
 
 } // namespace cachepush

@@ -50,8 +50,7 @@
 
 
 // app thread
-// Each thread uses ~4 keys, so 32 threads * 4 = 128 keys (under 200 limit)
-#define MAX_APP_THREAD 32   // 30 compute + 1 main + 1 spare  [CONFIG] 65 -> 32
+#define MAX_APP_THREAD 65   // one additional thread for data statistics(main thread)  [CONFIG] 65
 #define APP_MESSAGE_NR 96
 #define POLL_CQ_MAX_CNT_ONCE 8
 
@@ -100,14 +99,14 @@ constexpr uint64_t GB = 1024ull * MB;
 constexpr uint16_t kCacheLineSize = 64;
 
 // Remote Allocation
-constexpr uint64_t dsmSize           = 8;         // GB  [CONFIG] 64 -> 8 for limited memlock
+constexpr uint64_t dsmSize           = 64;        // GB  [CONFIG] 64
 constexpr uint64_t kChunkSize        = 16 * MB;   // B
 
 // Local Allocation
-constexpr uint64_t rdmaBufferSize     = 1;         // GB  [CONFIG] 4 -> 1 for limited memlock
+constexpr uint64_t rdmaBufferSize     = 4;         // GB  [CONFIG] 4
 
-// Cache (MB) - Match DEX CACHE_MB=256
-constexpr int kIndexCacheSize  = 256;  // MB - same as DEX
+// Cache (MB)
+constexpr int kIndexCacheSize  = 100;  // MB including kHotspotBufSize 
 constexpr int kHotspotBufSize  = 30;
 
 // KV

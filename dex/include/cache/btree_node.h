@@ -17,7 +17,32 @@ namespace cachepush {
 enum class PageType : uint8_t { BTreeInner = 1, BTreeLeaf = 2 };
 static const uint64_t swizzle_tag = 1ULL << 63;
 static const uint64_t swizzle_hide = (1ULL << 63) - 1;
-static const uint64_t pageSize = 1024; // 1KB
+// ── Node size configuration ────────────────────────────────────────────────
+// innerNodeSize controls inner-node fanout:
+//   maxEntries_inner = floor((innerNodeSize - 72) / 16)
+//   struct size      = 80 + 16*maxEntries  (must equal innerNodeSize)
+//   Valid values: any multiple of 16 ≥ 192  (e.g. 192→f=7, 256→f=11, 512→f=27)
+//   NOTE: (innerNodeSize - 72) must NOT be an exact multiple of 16 or the
+//         struct overflows by 8 bytes.  All multiples of 16 ≥ 192 satisfy this.
+//
+// leafNodeSize controls leaf capacity:
+//   maxEntries_leaf  = (leafNodeSize - 96) / 16
+//   struct size      = 96 + 16*maxEntries  (always fits exactly)
+//   Valid values: any multiple of 16 ≥ 160  (e.g. 160→cap=4, 192→cap=6, 256→cap=10)
+//
+// pageSize = max(innerNodeSize, leafNodeSize) — the cache-frame / RDMA unit.
+// The smaller node type wastes (pageSize - nodeSize) bytes per frame but the
+// allocator and RDMA layer stay unchanged.
+//
+// Depth reference (50M bulk-loaded keys):
+//   inner=192 (f=7)  leaf=192 (cap=6)  → depth ≈ 10   ← current
+//   inner=256 (f=11) leaf=192 (cap=6)  → depth ≈ 8
+//   inner=192 (f=7)  leaf=256 (cap=10) → depth ≈ 10  (fewer leaf nodes)
+//   inner=1024(f=59) leaf=1024(cap=58) → depth ≈ 5   (original paper config)
+static const uint64_t innerNodeSize = 192;
+static const uint64_t leafNodeSize  = 192;
+static const uint64_t pageSize =
+    (innerNodeSize >= leafNodeSize) ? innerNodeSize : leafNodeSize;
 static const uint64_t megaLevel =
     4; // 4 level as a Bigger Node to do coarse-grained distribution
 // Level 0, 1, ..., MegaLevel -1 are grouped as a sub-tree
@@ -175,7 +200,7 @@ template <class Key, class Payload> struct BTreeLeaf : public BTreeLeafBase {
   // This is the element type of the leaf node
   using KeyValueType = std::pair<Key, Payload>;
   static const uint64_t maxEntries =
-      (pageSize - (sizeof(Key) * 2 + sizeof(uint64_t) * 2) - sizeof(NodeBase)) /
+      (leafNodeSize - (sizeof(Key) * 2 + sizeof(uint64_t) * 2) - sizeof(NodeBase)) /
       (sizeof(KeyValueType));
 
   // This is the array that we perform search on
@@ -361,7 +386,7 @@ struct BTreeInnerBase : public NodeBase {
 
 template <class Key> struct BTreeInner : public BTreeInnerBase {
   static const uint64_t maxEntries =
-      (pageSize - sizeof(uint64_t) - sizeof(NodeBase)) /
+      (innerNodeSize - sizeof(uint64_t) - sizeof(NodeBase)) /
       (sizeof(Key) + sizeof(GlobalAddress));
   GlobalAddress children[maxEntries];
   Key keys[maxEntries];

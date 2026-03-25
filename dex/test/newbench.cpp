@@ -969,8 +969,8 @@ int main(int argc, char *argv[]) {
 
           if (tree_index == 1) {
             printf("cache hit rate: %lf\n", hit * 1.0 / all);
-          } else if (tree_index == 2) {
-            tree->get_statistic();
+          } else {
+            tree->get_statistic(); // DEX (0) and SMART (2) both use get_statistic
           }
         } else {
           if (cluster_tp != 0) {
@@ -994,7 +994,7 @@ int main(int argc, char *argv[]) {
 
           if (tree_index == 1) {
             printf("cache hit rate: %lf\n", hit * 1.0 / all);
-          } else if (tree_index == 2) {
+          } else {
             tree->get_statistic();
           }
         }

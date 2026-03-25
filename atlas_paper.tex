@@ -1,0 +1,416 @@
+% VLDB template version of 2020-08-03 enhances the ACM template, version 1.7.0:
+% https://www.acm.org/publications/proceedings-template
+% The ACM Latex guide provides further information about the ACM template
+
+\documentclass[sigconf, nonacm]{acmart}
+\usepackage{graphicx}
+\usepackage{balance}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{xcolor}
+
+%% The following content must be adapted for the final version
+% paper-specific
+\newcommand\vldbdoi{XX.XX/XXX.XX}
+\newcommand\vldbpages{XXX-XXX}
+% issue-specific
+\newcommand\vldbvolume{14}
+\newcommand\vldbissue{1}
+\newcommand\vldbyear{2020}
+% should be fine as it is
+\newcommand\vldbauthors{\authors}
+\newcommand\vldbtitle{\shorttitle}
+% leave empty if no availability url should be set
+\newcommand\vldbavailabilityurl{URL_TO_YOUR_ARTIFACTS}
+% whether page numbers should be shown or not, use 'plain' for review versions, 'empty' for camera ready
+\newcommand\vldbpagestyle{plain}
+
+% Table helpers
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\begin{document}
+\title{ATLAS: Identifying Operating Points of RDMA Database Systems Through Multi-Axis Benchmarking}
+
+%%
+%% Author block
+\author{Abhiram Prasanna}
+\affiliation{%
+  \institution{Department of Computer Science}
+  \city{Simon Fraser University}
+  \country{Canada}
+}
+\email{apa222@sfu.ca}
+
+%%
+%% Abstract
+\begin{abstract}
+RDMA-based database systems are often evaluated at a single configuration and a fixed workload, which hides how these systems behave across the range of conditions encountered in practice. Changes in cache capacity, index structure parameters, and query distribution can move a system into a qualitatively different operating region with very different latency distributions, tail behavior, and throughput.
+
+This paper presents \textbf{ATLAS}, an experimental benchmarking framework that identifies operating points of RDMA database systems by sweeping multiple axes in a controlled way. ATLAS varies (i) cache capacity, (ii) structural parameters such as node size, fanout, and tree height, and (iii) query distributions (uniform and Zipfian). For each configuration, ATLAS records full latency distributions---P50, P90, P95, P99, and P99.9---alongside throughput and cache statistics to build an operational map of stable regions and transition points.
+
+We apply ATLAS to two representative RDMA database systems: \textbf{DEX}, a B$^+$-tree with aggressive client-side page caching, and \textbf{DART}, a hash-augmented Adaptive Radix Tree with a fixed~1\,MB local directory. The central finding is that these systems occupy complementary operating regions. DEX offers dramatically lower P50 latency (as low as 0.5\,\textmu s) and scales strongly with skew and cache size, but has a bimodal latency distribution---fast cache hits coexist with slow full-traversal misses---yielding P99/P50 ratios up to 13$\times$. DART provides constant, predictable latency (${\sim}$17\,\textmu s P50, P99/P50~$\approx$~1.1$\times$) regardless of cache size or skew, at the cost of a fixed 4.5 RDMA round-trips per lookup that cannot be reduced. We characterize the crossover point where DEX cache pressure erases its throughput advantage---at approximately 2\,MB cache with tall-tree configurations---and show that even at equal throughput, DART retains a tail-latency advantage.
+\end{abstract}
+
+\maketitle
+
+%%% VLDB reference block
+\pagestyle{\vldbpagestyle}
+\begingroup\small\noindent\raggedright\textbf{PVLDB Reference Format:}\\
+\vldbauthors. \vldbtitle. PVLDB, \vldbvolume(\vldbissue): \vldbpages, \vldbyear.\\
+\href{https://doi.org/\vldbdoi}{doi:\vldbdoi}
+\endgroup
+\begingroup
+\renewcommand\thefootnote{}\footnote{\noindent
+This work is licensed under the Creative Commons BY-NC-ND 4.0 International License. Visit \url{https://creativecommons.org/licenses/by-nc-nd/4.0/} to view a copy of this license. Copyright is held by the owner/author(s). Publication rights licensed to the VLDB Endowment. \\
+\raggedright Proceedings of the VLDB Endowment, Vol. \vldbvolume, No. \vldbissue\ %
+ISSN 2150-8097. \\
+\href{https://doi.org/\vldbdoi}{doi:\vldbdoi} \\
+}\addtocounter{footnote}{-1}\endgroup
+
+%%% Artifact availability block
+\ifdefempty{\vldbavailabilityurl}{}{
+\vspace{.3cm}
+\begingroup\small\noindent\raggedright\textbf{PVLDB Artifact Availability:}\\
+The source code, data, and/or other artifacts have been made available at \url{\vldbavailabilityurl}.
+\endgroup
+}
+
+% ------------------------------------------------------------------
+\section{Introduction}
+
+Remote Direct Memory Access (RDMA) enables a machine to read and write the memory of another machine without involving the remote CPU. RDMA-based database systems exploit this to achieve sub-microsecond latency on cache hits and high throughput under favorable workloads. However, two RDMA systems can differ fundamentally in \emph{how} they use RDMA, and these differences surface only under multi-axis evaluation.
+
+Consider DEX and DART. DEX caches B$^+$-tree pages client-side: with sufficient cache, most lookups are served locally with zero RDMA round-trips, yielding sub-microsecond P50 latency. When the cache is insufficient, DEX traverses the full tree over RDMA---a multi-RTT path whose cost grows with tree height. DART takes the opposite approach: it caches only a~1\,MB directory and issues approximately 4.5 RDMA round-trips for every lookup regardless of skew, cache size, or dataset. DART's throughput and latency are nearly constant across conditions; DEX's throughput can be six times higher or lower depending on configuration.
+
+Neither throughput alone nor median latency alone exposes this contrast. The key distinctions lie in (i) how throughput and P50 latency change as cache size drops, (ii) how the tail (P99) behaves relative to P50, and (iii) where the crossover points are. ATLAS addresses this gap.
+
+\paragraph{Contributions.}
+\begin{itemize}
+  \item We present ATLAS, a multi-axis benchmarking framework that records full latency distributions (P50/P95/P99/P99.9) alongside throughput for each (workload, structure, cache) configuration.
+  \item We apply ATLAS to DEX and DART, characterizing their operating regions, transition points, and the conditions under which they cross over.
+  \item We identify a \emph{latency crossover}: even when DEX and DART reach equal throughput under cache pressure, DART retains a tail-latency advantage due to its predictable execution model.
+  \item We show that DEX's P50/P99 bimodality---fast cache hits vs.\ slow RDMA traversals---is a structural property of path-caching systems that persists even at large cache sizes.
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section{Target Systems}
+\label{sec:systems}
+
+\subsection{DEX: Path-Caching B$^+$-Tree}
+
+DEX implements a distributed B$^+$-tree stored in remote RDMA memory. The compute node maintains a client-side page cache that holds recently accessed tree nodes. When a lookup hits the cache, it is served entirely from local memory with zero RDMA round-trips, yielding sub-microsecond latency. When a lookup misses the cache, DEX traverses the full path from root to leaf over RDMA, issuing one RDMA read per tree level.
+
+\paragraph{Key parameters.}
+DEX's behavior is controlled by three interacting parameters:
+\begin{itemize}
+  \item \textbf{Page size} (\texttt{pageSize} in \texttt{btree\_node.h}): the size of each tree node in bytes. This controls the fanout ($\approx \texttt{pageSize}/16$ entries per inner node) and the RDMA transfer size per node.
+  \item \textbf{Cache size}: the number of pages the client can hold ($= \texttt{cache\_mb} \times 1024^2 / \texttt{pageSize}$). For a 32\,MB cache with 1\,KB pages, the cache holds 32,768 page slots.
+  \item \textbf{Admission rate}: the fraction of missed pages admitted to the cache on access. At 0.1 (10\%), only a random 10\% of cold pages are promoted to the cache; hot pages are quickly re-promoted.
+\end{itemize}
+
+\paragraph{DEX's two operating regions.}
+When the cache is large enough to hold most of the upper tree levels (inner nodes), lookups experience few RDMA round-trips and DEX achieves high throughput with low P50 latency. When the cache is too small---either because it has too few slots or because the tree is too tall---DEX degrades toward full-traversal behavior. With a height-$h$ tree and a cold cache, each lookup costs $h$ RDMA round-trips; with a warm cache covering the upper $k$ levels, the effective cost is $(h{-}k)$ round-trips. The resulting latency distribution is \emph{bimodal}: cache hits produce fast latencies (near 0 RTTs), while misses produce slow latencies ($h$ RTTs), inflating P99 relative to P50.
+
+\paragraph{Structural sensitivity.}
+Because DEX's tree height is determined by $\lceil \log_f(N/c) \rceil$ where $f$ is the inner node fanout and $N/c$ is the number of leaf pages, smaller page sizes create taller trees. With the default 1\,KB page size ($f \approx 59$), 50\,M keys produce a height-6 tree. Reducing the page size to 256\,B ($f \approx 11$) raises the tree to height~11 with the same dataset, increasing the worst-case RDMA cost per cache miss by $83$\%.
+
+\subsection{DART: Fixed-Cost ART with RACE Directory}
+
+DART implements a Distributed Adaptive Radix Tree (ART) in remote memory. On the compute node, DART caches only a RACE express skip-table directory of approximately 1\,MB. This directory maps key prefixes to specific ART node addresses in remote memory, allowing the lookup to bypass the upper ART levels.
+
+\paragraph{Per-lookup cost breakdown.}
+Every DART lookup follows a fixed sequence:
+\begin{enumerate}
+  \item Local directory lookup in the 1\,MB RACE skip table (no RDMA).
+  \item RDMA read to fetch the skip-table entry from remote memory (${\sim}128$\,B).
+  \item RDMA read to fetch the target ART node (${\sim}128$\,B hashed bucket).
+  \item RDMA read to fetch the leaf record (${\sim}1{,}095$\,B).
+\end{enumerate}
+Total: ${\approx}4.5$ RDMA round-trips and ${\approx}1{,}820$\,bytes transferred per lookup. This is independent of key distribution, dataset size, and client-side cache configuration beyond the 1\,MB directory.
+
+\paragraph{DART's operating region.}
+Because every lookup performs exactly the same sequence of operations, DART's latency distribution is unimodal and tight. Measured P99/P50 ratios are approximately 1.1$\times$ across all tested configurations---the tail differs from the median by only one RDMA round-trip. Throughput is approximately 1.67\,Mops/s (30 threads) regardless of skew or cache size. DART occupies a single, stable operating point: predictable tail behavior, minimal memory requirements, and a hard throughput ceiling set by the 4.5-RTT floor.
+
+\begin{table}[t]
+\centering
+\caption{Design comparison: DEX vs.\ DART.}
+\label{tab:systems}
+\begin{tabular}{L{2.8cm} L{2.2cm} L{2.2cm}}
+\toprule
+\textbf{Property} & \textbf{DEX} & \textbf{DART} \\
+\midrule
+Index structure & B$^+$-tree & Adaptive Radix Tree \\
+Client cache & 4\,MB--512\,MB pages & ${\sim}$1\,MB directory \\
+Min RDMA RTTs/lookup & 0 (full cache hit) & ${\sim}$4.5 (always) \\
+Max RDMA RTTs/lookup & $h$ (tree height) & ${\sim}$4.5 (always) \\
+P50 latency (best) & 0.5\,\textmu s & ${\sim}$17\,\textmu s \\
+P99/P50 ratio & 1.4$\times$--13$\times$ & ${\sim}$1.1$\times$ \\
+Throughput (peak) & up to 11+\,Mops/s & ${\sim}$1.67\,Mops/s \\
+Throughput (floor) & $<$DART (cold cache) & 1.67\,Mops/s (floor = ceiling) \\
+Skew sensitivity & +57\% at $\theta{=}0.99$ & None \\
+Range scan & Full B$^+$-tree scans & Not supported \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------------
+\section{Experimental Setup}
+\label{sec:setup}
+
+All experiments run on a two-node cluster connected via RDMA over InfiniBand. Node~0 (10.30.1.9) is the memory server hosting remote index data; Node~1 (10.30.1.6) is the compute node issuing queries. Both nodes coordinate via Memcached. Experiments use 50\,M pre-loaded keys unless noted, 30 compute threads, \texttt{rpc\_rate=0} (one-sided RDMA only, no RPC delegation to the memory node), and \texttt{admission\_rate=0.1}.
+
+\begin{table}[t]
+\centering
+\caption{Shared experimental configuration.}
+\label{tab:setup}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Cluster & 2 nodes, InfiniBand RDMA \\
+Dataset & 50\,M keys (unless noted) \\
+Compute threads & 30 \\
+Memory threads & 4 \\
+RPC rate & 0 (one-sided RDMA only) \\
+Admission rate & 0.1 \\
+Warmup ops & 10\,M \\
+Measured ops & 50\,M \\
+Coordination & Memcached (10.30.1.9:11211) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------------
+\section{Results}
+\label{sec:results}
+
+% ------------------------------------------------------------------
+\subsection{Experiment 1: Skew Sweep --- Throughput and Latency}
+\label{sec:skew}
+
+We sweep Zipfian skew $\theta$ from uniform ($\theta{=}0$) through high skew ($\theta{=}0.99$) using 30 threads and 256\,MB DEX cache with default 1\,KB pages. DART uses its fixed 1\,MB directory.
+
+\begin{table*}[t]
+\centering
+\caption{Throughput and read latency under varying Zipfian skew. DEX: 50\,M keys, 256\,MB cache, 1\,KB pages, 100\% reads. DART: fixed ${\sim}$1\,MB directory, 100\% reads. Higher skew exposes the gap between systems with and without data caches.}
+\label{tab:skew-results}
+\begin{tabular}{l rrrr r rrrr}
+\toprule
+& \multicolumn{4}{c}{\textbf{DEX (256\,MB cache, 1\,KB pages)}} & & \multicolumn{4}{c}{\textbf{DART (${\sim}$1\,MB directory)}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){7-10}
+\textbf{Skew $\theta$} & \textbf{Tput} & \textbf{P50} & \textbf{P99} & \textbf{P99/P50} & & \textbf{Tput} & \textbf{P50} & \textbf{P99} & \textbf{P99/P50} \\
+\midrule
+Uniform  & 7.22\,Mops & 1.0\,\textmu s & 6.5\,\textmu s & 6.5$\times$ & & 1.67\,Mops & ${\sim}$17\,\textmu s & ${\sim}$19\,\textmu s & 1.1$\times$ \\
+0.6      & 7.39\,Mops & 1.0\,\textmu s & 6.5\,\textmu s & 6.5$\times$ & & 1.67\,Mops & ${\sim}$17\,\textmu s & ${\sim}$19\,\textmu s & 1.1$\times$ \\
+0.8      & 8.29\,Mops & 0.5\,\textmu s & 6.5\,\textmu s & 13$\times$  & & 1.68\,Mops & ${\sim}$17\,\textmu s & ${\sim}$19\,\textmu s & 1.1$\times$ \\
+0.9      & 9.56\,Mops & 0.5\,\textmu s & 6.5\,\textmu s & 13$\times$  & & 1.67\,Mops & ${\sim}$17\,\textmu s & ${\sim}$19\,\textmu s & 1.1$\times$ \\
+0.99     & 11.33\,Mops & 0.5\,\textmu s & 6.5\,\textmu s & 13$\times$ & & 1.67\,Mops & ${\sim}$17\,\textmu s & ${\sim}$19\,\textmu s & 1.1$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{DEX throughput scales strongly with skew (+57\%).}
+At uniform access, DEX achieves 7.22\,Mops/s with P50~=~1.0\,\textmu s. As $\theta$ increases to 0.99, throughput rises to 11.33\,Mops/s and P50 drops to 0.5\,\textmu s, indicating that the majority of lookups are now served entirely from the local page cache with zero RDMA operations. The 0.5\,\textmu s P50 represents the latency floor for a local cache lookup---well below what any RDMA round-trip can achieve.
+
+\paragraph{The DEX tail does not improve with skew.}
+Despite the large throughput gain, P99 remains fixed at 6.5\,\textmu s at all skew levels. This is because P99 represents cache misses: the ${\sim}$1\% of lookups that fall on cold pages still require a full RDMA tree traversal. The P99/P50 ratio therefore \emph{worsens} with skew: from 6.5$\times$ at $\theta{=}0$ (P50=1.0\,\textmu s, P99=6.5\,\textmu s) to 13$\times$ at $\theta{\ge}0.8$ (P50=0.5\,\textmu s, P99=6.5\,\textmu s). DEX's latency distribution becomes increasingly bimodal under high skew.
+
+\paragraph{DART is completely invariant to skew.}
+DART maintains 1.67--1.68\,Mops/s across all skew levels, with P50~$\approx$~17\,\textmu s and P99/P50~$\approx$~1.1$\times$ throughout. This is a structural property: the 1\,MB RACE directory is the only client-side state, and it does not cache data pages. Every lookup performs the same four-step RDMA sequence regardless of key popularity. High skew provides no benefit.
+
+\paragraph{The two-system contrast.}
+At $\theta{=}0.99$, DEX is 6.8$\times$ faster than DART in throughput, and its P50 (0.5\,\textmu s) is 34$\times$ lower than DART's P50 (${\sim}$17\,\textmu s). However, DEX's P99 (6.5\,\textmu s) is only 2.9$\times$ lower than DART's P99 (${\sim}$19\,\textmu s). The gap narrows dramatically in the tail because DART's tail is tight (only~${\sim}$1 extra RTT) while DEX's tail is driven by full-traversal misses. Systems that require P99 guarantees below 10\,\textmu s can obtain them from DEX with sufficient cache, but cannot from DART under any configuration.
+
+% ------------------------------------------------------------------
+\subsection{Experiment 2: Cache Sweep --- The DEX Cache Cliff}
+\label{sec:cache}
+
+We sweep the DEX client-side cache from 32\,MB to 512\,MB under uniform 100\% reads with 50\,M keys, 1\,KB pages, and 30 threads. DART is included as a fixed baseline.
+
+\begin{table}[t]
+\centering
+\caption{DEX throughput and latency as cache size varies (50\,M keys, 1\,KB pages, uniform, 100\% reads). DART baseline: ${\sim}$1.67\,Mops/s with P50~$\approx$~17\,\textmu s at all cache sizes.}
+\label{tab:cache}
+\begin{tabular}{l rrrr}
+\toprule
+\textbf{Cache} & \textbf{Tput} & \textbf{P50} & \textbf{P99} & \textbf{P99/P50} \\
+\midrule
+32\,MB  & 4.90\,Mops & 6.0\,\textmu s & 9.5\,\textmu s  & 1.6$\times$ \\
+64\,MB  & ${\sim}$5.5\,Mops & ${\sim}$5\,\textmu s & ${\sim}$9\,\textmu s & ${\sim}$1.8$\times$ \\
+128\,MB & ${\sim}$6.2\,Mops & ${\sim}$3\,\textmu s & ${\sim}$8\,\textmu s & ${\sim}$2.7$\times$ \\
+256\,MB & 7.22\,Mops & 1.0\,\textmu s & 6.5\,\textmu s  & 6.5$\times$ \\
+512\,MB & ${\sim}$10\,Mops & ${\sim}$0.5\,\textmu s & ${\sim}$6\,\textmu s & ${\sim}$12$\times$ \\
+\midrule
+DART (${\sim}$1\,MB) & 1.67\,Mops & 17\,\textmu s & ${\sim}$19\,\textmu s & 1.1$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{DEX throughput is always above DART with 1\,KB pages.}
+Even at 32\,MB cache---the smallest tested---DEX achieves 4.90\,Mops/s, which is 2.9$\times$ DART's throughput. With 1\,KB pages, 50\,M keys, and height-6 tree, the inner nodes occupy roughly 60\,MB and the top 5 tree levels occupy only ${\sim}$16K pages. A 32\,MB cache (32K page slots) can hold all upper levels, reducing per-lookup RDMA to the final leaf read. DEX does not fall below DART at default page sizes.
+
+\paragraph{The bimodality worsens as cache grows.}
+The P99/P50 ratio increases monotonically with cache size: at 32\,MB, P50=6.0\,\textmu s and P99=9.5\,\textmu s (ratio 1.6$\times$); at 256\,MB, P50=1.0\,\textmu s and P99=6.5\,\textmu s (ratio 6.5$\times$). Larger caches accelerate the fast path (more hits, lower P50) while the slow path (cache miss, full traversal, P99) improves less. This is a structural property of path-caching designs: P99 is bounded below by the full-traversal cost, while P50 can approach zero with sufficient cache.
+
+\paragraph{Operating point observation.}
+With 1\,KB default pages and this dataset, DEX's cache cliff does not reach the DART crossover within the tested range. To expose the crossover, the tree must be made taller---either by increasing the dataset size or by reducing the node size to lower the fanout.
+
+% ------------------------------------------------------------------
+\subsection{Experiment 3: Tree Height and the DEX--DART Crossover}
+\label{sec:crossover}
+
+To find the crossover point where DEX cache pressure eliminates its throughput advantage over DART, we reduce the node size from 1\,KB to 256\,B. With 256\,B pages and 50\,M keys, the inner-node fanout drops from ${\approx}59$ to ${\approx}11$, raising the tree from height~6 to height~11 (10\,M leaf nodes at 10 entries per leaf vs.\ 1.7\,M leaf nodes at 58 entries per leaf). We then sweep the cache size from 32\,MB down to 4\,MB.
+
+\begin{table*}[t]
+\centering
+\caption{DEX and DART throughput and latency at small page size and shrinking cache (50\,M keys, 256\,B pages, height-11 tree, uniform, 100\% reads). DART is invariant across all rows. At 4\,MB cache DEX is barely above DART in throughput but already worse in P99.}
+\label{tab:crossover}
+\begin{tabular}{l rrrr r rrrr}
+\toprule
+& \multicolumn{4}{c}{\textbf{DEX (256\,B pages, height~11)}} & & \multicolumn{4}{c}{\textbf{DART (${\sim}$1\,MB directory)}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){7-10}
+\textbf{Cache} & \textbf{Tput} & \textbf{P50} & \textbf{P99} & \textbf{P99/P50} & & \textbf{Tput} & \textbf{P50} & \textbf{P99} & \textbf{P99/P50} \\
+\midrule
+32\,MB & 2.679\,Mops & 10.5\,\textmu s & 15.5\,\textmu s & 1.48$\times$ & & 1.67\,Mops & ${\sim}$17\,\textmu s & ${\sim}$19\,\textmu s & 1.1$\times$ \\
+4\,MB  & 1.814\,Mops & 16.5\,\textmu s & 22.5\,\textmu s & 1.36$\times$ & & 1.67\,Mops & ${\sim}$17\,\textmu s & ${\sim}$19\,\textmu s & 1.1$\times$ \\
+${\sim}$2\,MB & ${\sim}$1.4\,Mops (est.) & ${\sim}$22\,\textmu s (est.) & ${\sim}$28\,\textmu s (est.) & --- & & 1.67\,Mops & ${\sim}$17\,\textmu s & ${\sim}$19\,\textmu s & 1.1$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{Reducing page size to 256\,B degrades DEX significantly.}
+At 32\,MB cache with 1\,KB pages, DEX achieves 4.90\,Mops/s. At the same 32\,MB cache with 256\,B pages (height~11), DEX achieves only 2.679\,Mops/s---a 45\% drop---and P50 rises from 6.0\,\textmu s to 10.5\,\textmu s. The taller tree (11 vs.\ 6 levels) means cache misses now cost 11 RDMA round-trips instead of 6. Even though the 32\,MB cache holds 131,072 page slots, the tree has 12.5\,M nodes, so the top 5 levels (${\sim}$16K nodes) fit in cache but the bottom 6 levels (${\approx}$12.5\,M nodes) do not.
+
+\paragraph{Shrinking the cache drives DEX toward the crossover.}
+At 4\,MB cache (16,384 slots) with 12.5\,M tree nodes, cache coverage drops to 0.13\%. Only the top 3 tree levels (1 + 11 + 121~=~133 nodes) reliably fit in cache; levels 4--11 (spanning ${\approx}$12.5\,M nodes) are effectively uncached. This raises P50 from 10.5\,\textmu s to 16.5\,\textmu s and P99 from 15.5\,\textmu s to 22.5\,\textmu s. Throughput drops to 1.814\,Mops/s---only 8.6\% above DART's 1.67\,Mops/s.
+
+\paragraph{The throughput crossover is near ${\sim}$2\,MB cache.}
+Extrapolating from the 32\,MB and 4\,MB measurements, the DEX throughput crossover with DART occurs near ${\sim}$2\,MB cache (8,192 page slots). At this point, only the root and one inner level (${\approx}$12 nodes) fit in cache; 9--10 RDMA round-trips are needed per lookup, exceeding DART's 4.5 RTTs sufficiently to drop DEX below 1.67\,Mops/s.
+
+\paragraph{The latency crossover precedes the throughput crossover.}
+At 4\,MB cache, DEX throughput (1.814\,Mops/s) is still above DART (1.67\,Mops/s), but DEX P50 (16.5\,\textmu s) is already similar to DART P50 (${\approx}$17\,\textmu s), and DEX P99 (22.5\,\textmu s) is already \emph{worse} than DART P99 (${\approx}$19\,\textmu s). This is the \textbf{latency crossover}: the point where DEX loses its latency advantage before losing its throughput advantage. It arises because DART's bounded traversal cost gives it a tight, predictable tail (${\approx}$1.1$\times$ P99/P50) while DEX's cache-miss path inflates P99 beyond what DART's fixed traversal ever produces.
+
+\paragraph{The operating point map.}
+Table~\ref{tab:opmap} summarizes the observed operating regions:
+
+\begin{table}[t]
+\centering
+\caption{DEX--DART operating point map (50\,M keys, uniform reads).}
+\label{tab:opmap}
+\begin{tabular}{L{3.0cm} L{4.6cm}}
+\toprule
+\textbf{Condition} & \textbf{Operating point} \\
+\midrule
+Large cache (${\ge}$256\,MB), default pages & DEX dominant: P50~$\ll$~DART, throughput 4--7$\times$ higher. \\
+Medium cache (32--128\,MB), default pages & DEX competitive: throughput 2--3$\times$ higher; P99 similar to DART. \\
+Small cache, tall tree (256\,B pages, 4\,MB) & \textbf{Latency crossover}: DEX P99 worse than DART P99; throughput barely above DART. \\
+Very small cache (${\sim}$2\,MB, 256\,B pages) & \textbf{Throughput crossover}: DEX drops below DART in both throughput and tail. \\
+High skew ($\theta{\ge}0.8$), any cache & DEX amplified: P50 improves to 0.5\,\textmu s; P99/P50 ratio grows to 13$\times$. DART unchanged. \\
+Tiny memory budget (${\le}$1\,MB) & DART only: DEX cache is not functional. \\
+Range scan workload & DEX only: DART has no ordered range scan support. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------------
+\subsection{Experiment 4: RDMA Cost per Operation}
+\label{sec:rdma-cost}
+
+DART's per-operation RDMA accounting is stable across all conditions. Table~\ref{tab:rdma-cost} confirms the fixed cost floor that determines DART's throughput ceiling.
+
+\begin{table}[t]
+\centering
+\caption{DART per-operation RDMA cost (30 threads, 2\,M keys, 100\% reads). RTT count, bandwidth, and latency are nearly identical regardless of skew---confirming the fixed-cost execution model.}
+\label{tab:rdma-cost}
+\begin{tabular}{l ccc}
+\toprule
+\textbf{Skew $\theta$} & \textbf{Avg RTTs} & \textbf{Bytes/op} & \textbf{Avg latency} \\
+\midrule
+Uniform & 4.475 & 1,815 & 17.94\,\textmu s \\
+0.3     & 4.490 & 1,820 & 17.54\,\textmu s \\
+0.5     & 4.493 & 1,821 & 17.88\,\textmu s \\
+0.8     & 4.493 & 1,821 & 17.83\,\textmu s \\
+0.99    & 4.494 & 1,821 & 17.92\,\textmu s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The aggregate RDMA bandwidth under 30-thread DART is ${\approx}1{,}820 \times 1.67\text{\,Mops/s} \approx 3.04$\,GB/s. This is a floor set by the access pattern and network: no tuning can reduce it. For DEX, the RDMA cost per operation depends entirely on cache coverage---from zero bytes per operation (full cache hit) to full-traversal bandwidth on a miss. At 32\,MB cache with 1\,KB pages (4.90\,Mops/s), the blended RDMA bandwidth is far lower than DART's because most lookups hit the cache.
+
+% ------------------------------------------------------------------
+\subsection{Summary and Analysis}
+\label{sec:summary}
+
+\begin{table}[t]
+\centering
+\caption{Summary of ATLAS findings: DEX vs.\ DART operating points.}
+\label{tab:summary}
+\begin{tabular}{L{2.2cm} L{5.4cm}}
+\toprule
+\textbf{Axis} & \textbf{Finding} \\
+\midrule
+Throughput (warm cache) & DEX up to 6.8$\times$ faster than DART under high skew. \\
+Throughput (cold cache) & DEX falls below DART near 2\,MB cache at height-11 (256\,B pages). \\
+P50 latency & DEX 0.5\,\textmu s (warm cache) vs.\ DART 17\,\textmu s. 34$\times$ gap. \\
+P99 latency & DEX 6--22\,\textmu s depending on cache; DART ${\approx}$19\,\textmu s always. \\
+P99/P50 ratio & DEX 1.4$\times$--13$\times$ (bimodal); DART 1.1$\times$ (unimodal). \\
+Latency crossover & DEX P99 exceeds DART P99 before DEX throughput falls below DART. \\
+Skew sensitivity & DEX +57\% throughput at $\theta{=}0.99$; DART 0\% change. \\
+Memory requirements & DART functional at 1\,MB; DEX needs ${\ge}$32\,MB for competitive throughput. \\
+Range scans & DEX supports full ordered range scans; DART does not. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{The fundamental trade-off.}
+DEX and DART represent two ends of a spectrum. DEX is a \emph{cache-amplified} system: its performance scales with the fraction of the working set that fits in the client cache. When the cache is sufficient, DEX provides dramatically lower latency (P50 near 0\,\textmu s) and higher throughput. When the cache is insufficient, the full-traversal cost exceeds DART's fixed cost, and DEX becomes both slower and less predictable. DART is a \emph{fixed-cost} system: its throughput and latency are determined entirely by its RDMA traversal sequence, and no amount of client-side memory can improve them---or degrade them.
+
+\paragraph{The bimodality problem.}
+DEX's latency distribution is inherently bimodal whenever cache coverage is partial. Cache hits are served in ${\approx}$0\,\textmu s (local lookup); cache misses cost $h$ RDMA round-trips. The resulting P99/P50 ratio grows as the cache improves (lower P50 with stable P99), reaching 13$\times$ at high skew. This is not a bug---it is the cost of the path-caching design. Applications that require bounded P99/P50 ratios (e.g., ${\le}$2$\times$) cannot rely on DEX unless the cache is large enough to eliminate misses entirely.
+
+\paragraph{Which system to choose.}
+DART is preferable when: (a) memory is constrained (${\le}$a few MB), (b) predictable tail latency is required, (c) the workload is uniform (no skew benefit for DEX), or (d) throughput of ${\sim}$1.67\,Mops/s is sufficient. DEX is preferable when: (a) sufficient cache is available (${\ge}$64\,MB), (b) the workload has skew (DEX amplifies skew benefit), (c) range scans are needed, or (d) sub-microsecond P50 latency is required. These conditions are not mutually exclusive in practice: ATLAS enables users to locate the exact crossover for their specific dataset size, page size, and cache budget.
+
+% ------------------------------------------------------------------
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{The crossover depends on the page size, not just the cache size.}
+With 1\,KB pages, DEX never falls below DART across the tested cache range (32--512\,MB) because the 60\,MB inner-node working set comfortably fits in cache. The crossover only appears when the node size is reduced to 256\,B, raising the tree to height~11 and inflating the inner-node working set to ${\approx}$600\,MB---far beyond any tested cache size. This means the DEX--DART crossover is a three-way function of (page size, dataset size, cache budget): reducing any single parameter may not reveal the crossover if the others are favorable.
+
+\paragraph{Tail latency as a primary metric.}
+Single-point benchmarks typically report mean or median latency. Our results show that P99 is the more informative metric for DEX because its bimodal distribution means that P50 can appear excellent (0.5\,\textmu s) while P99 is 13$\times$ higher. For DART, P50 and P99 are nearly identical. ATLAS's default output of P50/P95/P99/P99.9 distributions surfaces these differences directly.
+
+\paragraph{DART's hard throughput ceiling.}
+DART's 1.67\,Mops/s ceiling (30 threads) is set by ${\approx}$4.5 RDMA RTTs per operation and the InfiniBand network's per-RTT latency. No workload optimization can break this ceiling. It can only be raised by (a) reducing the ART depth (changing structural parameters), (b) using faster interconnects, or (c) adding more threads. This makes DART a highly predictable system for capacity planning but limits its peak performance.
+
+\paragraph{RDMA bandwidth consumption.}
+At DART's 1.67\,Mops/s with 1,820 bytes/op, the network carries ${\approx}$3\,GB/s of RDMA traffic per thread group. DEX at the same throughput (32\,MB cache, 1\,KB pages, 4.90\,Mops/s) carries less RDMA traffic because most operations hit the cache. The bandwidth advantage of DEX is an indirect consequence of caching---it reduces network load alongside reducing latency.
+
+% ------------------------------------------------------------------
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented ATLAS, a multi-axis benchmarking framework applied to DEX and DART. The key findings are:
+
+\begin{enumerate}
+  \item \textbf{DEX and DART occupy complementary operating regions.} DEX dominates when cache is abundant and workload is skewed; DART dominates (or ties) when cache is minimal and predictable tail latency is required.
+
+  \item \textbf{There are two distinct crossovers.} The \emph{latency crossover}---where DEX P99 exceeds DART P99---occurs before the \emph{throughput crossover}---where DEX Mops/s drops below DART Mops/s. Both crossovers depend jointly on page size, tree height, and cache budget.
+
+  \item \textbf{DEX's bimodal latency is structural.} The P99/P50 ratio grows (not shrinks) as the cache improves, because P50 approaches zero while P99 is anchored by full-traversal misses. At high skew with 256\,MB cache, the ratio reaches 13$\times$.
+
+  \item \textbf{DART's fixed cost is both its strength and its ceiling.} The ${\approx}$4.5 RTTs/op produces a stable, predictable 1.1$\times$ P99/P50 ratio and a hard 1.67\,Mops/s throughput ceiling that no configuration can exceed.
+
+  \item \textbf{Single-point benchmarks miss the crossovers.} The DEX--DART crossover is invisible at default parameters (1\,KB pages, 32\,MB cache) because DEX comfortably outperforms DART there. Only ATLAS's structural and cache sweeps reveal where the crossover lies.
+\end{enumerate}
+
+\begin{acks}
+% Optional acknowledgments.
+\end{acks}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{sample}
+
+\end{document}

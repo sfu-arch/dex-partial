@@ -1,0 +1,28 @@
+Commands to run (on the server)
+On 10.30.1.9 (memory node) — do this first:
+
+
+# Start memcached fresh
+sudo pkill -9 memcached 2>/dev/null; sleep 2
+sudo memcached -u root -l 0.0.0.0 -p 11211 -c 10000 -d
+sleep 2
+printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# Verify
+printf "get serverNum\r\nquit\r\n" | nc -w 2 10.30.1.9 11211
+
+# Run memory node (rpc=0, admit=1.0, cache=256MB, uniform workload)
+cd /home/apa222/dex-partial/dex/build
+sudo ./newbench_latency 2 100 0 0 0 0 18 4 256 1 0.0 50 10 50 0 1 0 0 0 1.0 0 36
+On 10.30.1.6 (compute node) — run right after:
+
+
+cd /home/apa222/dex-partial/dex/build
+sudo ./newbench_latency 2 100 0 0 0 0 18 4 256 1 0.0 50 10 50 0 1 0 0 0 1.0 0 36
+Key changes from defaults:
+
+rpc=0 (was 1) — pure one-sided RDMA
+admit=1.0 (was 0.1) — admit all pages, fill cache greedily
+early=0 (was 1) — don't stop early, run full 50M ops
+uniform=1, theta=0.0 — uniform workload

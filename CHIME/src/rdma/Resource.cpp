@@ -1,6 +1,4 @@
 #include "Rdma.h"
-#include <errno.h>
-#include <string.h>
 
 bool createContext(RdmaContext *context, uint8_t port, int gidIndex,
                    uint8_t devIndex) {
@@ -128,33 +126,13 @@ bool destoryContext(RdmaContext *context) {
 
 ibv_mr *createMemoryRegion(uint64_t mm, uint64_t mmSize, RdmaContext *ctx) {
 
-  if (!ctx) {
-    Debug::notifyError("Memory registration failed: ctx is NULL");
-    return NULL;
-  }
-  if (!ctx->pd) {
-    Debug::notifyError("Memory registration failed: ctx->pd is NULL");
-    return NULL;
-  }
-  if (!ctx->ctx) {
-    Debug::notifyError("Memory registration failed: ctx->ctx is NULL");
-    return NULL;
-  }
-  
-  Debug::notifyInfo("Registering memory: addr=%p, size=%lu MB, pd=%p", 
-                    (void*)mm, mmSize / (1024*1024), ctx->pd);
-
   ibv_mr *mr = NULL;
   mr = ibv_reg_mr(ctx->pd, (void *)mm, mmSize,
                   IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ |
                       IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_REMOTE_ATOMIC);
 
   if (!mr) {
-    Debug::notifyError("Memory registration failed: addr=%p, size=%lu MB, errno=%d (%s)", 
-                       (void*)mm, mmSize / (1024*1024), errno, strerror(errno));
-    Debug::notifyError("Check: /proc/sys/kernel/keys/maxkeys and /proc/sys/kernel/keys/maxbytes");
-  } else {
-    Debug::notifyInfo("Memory registration succeeded: lkey=%u, rkey=%u", mr->lkey, mr->rkey);
+    Debug::notifyError("Memory registration failed");
   }
 
   return mr;
