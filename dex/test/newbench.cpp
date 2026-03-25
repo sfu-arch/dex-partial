@@ -85,6 +85,74 @@ struct zipf_gen_state state;
 int uniform_workload = 0;
 uniform_key_generator_t *uniform_generator = nullptr;
 
+// ── Latency histogram (500 ns buckets, max 50 ms) ─────────────────────────
+#define LATENCY_BUCKETS        100000
+#define LATENCY_NS_GRANULARITY 500
+uint64_t read_latency_histogram[MAX_APP_THREAD][LATENCY_BUCKETS];
+uint64_t range_latency_histogram[MAX_APP_THREAD][LATENCY_BUCKETS];
+uint64_t thread_read_count[MAX_APP_THREAD];
+uint64_t thread_range_count[MAX_APP_THREAD];
+
+inline void record_read_latency(int tid, uint64_t ns) {
+  uint64_t b = ns / LATENCY_NS_GRANULARITY;
+  if (b >= LATENCY_BUCKETS) b = LATENCY_BUCKETS - 1;
+  read_latency_histogram[tid][b]++;
+  thread_read_count[tid]++;
+}
+inline void record_range_latency(int tid, uint64_t ns) {
+  uint64_t b = ns / LATENCY_NS_GRANULARITY;
+  if (b >= LATENCY_BUCKETS) b = LATENCY_BUCKETS - 1;
+  range_latency_histogram[tid][b]++;
+  thread_range_count[tid]++;
+}
+
+void save_latency_histogram(const std::string &filename,
+                            uint64_t histogram[][LATENCY_BUCKETS],
+                            int nthreads, const char *tag) {
+  uint64_t agg[LATENCY_BUCKETS] = {};
+  for (int t = 0; t < nthreads; ++t)
+    for (int i = 0; i < LATENCY_BUCKETS; ++i)
+      agg[i] += histogram[t][i];
+
+  uint64_t total = 0, sum = 0;
+  for (int i = 0; i < LATENCY_BUCKETS; ++i) { total += agg[i]; sum += agg[i] * i; }
+  if (total == 0) { printf("No %s samples\n", tag); return; }
+
+  double avg = (double)sum / total;
+  uint64_t p50=0,p90=0,p95=0,p99=0,p999=0, cum=0;
+  for (int i = 0; i < LATENCY_BUCKETS; ++i) {
+    cum += agg[i];
+    if (!p50  && cum >= total*0.500) p50  = i;
+    if (!p90  && cum >= total*0.900) p90  = i;
+    if (!p95  && cum >= total*0.950) p95  = i;
+    if (!p99  && cum >= total*0.990) p99  = i;
+    if (!p999 && cum >= total*0.999) p999 = i;
+  }
+#define NS(b) ((b)*LATENCY_NS_GRANULARITY)
+  printf("\n===== DEX %s LATENCY =====\n", tag);
+  printf("ops=%lu  avg=%.0f ns\n", total, avg*LATENCY_NS_GRANULARITY);
+  printf("P50=%lu  P90=%lu  P95=%lu  P99=%lu  P99.9=%lu  (ns)\n",
+         NS(p50),NS(p90),NS(p95),NS(p99),NS(p999));
+  printf("==========================\n\n");
+#undef NS
+
+  std::ofstream f(filename);
+  if (!f) { printf("ERROR: cannot write %s\n", filename.c_str()); return; }
+  f << "# DEX Latency - " << tag << " (ns)\n"
+    << "# ops=" << total << " avg=" << avg*LATENCY_NS_GRANULARITY << " ns\n"
+    << "# P50=" << p50*LATENCY_NS_GRANULARITY
+    << " P90=" << p90*LATENCY_NS_GRANULARITY
+    << " P95=" << p95*LATENCY_NS_GRANULARITY
+    << " P99=" << p99*LATENCY_NS_GRANULARITY
+    << " P99.9=" << p999*LATENCY_NS_GRANULARITY << " ns\n"
+    << "# latency_ns\tcount\n";
+  for (int i = 0; i < LATENCY_BUCKETS; ++i)
+    if (agg[i]) f << i*LATENCY_NS_GRANULARITY << "\t" << agg[i] << "\n";
+  f.close();
+  printf("Saved: %s\n", filename.c_str());
+}
+// ── end latency helpers ────────────────────────────────────────────────────
+
 // std::vector<double> admission_rate_vec = {1,   0.8,  0.6,  0.4,   0.2,
 //                                           0.1, 0.05, 0.01, 0.001, 0};
 std::vector<double> admission_rate_vec = {1, 0.8, 0.4, 0.2, 0.1, 0.05, 0.01, 0};
