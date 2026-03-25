@@ -52,6 +52,18 @@ DISTRIBUTIONS=(
     "zipf0.99  0  0.99"
 )
 
+MEMC_HOST=10.30.1.9   # memcached server IP for counter reset
+
+# Reset memcached and zero the serverNum/clientNum counters so the next run
+# can complete its rendezvous cleanly.  Called AFTER each benchmark binary exits.
+flush_memc() {
+    sudo pkill -9 memcached 2>/dev/null; sleep 2
+    sudo memcached -u root -l 0.0.0.0 -p 11211 -c 10000 -d
+    sleep 2
+    printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 "$MEMC_HOST" 11211
+    printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 "$MEMC_HOST" 11211
+}
+
 echo "======================================================="
 echo " DEX B+ Tree | inner=256B(f=11) leaf=512B(cap=26) | depth≈10 | bulk=50M"
 echo " Cache sweep: ${CACHES[*]} MB"
@@ -80,6 +92,7 @@ run_one() {
         $CORRECT $TIMEBASED $EARLYSTOP \
         $INDEX $RPC_RATE $ADMIT_RATE $AUTOTUNE $MAX_THREADS
     echo "[SWEEP_END] op=${label} cache=${cache}MB"
+    flush_memc
     echo ""
     sleep 3
 }
@@ -160,6 +173,7 @@ run_latency() {
     [ -f dex_range_latency.dat ] && mv dex_range_latency.dat "latency_results/${tag}_range.dat"
 
     echo "--- [LATENCY] done: ${label} → latency_results/${tag}_{read,range}.dat ---"
+    flush_memc
     echo ""
     sleep 3
 }
