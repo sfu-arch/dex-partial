@@ -14,6 +14,10 @@
 #include "rdma/rdma.hpp"
 #include "ycsb/ycsb.hpp"
 #include "prheart/prheart.hpp"
+#include "race/generator.h"
+#include "microbench/uniform_generator.h"
+#include "microbench/uniform.h"
+#include "microbench/zipf.h"
 
 // some factors here
 // #define LEVEL_COUNT
@@ -40,6 +44,20 @@ DEFINE_uint64(nic_index, 0, "index of nic");
 DEFINE_uint64(ib_port, 1, "port of ib");
 DEFINE_uint64(numa_node_total_num, 2, "total groups of numa node");
 DEFINE_uint64(numa_node_group, 0, "group of numa node");
+
+// Microbenchmark flags (used when monitor sends test_func=1)
+DEFINE_uint32(mb_read_ratio,   100, "microbench read ratio (0-100, must sum to 100 with others)");
+DEFINE_uint32(mb_insert_ratio,   0, "microbench insert ratio (0-100)");
+DEFINE_uint32(mb_update_ratio,   0, "microbench update ratio (0-100)");
+DEFINE_uint32(mb_delete_ratio,   0, "microbench delete ratio (0-100)");
+DEFINE_uint32(mb_range_ratio,    0, "microbench range scan ratio (0-100)");
+DEFINE_uint64(mb_bulk_load_num, 10000000, "microbench bulk-load key count");
+DEFINE_uint64(mb_warmup_num,     5000000, "microbench warmup op count (total across all threads)");
+DEFINE_uint64(mb_op_num,        10000000, "microbench benchmark op count (total across all threads)");
+DEFINE_bool  (mb_uniform,         false,  "use uniform distribution (false = zipfian)");
+DEFINE_double(mb_zipfian,          0.99,  "zipfian theta");
+DEFINE_uint32(mb_scan_num,          100,  "range scan count per Range op");
+DEFINE_uint32(mb_node_id,             0,  "compute node id (for workload partitioning seed)");
 
 bool is_email = false;
 
@@ -406,6 +424,322 @@ void dfs(
     prheart_tree.cal_cost(is_email);
 }
 
+// ============================================================
+// Microbenchmark infrastructure
+// ============================================================
+
+// --- op type encoding (packed into high 8 bits of key entry) ---
+enum class mb_op_t : uint8_t { Insert = 0, Update = 1, Lookup = 2, Delete = 3, Range = 4 };
+static constexpr uint64_t MB_OP_MASK = (1ULL << 56) - 1;
+
+// --- global workload state ---
+static uint64_t g_mb_key_space        = 0;
+static uint64_t g_mb_bulk_load_num    = 0;
+static uint64_t g_mb_thread_op_num    = 0;
+static uint64_t g_mb_thread_warmup_num = 0;
+static uint64_t *g_mb_bulk_array      = nullptr;
+static uint64_t *g_mb_warmup_array    = nullptr;
+static uint64_t *g_mb_workload_array  = nullptr;
+
+// --- key helpers ---
+// Scramble raw distribution index with FNV hash to avoid sequential key patterns.
+inline uint64_t mb_to_key(uint64_t raw) {
+    return (RACE::FNVHash64(raw) + 1) % g_mb_key_space;
+}
+
+// Encode uint64_t as 8-byte big-endian span (so ART ordering matches numeric order).
+inline span mb_make_span_be(uint64_t k, uint8_t buf[8]) {
+    const uint8_t *p = reinterpret_cast<const uint8_t *>(&k);
+    for (int i = 0; i < 8; i++) buf[i] = p[7 - i];
+    return span(buf, 8);
+}
+
+// --- workload generation ---
+// Called once from main() before spawning worker threads.
+void mb_generate_workload(uint32_t kThreadCount) {
+    assert(FLAGS_mb_read_ratio + FLAGS_mb_insert_ratio + FLAGS_mb_update_ratio +
+           FLAGS_mb_delete_ratio + FLAGS_mb_range_ratio == 100);
+
+    g_mb_thread_op_num     = FLAGS_mb_op_num    / kThreadCount;
+    g_mb_thread_warmup_num = FLAGS_mb_warmup_num / kThreadCount;
+    g_mb_bulk_load_num     = FLAGS_mb_bulk_load_num;
+
+    uint64_t node_op_num     = g_mb_thread_op_num     * kThreadCount;
+    uint64_t node_warmup_num = g_mb_thread_warmup_num * kThreadCount;
+
+    // Key space: enough for bulk load + inserts from warmup + run
+    g_mb_key_space = g_mb_bulk_load_num +
+        (uint64_t)((FLAGS_mb_op_num + FLAGS_mb_warmup_num) * (FLAGS_mb_insert_ratio / 100.0)) + 1000;
+
+    log_info << "Microbench: key_space=" << g_mb_key_space
+             << " bulk=" << g_mb_bulk_load_num
+             << " warmup=" << node_warmup_num
+             << " ops=" << node_op_num << std::endl;
+
+    // Build shuffled space array and extract bulk-load slice
+    uint64_t *space_array = new uint64_t[g_mb_key_space];
+    for (uint64_t i = 0; i < g_mb_key_space; i++) space_array[i] = i;
+    std::mt19937 gen(0xc70f6907UL + FLAGS_mb_node_id);
+    std::shuffle(space_array, space_array + g_mb_key_space, gen);
+
+    g_mb_bulk_array = new uint64_t[g_mb_bulk_load_num];
+    memcpy(g_mb_bulk_array, space_array, sizeof(uint64_t) * g_mb_bulk_load_num);
+    delete[] space_array;
+
+    // Seed for distribution generators
+    uint64_t seed = (uint64_t)std::chrono::high_resolution_clock::now()
+                        .time_since_epoch().count() ^ (uint64_t)FLAGS_mb_node_id;
+
+    // Init key generator
+    zipf_gen_state zip_state{};
+    uniform_key_generator_t *uniform_gen = nullptr;
+    if (FLAGS_mb_uniform) {
+        uniform_gen = new uniform_key_generator_t(g_mb_key_space);
+    } else {
+        uint64_t zseed = seed & ((1UL << 48) - 1);
+        if (zseed == 0) zseed = 1;
+        mehcached_zipf_init(&zip_state, g_mb_key_space, FLAGS_mb_zipfian, zseed);
+    }
+
+    // Op boundary marks (cumulative percentages)
+    uint32_t read_mark   = FLAGS_mb_read_ratio;
+    uint32_t insert_mark = read_mark   + FLAGS_mb_insert_ratio;
+    uint32_t update_mark = insert_mark + FLAGS_mb_update_ratio;
+    uint32_t delete_mark = update_mark + FLAGS_mb_delete_ratio;
+
+    UniformRandom rng(seed);
+
+    auto gen_raw_key = [&]() -> uint64_t {
+        if (FLAGS_mb_uniform)
+            return uniform_gen->next_id() % g_mb_key_space;
+        else
+            return mehcached_zipf_next(&zip_state);
+    };
+
+    auto make_entry = [&](uint64_t raw_k, uint32_t rn) -> uint64_t {
+        mb_op_t op;
+        if      (rn < read_mark)   op = mb_op_t::Lookup;
+        else if (rn < insert_mark) op = mb_op_t::Insert;
+        else if (rn < update_mark) op = mb_op_t::Update;
+        else if (rn < delete_mark) op = mb_op_t::Delete;
+        else                       op = mb_op_t::Range;
+        return raw_k | (static_cast<uint64_t>(op) << 56);
+    };
+
+    g_mb_warmup_array = new uint64_t[node_warmup_num];
+    for (uint64_t i = 0; i < node_warmup_num; i++)
+        g_mb_warmup_array[i] = make_entry(gen_raw_key(), rng.next_uint32() % 100);
+
+    g_mb_workload_array = new uint64_t[node_op_num];
+    for (uint64_t i = 0; i < node_op_num; i++)
+        g_mb_workload_array[i] = make_entry(gen_raw_key(), rng.next_uint32() % 100);
+
+    if (uniform_gen) delete uniform_gen;
+    log_info << "Microbench workload generation done." << std::endl;
+}
+
+// --- microbench bulk-load thread ---
+// Inserts each thread's slice of g_mb_bulk_array into the tree.
+void test_mb_load(
+    uint32_t memory_machine_num,
+    uint32_t compute_machine_num,
+    uint32_t total_thread_num,
+    uint32_t used_thread_num,
+    uint32_t coro_num,
+    uint32_t compute_index,
+    uint32_t thread_index,
+    uint32_t payload_byte,
+    uint32_t epoch_num,
+    uint32_t percent_num,
+    uint32_t bucket_num,
+    RDMA::RDMAConnection *memory_connections,
+    counter::TimeCounter &time_counter,
+    YCSB::FileLoader & /*unused*/,
+    YCSB::FileLoader & /*unused*/,
+    std::vector<RACE::Client *> race_cli,
+    std::vector<RACE::rdma_client *> rdma_cli
+) {
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(thread_index * FLAGS_numa_node_total_num + FLAGS_numa_node_group, &mask);
+    sched_setaffinity(0, sizeof(mask), &mask);
+
+    DM::DisaggregatedMemoryController dmc(
+        memory_connections,
+        memory_machine_num, compute_machine_num, total_thread_num,
+        compute_index, thread_index
+    );
+    if (!dmc.check_local_memory()) {
+        log_error << "mb_load: local memory check error" << std::endl;
+        return;
+    }
+
+    prheart::PrheartTree prheart_tree(
+        &dmc,
+        dmc.get_root_start_fptr(),
+        dmc.get_alloc_start_fptr(), dmc.get_alloc_end_fptr(),
+        dmc.get_local_start_ptr(),
+        dmc.get_local_start_ptr() + dmc.get_local_size(),
+        bucket_num, NULL,
+        race_cli, rdma_cli,
+        memory_machine_num
+    );
+
+    if (alloced_before[thread_index])
+        prheart_tree.alloc_now_fptr = alloc_now_pos[thread_index];
+
+    if (rdma_cli.size() == memory_machine_num) {
+        for (int i = 0; i < (int)memory_machine_num; ++i)
+            if (rdma_cli[i])
+                rdma_cli[i]->run(race_cli[i]->start(used_thread_num));
+    }
+
+    // Each thread inserts its contiguous slice of the bulk array
+    uint64_t per_thread = g_mb_bulk_load_num / used_thread_num;
+    uint64_t load_start = thread_index * per_thread;
+    uint64_t load_end   = (thread_index == used_thread_num - 1)
+                          ? g_mb_bulk_load_num
+                          : load_start + per_thread;
+
+    for (uint64_t i = load_start; i < load_end; i++) {
+        uint64_t k = mb_to_key(g_mb_bulk_array[i]);
+        uint8_t key_buf[8], val_buf[8];
+        span key_span = mb_make_span_be(k, key_buf);
+        span val_span = mb_make_span_be(k + 1, val_buf);
+        prheart_tree.insert(key_span, val_span);
+    }
+
+    alloc_now_pos[thread_index]  = prheart_tree.alloc_now_fptr;
+    alloced_before[thread_index] = true;
+
+    if (rdma_cli.size() == memory_machine_num) {
+        for (int i = 0; i < (int)memory_machine_num; ++i)
+            if (rdma_cli[i])
+                rdma_cli[i]->run(race_cli[i]->stop());
+    }
+}
+
+// --- microbench run thread ---
+// Runs warmup phase, then the timed benchmark phase using pre-generated arrays.
+void test_mb_run(
+    uint32_t memory_machine_num,
+    uint32_t compute_machine_num,
+    uint32_t total_thread_num,
+    uint32_t used_thread_num,
+    uint32_t coro_num,
+    uint32_t compute_index,
+    uint32_t thread_index,
+    uint32_t payload_byte,
+    uint32_t epoch_num,
+    uint32_t percent_num,
+    uint32_t bucket_num,
+    RDMA::RDMAConnection *memory_connections,
+    counter::TimeCounter &time_counter,
+    YCSB::FileLoader & /*unused*/,
+    YCSB::FileLoader & /*unused*/,
+    std::vector<RACE::Client *> race_cli,
+    std::vector<RACE::rdma_client *> rdma_cli
+) {
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(thread_index * FLAGS_numa_node_total_num + FLAGS_numa_node_group, &mask);
+    sched_setaffinity(0, sizeof(mask), &mask);
+
+    DM::DisaggregatedMemoryController dmc(
+        memory_connections,
+        memory_machine_num, compute_machine_num, total_thread_num,
+        compute_index, thread_index
+    );
+    if (!dmc.check_local_memory()) {
+        log_error << "mb_run: local memory check error" << std::endl;
+        return;
+    }
+
+    prheart::PrheartTree prheart_tree(
+        &dmc,
+        dmc.get_root_start_fptr(),
+        dmc.get_alloc_start_fptr(), dmc.get_alloc_end_fptr(),
+        dmc.get_local_start_ptr(),
+        dmc.get_local_start_ptr() + dmc.get_local_size(),
+        bucket_num, NULL,
+        race_cli, rdma_cli,
+        memory_machine_num
+    );
+
+    rtt = access_size = 0;
+    if (alloced_before[thread_index])
+        prheart_tree.alloc_now_fptr = alloc_now_pos[thread_index];
+
+    if (rdma_cli.size() == memory_machine_num) {
+        for (int i = 0; i < (int)memory_machine_num; ++i)
+            if (rdma_cli[i])
+                rdma_cli[i]->run(race_cli[i]->start(used_thread_num));
+    }
+
+    // Helper: execute one packed op entry against the tree
+    auto execute_op = [&](uint64_t packed) {
+        mb_op_t cur_op = static_cast<mb_op_t>(packed >> 56);
+        uint64_t raw_k  = packed & MB_OP_MASK;
+        uint64_t k      = mb_to_key(raw_k);
+        uint8_t key_buf[8], val_buf[8], end_buf[8];
+        span key_span = mb_make_span_be(k, key_buf);
+
+        switch (cur_op) {
+        case mb_op_t::Lookup:
+            prheart_tree.search(key_span);
+            break;
+        case mb_op_t::Insert: {
+            span val_span = mb_make_span_be(k + 1, val_buf);
+            prheart_tree.insert(key_span, val_span);
+        } break;
+        case mb_op_t::Update: {
+            span val_span = mb_make_span_be(k + 1, val_buf);
+            prheart_tree.update(key_span, val_span);
+        } break;
+        case mb_op_t::Delete:
+            prheart_tree.remove(key_span);
+            break;
+        case mb_op_t::Range: {
+            // Scan from k to k+scan_num in key space
+            span end_span = mb_make_span_be(k + FLAGS_mb_scan_num, end_buf);
+            vec<str> result_vec;
+            prheart_tree.scan(key_span, end_span, result_vec);
+        } break;
+        }
+    };
+
+    // --- Warmup phase (untimed) ---
+    uint64_t *my_warmup = g_mb_warmup_array + thread_index * g_mb_thread_warmup_num;
+    for (uint64_t i = 0; i < g_mb_thread_warmup_num; i++)
+        execute_op(my_warmup[i]);
+
+    // --- Timed benchmark phase ---
+    time_counter.reset_time_counter();
+    time_counter.start();
+
+    uint64_t *my_work = g_mb_workload_array + thread_index * g_mb_thread_op_num;
+    for (uint64_t i = 0; i < g_mb_thread_op_num; i++)
+        execute_op(my_work[i]);
+
+    alloc_now_pos[thread_index]  = prheart_tree.alloc_now_fptr;
+    alloced_before[thread_index] = true;
+
+    time_counter.stop();
+    time_counter.add_event_count(g_mb_thread_op_num);
+    time_counter.set_rtt_count(rtt);
+    time_counter.set_band_count(access_size);
+
+    if (rdma_cli.size() == memory_machine_num) {
+        for (int i = 0; i < (int)memory_machine_num; ++i)
+            if (rdma_cli[i])
+                rdma_cli[i]->run(race_cli[i]->stop());
+    }
+}
+
+// ============================================================
+// end microbenchmark infrastructure
+// ============================================================
+
 int main(int argc, char** argv) {
 
     InstallSignalHandlers();
@@ -524,8 +858,10 @@ int main(int argc, char** argv) {
 #endif
     
     // choose the test function
+    // index 0 = YCSB (file-based), index 1 = microbench (in-memory generated)
     fnType* test_func_list[] = {
-    test_ycsb_run
+        test_ycsb_run,
+        test_mb_run
     };
     fnType* test_func = test_func_list[test_func_num];
 
@@ -766,11 +1102,105 @@ int main(int argc, char** argv) {
         log_warn << "prepare done, start to run" << std::endl;
     }
 
+    // --- microbench load / prepare path ---
+    else if (test_func == test_mb_run) {
+        // Generate the in-memory workload before spawning worker threads
+        mb_generate_workload(run_thread_num);
+
+        // Bulk-load phase
+        log_warn << "microbench bulk-load start" << std::endl;
+        {
+            std::vector<std::thread> load_threads;
+            for (uint32_t thread_ind = 0; thread_ind < load_thread_num; ++thread_ind) {
+                load_threads.emplace_back(
+                    test_mb_load,
+                    memory_machine_num,
+                    compute_machine_num,
+                    thread_num_per_compute,
+                    load_thread_num,
+                    1,  // coro_num=1 for load
+                    com_ind,
+                    thread_ind,
+                    payload_byte, epoch_num, percent_num, bucket_num,
+                    &rdma_conn_list[mem_thre_di(0, thread_ind)],
+                    std::ref(tc_list[thread_ind]),
+                    std::ref(file_loader_load),
+                    std::ref(file_loader_run),
+                    std::vector<RACE::Client*>(),
+                    std::vector<RACE::rdma_client*>()
+                );
+            }
+            for (auto& t : load_threads) t.join();
+        }
+        for (uint32_t i = 0; i < thread_num_per_compute; ++i) {
+            for (uint32_t j = 0; j < memory_machine_num; ++j)
+                rdma_conn_list[mem_thre_di(j, i)].reset_usage();
+            tc_list[i].reset_time_counter();
+        }
+
+        result = sock_conn.sock_send_u32(600);
+        if (!result) {
+            log_error << "mb: send 600 error" << std::endl;
+            sock_conn.disconnect();
+            delete[] rdma_conn_list;
+            delete[] tc_list;
+            return 0;
+        }
+        uint32_t run_sig = 0;
+        result = sock_conn.sock_read_u32(run_sig);
+        if (run_sig != 700) {
+            log_error << "mb: cannot start prepare, monitor sent " << run_sig << std::endl;
+            sock_conn.disconnect();
+            delete[] rdma_conn_list;
+            delete[] tc_list;
+            return 0;
+        }
+        log_warn << "microbench bulk-load done, start to prepare" << std::endl;
+
+        #ifdef SKIP_TABLE
+        if (com_ind == 0) {
+            create_skip_table(
+                memory_machine_num,
+                compute_machine_num,
+                thread_num_per_compute,
+                load_thread_num,
+                1,
+                com_ind,
+                0,
+                bucket_num,
+                &rdma_conn_list[mem_thre_di(0, 0)],
+                (std::vector<RACE::Client*>)clis[0],
+                rdma_clis[0]
+            );
+            log_info << "mb: skip list done!" << std::endl;
+        }
+        #endif
+
+        result = sock_conn.sock_send_u32(800);
+        if (!result) {
+            log_error << "mb: send 800 error" << std::endl;
+            sock_conn.disconnect();
+            delete[] rdma_conn_list;
+            delete[] tc_list;
+            return 0;
+        }
+        run_sig = 0;
+        result = sock_conn.sock_read_u32(run_sig);
+        if (run_sig != 900) {
+            log_error << "mb: cannot start run, monitor sent " << run_sig << std::endl;
+            sock_conn.disconnect();
+            delete[] rdma_conn_list;
+            delete[] tc_list;
+            return 0;
+        }
+        log_warn << "microbench prepare done, start to run" << std::endl;
+    }
+
     // create threads
     std::vector<std::thread> threads;
     for (uint32_t thread_ind = 0; thread_ind < run_thread_num; ++thread_ind) {
         threads.emplace_back(
-            test_ycsb_run,
+            test_func,
             memory_machine_num,
             compute_machine_num,
             thread_num_per_compute,
@@ -801,8 +1231,7 @@ int main(int argc, char** argv) {
 
 
     // collect and show results
-    if (test_func == test_ycsb_run) {
-        uint64_t all_count = 0;
+    if (test_func == test_ycsb_run || test_func == test_mb_run) {
         for (uint32_t i = 0; i < run_thread_num; ++i) {
             tc.add_event_count(tc_list[i].get_event_count());
             tc.add_all_time_cost(tc_list[i].get_all_time());
@@ -810,10 +1239,6 @@ int main(int argc, char** argv) {
         }
         log_info << tc.time_event_str() << std::endl;
         log_info << tc.throughput_latency_str() << std::endl;
-    }
-
-
-    if (test_func == test_ycsb_run) {
         log_info << "ALL: throughput = " << tc.get_throughput_MOps() << " MOps" << std::endl;
         log_info << "ALL: latency = " << tc.get_latency_us() << " us" << std::endl;
         sock_conn.sock_send_double(tc.get_throughput_MOps());
@@ -825,6 +1250,14 @@ int main(int argc, char** argv) {
         sock_conn.sock_send_double(0);
         sock_conn.sock_send_double(0);
         sock_conn.sock_send_double(0);
+    }
+
+    // Free microbench workload arrays if used
+    if (test_func == test_mb_run) {
+        delete[] g_mb_bulk_array;
+        delete[] g_mb_warmup_array;
+        delete[] g_mb_workload_array;
+        g_mb_bulk_array = g_mb_warmup_array = g_mb_workload_array = nullptr;
     }
 
     // wait for the end

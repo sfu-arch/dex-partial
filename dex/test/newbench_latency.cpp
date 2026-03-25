@@ -706,29 +706,30 @@ int main(int argc, char *argv[]) {
     }
     
     ready_to_report.store(true);
-    
-    // Wait for all threads to complete
+
+    // Monitor: print [DEX] cache miss stats every 2s while workers run
     while (worker.load() != 0) {
-      sleep(1);
+      sleep(2);
+      if (node_id == 0 && worker.load() != 0)
+        tree->get_statistic();
     }
-    
+
     for (int i = 0; i < kThreadCount; i++) {
       th[i].join();
     }
-    
+
     uint64_t total_throughput = 0;
     for (int i = 0; i < kThreadCount; ++i) {
       total_throughput += total_tp[i];
     }
-    
+
     total_cluster_tp = dsm->sum_total(total_throughput, CNodeCount, false);
-    
-    // Save per-op latency histograms (only on node 0)
+
+    // Save per-op latency histograms and print final stats (node 0 only)
     if (node_id == 0) {
       save_latency_histogram("dex_read_latency.dat", read_latency_histogram, kThreadCount, "Read");
       save_latency_histogram("dex_range_latency.dat", range_latency_histogram, kThreadCount, "Range");
-      
-      // Print aggregate counts
+
       uint64_t total_reads = 0, total_ranges = 0;
       for (int i = 0; i < kThreadCount; ++i) {
         total_reads += thread_read_count[i];
@@ -736,6 +737,41 @@ int main(int argc, char *argv[]) {
       }
       printf("Total reads: %lu, Total ranges: %lu\n", total_reads, total_ranges);
       printf("Final cluster throughput: %.3f Mops/s\n", total_cluster_tp / 1e6);
+
+      // Final [DEX] cache miss snapshot
+      tree->get_statistic();
+
+      // RDMA statistics (mirrors newbench output for grep compatibility)
+      uint64_t ops          = execute_op.load();
+      uint64_t rdma_read_num  = dsm->get_rdma_read_num();
+      uint64_t rdma_write_num = dsm->get_rdma_write_num();
+      uint64_t rdma_read_time = dsm->get_rdma_read_time();
+      uint64_t rdma_write_time= dsm->get_rdma_write_time();
+      int64_t  rdma_read_size = dsm->get_rdma_read_size();
+      uint64_t rdma_write_size= dsm->get_rdma_write_size();
+      uint64_t rdma_cas_num   = dsm->get_rdma_cas_num();
+      uint64_t rdma_rpc_num   = dsm->get_rdma_rpc_num();
+      std::cout << "Avg. rdma read time(ms) = "
+                << static_cast<double>(rdma_read_time) / 1000 / rdma_read_num << "\n";
+      std::cout << "Avg. rdma write time(ms) = "
+                << static_cast<double>(rdma_write_time) / 1000 / rdma_write_num << "\n";
+      std::cout << "Avg. rdma read / op = "
+                << static_cast<double>(rdma_read_num) / ops << "\n";
+      std::cout << "Avg. rdma write / op = "
+                << static_cast<double>(rdma_write_num) / ops << "\n";
+      std::cout << "Avg. rdma cas / op = "
+                << static_cast<double>(rdma_cas_num) / ops << "\n";
+      std::cout << "Avg. rdma rpc / op = "
+                << static_cast<double>(rdma_rpc_num) / ops << "\n";
+      std::cout << "Avg. all rdma / op = "
+                << static_cast<double>(rdma_read_num + rdma_write_num +
+                                       rdma_cas_num + rdma_rpc_num) / ops << "\n";
+      std::cout << "Avg. rdma read size/ op = "
+                << static_cast<double>(rdma_read_size) / ops << "\n";
+      std::cout << "Avg. rdma write size / op = "
+                << static_cast<double>(rdma_write_size) / ops << "\n";
+      std::cout << "Avg. rdma RW size / op = "
+                << static_cast<double>(rdma_read_size + rdma_write_size) / ops << "\n";
     }
   }
 
