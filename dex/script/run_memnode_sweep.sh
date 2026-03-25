@@ -2,18 +2,16 @@
 # Memory node sweep -- mirrors run_bp_sweep.sh on the compute node exactly.
 #
 # HOW IT WORKS:
-#   1. After each experiment the compute node calls flush_memc which sets
-#      serverNum=0 in memcached.  This script polls for that reset as the
-#      signal to start the next binary.
-#   2. After the binary exits this script resets the counters via nc (no
-#      local memcached restart -- memcached lives on the compute node).
+#   Mirrors run_other.sh: just launches ./newbench for each experiment.
+#   DSMKeeper's serverEnter()/serverConnect() handle rendezvous internally.
+#   The compute node (run_bp_sweep.sh) resets memcached counters before each
+#   run, so it always gets ID 0.  This script's binary gets ID 1.
 #
 # USAGE:
-#   On memory node:  ./run_memnode_sweep.sh
-#   On compute node: ./run_bp_sweep.sh        (start roughly at same time)
+#   On compute node: ./run_bp_sweep.sh
+#   On memory node:  ./run_memnode_sweep.sh   (start roughly at same time)
 #
-# The memory node binary will wait in DSMKeeper until the compute node
-# connects, so exact timing is not critical -- just start within ~60s.
+# Start order does not matter — DSMKeeper waits for all nodes internally.
 
 NODENUM=2
 MEM_THREADS=4
@@ -45,42 +43,6 @@ DISTRIBUTIONS=(
 
 LOGFILE="memnode_sweep_$(date +%Y%m%d_%H%M).log"
 
-# ── helpers ───────────────────────────────────────────────────────────────
-
-# Read serverNum from memcached
-get_server_num() {
-    printf "get serverNum\r\n" \
-        | nc -w 2 "$MEMC_HOST" "$MEMC_PORT" 2>/dev/null \
-        | awk '/^[0-9]/{print $1; exit}'
-}
-
-# Block until compute node's flush_memc has set serverNum=0
-wait_for_reset() {
-    echo "[MEM] waiting for serverNum=0 (compute flush) ..."
-    local waited=0
-    while true; do
-        local val
-        val=$(get_server_num)
-        if [ "$val" = "0" ]; then
-            echo "[MEM] reset detected after ${waited}s"
-            break
-        fi
-        sleep 1
-        (( waited++ ))
-        if (( waited % 10 == 0 )); then
-            echo "[MEM] still waiting... serverNum=${val}"
-        fi
-    done
-    # Give compute node time to finish restartMemc before we register
-    sleep 2
-}
-
-# After our binary exits: reset counters via nc only (no local memcached)
-flush_counters() {
-    printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 "$MEMC_HOST" "$MEMC_PORT"
-    printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 "$MEMC_HOST" "$MEMC_PORT"
-}
-
 # ── per-experiment runner ─────────────────────────────────────────────────
 
 run_exp() {
@@ -90,8 +52,6 @@ run_exp() {
     local uni="$4"
     local theta="$5"
     local cache="$6"
-
-    wait_for_reset
 
     echo "[MEM][START] op=${label} cache=${cache}MB uni=${uni} theta=${theta}"
     sudo ./newbench \
@@ -104,9 +64,9 @@ run_exp() {
         $INDEX $RPC_RATE $ADMIT_RATE $AUTOTUNE $MAX_THREADS
     echo "[MEM][END]   op=${label} cache=${cache}MB"
 
-    # Reset counters so next wait_for_reset starts from a known state
-    flush_counters
-    sleep 3
+    # No counter reset here — compute node handles that before each run.
+    # Just sleep briefly to let both sides finish cleanly.
+    sleep 10
 }
 
 # ── main ─────────────────────────────────────────────────────────────────

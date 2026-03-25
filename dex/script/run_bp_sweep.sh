@@ -45,9 +45,8 @@ mkdir -p latency_results
 echo "Logging to: ${LOGFILE}"
 
 flush_memc() {
-    sudo pkill -9 memcached 2>/dev/null; sleep 2
-    sudo memcached -u root -l 0.0.0.0 -p 11211 -c 10000 -d
-    sleep 2
+    # Reset rendezvous counters on the remote memcached (like restartMemc.sh).
+    # Memcached lives on 10.30.1.9 — do NOT kill/restart locally.
     printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 "$MEMC_HOST" 11211
     printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 "$MEMC_HOST" 11211
 }
@@ -62,7 +61,9 @@ run_one() {
     local tag="$7"
 
     echo "[SWEEP] op=${label} cache=${cache}MB inner=${INNER_NODE_SIZE}B leaf=${LEAF_NODE_SIZE}B uni=${uni} theta=${theta}"
-    # Reset memcached counters so memory node's wait_for_reset() fires
+    # Reset counters before launching (like run.sh's restartMemc.sh).
+    # Binary's serverEnter() will increment serverNum 0→1 and get ID 0.
+    # Memory node's binary then increments 1→2 and gets ID 1.
     flush_memc
     sleep 2
     sudo ./newbench \
@@ -78,7 +79,6 @@ run_one() {
     [ -f dex_range_latency.dat ] && mv dex_range_latency.dat "latency_results/${tag}_range.dat"
 
     echo "[SWEEP_END] op=${label} cache=${cache}MB"
-    flush_memc
     echo ""
     sleep 3
 }
