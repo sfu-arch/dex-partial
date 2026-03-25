@@ -45,8 +45,9 @@ mkdir -p latency_results
 echo "Logging to: ${LOGFILE}"
 
 flush_memc() {
-    # Reset rendezvous counters on the remote memcached (like restartMemc.sh).
-    # Memcached lives on 10.30.1.9 — do NOT kill/restart locally.
+    sudo pkill -9 memcached 2>/dev/null; sleep 2
+    sudo memcached -u root -l 0.0.0.0 -p 11211 -c 10000 -d
+    sleep 2
     printf "set serverNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 "$MEMC_HOST" 11211
     printf "set clientNum 0 0 1\r\n0\r\nquit\r\n" | nc -w 2 "$MEMC_HOST" 11211
 }
@@ -79,6 +80,7 @@ run_one() {
     [ -f dex_range_latency.dat ] && mv dex_range_latency.dat "latency_results/${tag}_range.dat"
 
     echo "[SWEEP_END] op=${label} cache=${cache}MB"
+    flush_memc
     echo ""
     sleep 3
 }
