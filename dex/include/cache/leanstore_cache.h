@@ -677,7 +677,9 @@ public:
 
       int ret_flag = 1;
       if (ret <= 0) {
-        assert(rpc_type == RPC_type::INSERT);
+        // Any RPC type can return <=0 under SMO race (node changed mid-flight).
+        // INSERT returns -1 when leaf is full; LOOKUP/UPDATE/DELETE return <=0
+        // when the target node was split/merged concurrently. Caller retries.
         ret_flag = -1;
       } else if (ret == 1) {
         success = true;
@@ -747,7 +749,7 @@ public:
 
       int ret_flag = 1;
       if (ret <= 0) {
-        assert(rpc_type == RPC_type::INSERT);
+        // Any RPC type can return <=0 under SMO race; caller retries.
         ret_flag = -1;
       } else if (ret == 1) {
         success = true;

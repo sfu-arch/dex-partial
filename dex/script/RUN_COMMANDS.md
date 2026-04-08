@@ -156,35 +156,41 @@ Both nodes run the **same binary** (`newbench`). Node ID is assigned by memcache
 connection order — whoever connects first gets ID 0 (compute), second gets ID 1 (memory).
 
 ```bash
+# Argument positions (22 args after binary name = argc 23):
+#   nodecount R I U D Rng  threads mem_t cache  uni theta  bulk warm run  chk tb es  idx rpc admit tune maxth
+
 # Memory node — start FIRST (waits in DSMKeeper until compute connects)
-sudo ./newbench 2 100 0 0 0 0 36 4 128 1 0.99 50 10 50 0 1 0 0 0 0.1 0 36
+sudo ./newbench 2 100 0 0 0 0  36 4 128  1 0.99  50 10 50  0 1 0  0 0 0.1 0  36
 
 # Compute node — start within ~60 s of memory node
 ./restartMemc.sh
-sudo ./newbench 2 100 0 0 0 0 36 4 128 1 0.99 50 10 50 0 1 0 0 0 0.1 0 36
+sudo ./newbench 2 100 0 0 0 0  36 4 128  1 0.99  50 10 50  0 1 0  0 0 0.1 0  36
 
 # Point lookup, zipf θ=0.99, 256 MB cache
-sudo ./newbench 2 100 0 0 0 0 36 4 256 0 0.99 50 10 50 0 1 0 0 0 0.1 0 36
+sudo ./newbench 2 100 0 0 0 0  36 4 256  0 0.99  50 10 50  0 1 0  0 0 0.1 0  36
 
 # Range query, uniform, 256 MB cache
-sudo ./newbench 2 0 0 0 0 100 36 4 256 1 0.99 50 10 50 0 1 0 0 0 0.1 0 36
+sudo ./newbench 2 0 0 0 0 100  36 4 256  1 0.99  50 10 50  0 1 0  0 0 0.1 0  36
 ```
 
-### Argument order reference
+### Argument order reference (22 args → argc=23)
 ```
-./newbench
-    <nodenum>
-    <read%> <insert%> <update%> <delete%> <range%>
-    <total_threads> <mem_threads> <cache_mb>
-    <uniform_workload>  <zipf_theta>
-    <bulk_M> <warmup_M> <run_M>
-    <check_correctness> <time_based> <early_stop>
-    <index>  <rpc_rate>  <admission_rate>  <autotune>  <max_threads>
-
-# index:            0=DEX  1=Sherman  2=SMART
-# uniform_workload: 1=uniform (theta ignored)  0=zipf (theta used)
-# early_stop:       0 = all threads run to completion (good for latency);
-#                   1 = first-finisher kills all (good for throughput)
+./newbench \
+  <nodecount>                          # 1  total physical nodes (mem+compute)
+  <read%> <insert%> <update%> <delete%> <range%>  # 2-6  must sum to 100
+  <total_threads> <mem_threads>        # 7-8
+  <cache_mb>                           # 9   compute-node cache size
+  <uniform_workload>                   # 10  1=uniform  0=zipf
+  <zipf_theta>                         # 11  ignored when uniform=1
+  <bulk_M> <warmup_M> <run_M>          # 12-14  ×1 000 000 ops
+  <check_correctness>                  # 15  0=no  1=yes
+  <time_based>                         # 16  0=op-count  1=60-s cap
+  <early_stop>                         # 17  0=all-finish  1=first-finish-kills
+  <index>                              # 18  0=DEX  1=Sherman  2=SMART
+  <rpc_rate>                           # 19  fraction of misses routed to RPC
+  <admission_rate>                     # 20  fraction of misses admitted to cache
+  <autotune>                           # 21  0=fixed params  1=sweep admission_rate_vec
+  <max_threads_per_cnode>              # 22  typically 36
 ```
 
 ---
