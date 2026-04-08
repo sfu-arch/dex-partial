@@ -75,13 +75,12 @@ run_one() {
         $CORRECT $TIMEBASED $EARLYSTOP \
         $INDEX $rpc $ADMIT_RATE $AUTOTUNE $MAX_THREADS
 
-    [ -f dex_read_latency.dat  ] && mv dex_read_latency.dat  "latency_results/${tag}_rpc${rpc}_read.dat"
-    [ -f dex_range_latency.dat ] && mv dex_range_latency.dat "latency_results/${tag}_rpc${rpc}_range.dat"
+    [ -f dex_read_latency.dat  ] && mv -f dex_read_latency.dat  "latency_results/${tag}_rpc${rpc}_read.dat"
+    [ -f dex_range_latency.dat ] && mv -f dex_range_latency.dat "latency_results/${tag}_rpc${rpc}_range.dat"
 
     echo "[SWEEP_END] op=${label} cache=${cache}MB rpc=${rpc}"
-    flush_memc
     echo ""
-    sleep 3
+    sleep 1
 }
 
 # ── header ────────────────────────────────────────────────────────────────

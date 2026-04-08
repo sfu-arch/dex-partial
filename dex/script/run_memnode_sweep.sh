@@ -68,7 +68,9 @@ run_exp() {
     echo "[MEM][END]   op=${label} cache=${cache}MB rpc=${rpc}"
 
     # No counter reset here — compute node handles that before each run.
-    sleep 10
+    # Sleep longer than compute's inter-run gap (flush ~4.5s + sleep 2 = ~7.5s)
+    # so compute always connects first and gets ID 0.
+    sleep 15
 }
 
 # ── main ─────────────────────────────────────────────────────────────────
