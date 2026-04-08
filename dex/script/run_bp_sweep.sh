@@ -1,7 +1,7 @@
 #!/bin/bash
 # DEX B+ tree sweep — depth≈10, uniform→zipf, point+range
 #
-# Uses newbench_latency exclusively so every run gets:
+# Uses newbench so every run gets:
 #   throughput  +  [DEX] miss stats  +  Avg. rdma read/op  +  latency percentiles
 #
 # Node config (compiled into binary — must match btree_node.h):
@@ -91,7 +91,7 @@ echo "======================================================="
 echo " DEX | inner=${INNER_NODE_SIZE}B(f=11) leaf=${LEAF_NODE_SIZE}B(cap=26) | depth=10 | bulk=50M"
 echo " Cache sweep: ${CACHES[*]} MB"
 echo " Distributions: uniform 0.30 0.50 0.60 0.99"
-echo " Binary: newbench_latency (throughput + latency + RDMA stats per run)"
+echo " Binary: newbench (throughput + latency + RDMA stats per run)"
 echo "======================================================="
 echo ""
 

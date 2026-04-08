@@ -95,6 +95,15 @@ uint64_t range_latency_histogram[MAX_APP_THREAD][LATENCY_BUCKETS];
 uint64_t thread_read_count[MAX_APP_THREAD];
 uint64_t thread_range_count[MAX_APP_THREAD];
 
+// ── LatencyCollector per-thread stats (saved before thread-local is destroyed)
+struct LCStats {
+  uint64_t pushdown_times  = 0;
+  uint64_t caching_times   = 0;
+  int64_t  avg_pushdown_ns = 0;
+  int64_t  avg_caching_ns  = 0;
+};
+LCStats g_lc_stats[MAX_APP_THREAD];
+
 inline void record_read_latency(int tid, uint64_t ns) {
   uint64_t b = ns / LATENCY_NS_GRANULARITY;
   if (b >= LATENCY_BUCKETS) b = LATENCY_BUCKETS - 1;
@@ -404,6 +413,13 @@ void thread_run(int id) {
   //             << std::endl;
   // }
   // std::cout << "Real rpc ratio = " << tree->get_rpc_ratio() << std::endl;
+  // Save this thread's LatencyCollector decision stats before the thread-local
+  // is destroyed.  decision lives in cachepush namespace (leanstore_cache.h).
+  g_lc_stats[id].pushdown_times  = cachepush::decision.pushdown_times;
+  g_lc_stats[id].caching_times   = cachepush::decision.caching_times;
+  g_lc_stats[id].avg_pushdown_ns = cachepush::decision.avg_pushdown_latency().count();
+  g_lc_stats[id].avg_caching_ns  = cachepush::decision.avg_caching_latency().count();
+
   uint64_t first_not_found_key = 0;
   bool not_found = false;
 #ifdef CHECK_CORRECTNESS
@@ -907,6 +923,13 @@ int main(int argc, char *argv[]) {
     generate_workload();
     bulk_load();
 
+    // Print B-tree structure once after bulkload so we know inner/leaf counts
+    if (node_id == 0 && tree_index == 0) {
+      printf("\n===== B-tree structure after bulk-load =====\n");
+      tree->get_basic();
+      printf("============================================\n\n");
+    }
+
     if (auto_tune) {
       run_times = admission_rate_vec.size() * rpc_rate_vec.size();
     }
@@ -940,6 +963,8 @@ int main(int argc, char *argv[]) {
       // Reset all parameters in thread_run
       dsm->resetThread();
       reset_all_params();
+      // Clear per-thread LatencyCollector stats for this run
+      memset(g_lc_stats, 0, sizeof(g_lc_stats));
       std::cout << node_id << " is ready for the benchmark" << std::endl;
 
       for (int i = 0; i < kThreadCount; i++) {
@@ -1097,10 +1122,43 @@ int main(int argc, char *argv[]) {
         total_throughput += total_tp[i];
       }
 
-      // uint64_t max_time = 0;
-      // for (int i = 0; i < kThreadCount; ++i) {
-      //   max_time = std::max<uint64_t>(max_time, total_time[i]);
-      // }
+      // ── LatencyCollector aggregate report (node 0, DEX only) ──────────────
+      if (node_id == 0 && tree_index == 0) {
+        uint64_t tot_pd = 0, tot_c = 0;
+        double   sum_pd_ns = 0, sum_c_ns = 0;
+        int      pd_threads = 0, c_threads = 0;
+        for (int i = 0; i < kThreadCount; ++i) {
+          tot_pd += g_lc_stats[i].pushdown_times;
+          tot_c  += g_lc_stats[i].caching_times;
+          if (g_lc_stats[i].pushdown_times > 0) {
+            sum_pd_ns += g_lc_stats[i].avg_pushdown_ns;
+            ++pd_threads;
+          }
+          if (g_lc_stats[i].caching_times > 0) {
+            sum_c_ns += g_lc_stats[i].avg_caching_ns;
+            ++c_threads;
+          }
+        }
+        uint64_t tot_dec = tot_pd + tot_c;
+        printf("\n===== LatencyCollector Decision Stats (run %d) =====\n", cur_run);
+        printf("  Total decisions : %lu  (pushdown=%lu  caching=%lu)\n",
+               tot_dec, tot_pd, tot_c);
+        printf("  Pushdown rate   : %.2f%%\n",
+               tot_dec > 0 ? 100.0 * tot_pd / tot_dec : 0.0);
+        printf("  Avg pushdown lat: %.0f ns  (over %d threads with pushdown samples)\n",
+               pd_threads > 0 ? sum_pd_ns / pd_threads : 0.0, pd_threads);
+        printf("  Avg caching  lat: %.0f ns  (over %d threads with caching  samples)\n",
+               c_threads  > 0 ? sum_c_ns  / c_threads  : 0.0, c_threads);
+        printf("  rpc_rate=%.3f  admission_rate=%.3f  workload=%s",
+               rpc_rate, admission_rate, uniform_workload ? "uniform" : "zipf");
+        if (!uniform_workload) printf("(theta=%.2f)", zipfian);
+        printf("\n====================================================\n\n");
+
+        // Full cache + B-tree structural snapshot after run
+        tree->get_statistic();
+        tree->get_basic();
+      }
+      // ──────────────────────────────────────────────────────────────────────
 
       total_cluster_tp = dsm->sum_total(total_throughput, CNodeCount, false);
       straggler_cluster_tp =
@@ -1133,48 +1191,51 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Before barrier finish" << std::endl;
   dsm->barrier("finish");
-  // Collect RDMA statistics
-  uint64_t rdma_read_num = dsm->get_rdma_read_num();
-  uint64_t rdma_write_num = dsm->get_rdma_write_num();
-  uint64_t rdma_read_time = dsm->get_rdma_read_time();
-  uint64_t rdma_write_time = dsm->get_rdma_write_time();
-  int64_t rdma_read_size = dsm->get_rdma_read_size();
-  uint64_t rdma_write_size = dsm->get_rdma_write_size();
-  uint64_t rdma_cas_num = dsm->get_rdma_cas_num();
-  uint64_t rdma_rpc_num = dsm->get_rdma_rpc_num();
-  std::cout << "Avg. rdma read time(ms) = "
-            << static_cast<double>(rdma_read_time) / 1000 / rdma_read_num
-            << std::endl;
-  std::cout << "Avg. rdma write time(ms) = "
-            << static_cast<double>(rdma_write_time) / 1000 / rdma_write_num
-            << std::endl;
-  std::cout << "Avg. rdma read / op = "
-            << static_cast<double>(rdma_read_num) / execute_op.load()
-            << std::endl;
-  std::cout << "Avg. rdma write / op = "
-            << static_cast<double>(rdma_write_num) / execute_op.load()
-            << std::endl;
-  std::cout << "Avg. rdma cas / op = "
-            << static_cast<double>(rdma_cas_num) / execute_op.load()
-            << std::endl;
-  std::cout << "Avg. rdma rpc / op = "
-            << static_cast<double>(rdma_rpc_num) / execute_op.load()
-            << std::endl;
-  std::cout << "Avg. all rdma / op = "
-            << static_cast<double>(rdma_read_num + rdma_write_num +
-                                   rdma_cas_num + rdma_rpc_num) /
-                   execute_op.load()
-            << std::endl;
-  std::cout << "Avg. rdma read size/ op = "
-            << static_cast<double>(rdma_read_size) / execute_op.load()
-            << std::endl;
-  std::cout << "Avg. rdma write size / op = "
-            << static_cast<double>(rdma_write_size) / execute_op.load()
-            << std::endl;
-  std::cout << "Avg. rdma RW size / op = "
-            << static_cast<double>(rdma_read_size + rdma_write_size) /
-                   execute_op.load()
-            << std::endl;
+
+  // RDMA statistics — only meaningful on compute nodes that executed ops.
+  // Memory nodes (nodeID >= CNodeCount) have execute_op=0 → skip to avoid -nan.
+  uint64_t ops = execute_op.load();
+  if (ops > 0) {
+    uint64_t rdma_read_num = dsm->get_rdma_read_num();
+    uint64_t rdma_write_num = dsm->get_rdma_write_num();
+    uint64_t rdma_read_time = dsm->get_rdma_read_time();
+    uint64_t rdma_write_time = dsm->get_rdma_write_time();
+    int64_t rdma_read_size = dsm->get_rdma_read_size();
+    uint64_t rdma_write_size = dsm->get_rdma_write_size();
+    uint64_t rdma_cas_num = dsm->get_rdma_cas_num();
+    uint64_t rdma_rpc_num = dsm->get_rdma_rpc_num();
+    std::cout << "Avg. rdma read time(ms) = "
+              << (rdma_read_num > 0
+                      ? static_cast<double>(rdma_read_time) / 1000 / rdma_read_num
+                      : 0.0)
+              << std::endl;
+    std::cout << "Avg. rdma write time(ms) = "
+              << (rdma_write_num > 0
+                      ? static_cast<double>(rdma_write_time) / 1000 / rdma_write_num
+                      : 0.0)
+              << std::endl;
+    std::cout << "Avg. rdma read / op = "
+              << static_cast<double>(rdma_read_num) / ops << std::endl;
+    std::cout << "Avg. rdma write / op = "
+              << static_cast<double>(rdma_write_num) / ops << std::endl;
+    std::cout << "Avg. rdma cas / op = "
+              << static_cast<double>(rdma_cas_num) / ops << std::endl;
+    std::cout << "Avg. rdma rpc / op = "
+              << static_cast<double>(rdma_rpc_num) / ops << std::endl;
+    std::cout << "Avg. all rdma / op = "
+              << static_cast<double>(rdma_read_num + rdma_write_num +
+                                     rdma_cas_num + rdma_rpc_num) / ops
+              << std::endl;
+    std::cout << "Avg. rdma read size/ op = "
+              << static_cast<double>(rdma_read_size) / ops << std::endl;
+    std::cout << "Avg. rdma write size / op = "
+              << static_cast<double>(rdma_write_size) / ops << std::endl;
+    std::cout << "Avg. rdma RW size / op = "
+              << static_cast<double>(rdma_read_size + rdma_write_size) / ops
+              << std::endl;
+  } else {
+    printf("[MEM NODE] No ops executed on this node (memory node). RDMA stats skipped.\n");
+  }
 
   if (auto_tune) {
     std::cout << "------------------------------------------" << std::endl;
@@ -1244,9 +1305,9 @@ int main(int argc, char *argv[]) {
       }
       std::cout << "------------------------------------------" << std::endl;
 
-      // Latency histograms — node 0 only, after all threads joined
+      // Latency histograms — node 0 only, after all threads joined.
+      // Saved to flat names in CWD so run_bp_sweep.sh can mv/rename them.
       if (node_id == 0) {
-        mkdir("latency_results", 0755);
         save_latency_histogram("dex_read_latency.dat",
                                read_latency_histogram, kThreadCount, "Read");
         save_latency_histogram("dex_range_latency.dat",

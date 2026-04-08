@@ -6673,3 +6673,20 @@ Saved: dex_range_latency.dat
  Log: memnode_sweep_20260325_0619.log
 =======================================================
 $
+
+Now I'm trying to break down the re-swizzle overhead more precisely by looking at the inner node count distribution across the tree's 10 levels. So the average fan-out works out to about 5.4 when I calculate it from the total leaf count—that's reasonable given the max capacity is 11 and typical nodes are around half full. Now I can work through the node counts at each level going up from the leaves.
+
+The lock contention this creates:
+
+Each re-promotion requires try_promote_using_value() which locks the hash_table bucket for that page. Under uniform, 399K lock acquisitions/sec spread across 174,763 buckets = 2.3 locks/bucket/sec.
+
+Under zipf0.50, top-1000 hot pages all hash to their own buckets, but 36 threads simultaneously re-promote rank-1 (737/sec each attempted) = lock contention at those specific buckets.
+
+The numbers tell the story directly:
+
+
+uniform:  RDMA/op=1.617  latency=11,958 ns  throughput=2.92 Mops
+zipf0.50: RDMA/op=1.607  latency=12,078 ns  throughput=2.89 Mops
+RDMA/op is 0.6% better (cache IS helping slightly). But latency is 120 ns worse. That 120 ns is entirely the re-promotion overhead on hot pages — 36 threads repeatedly hitting the same COOLING pages and serializing through try_promote_using_value().
+
+Root cause in one line: random_select() unswizzles rank-1 (accessed 737/sec) at the same rate as a cold page (accessed 0.76/sec), turning 1,843 otherwise-free pointer dereferences into expensive cache_get() calls every 2.5 seconds, concentrated on the same 1000 pages, causing lock serialization that outweighs the RDMA savings.

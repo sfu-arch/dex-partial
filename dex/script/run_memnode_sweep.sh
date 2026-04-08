@@ -75,7 +75,7 @@ run_exp() {
 TOTAL=$(( ${#DISTRIBUTIONS[@]} * ${#CACHES[@]} * 2 ))
 echo "======================================================="
 echo " Memory node sweep | ${TOTAL} experiments"
-echo " MEMC_HOST=${MEMC_HOST}  binary=newbench_latency"
+echo " MEMC_HOST=${MEMC_HOST}  binary=newbench"
 echo "======================================================="
 echo ""
 

@@ -24,15 +24,15 @@ mkdir -p build && cd build
 
 cmake .. -DCMAKE_BUILD_TYPE=Release
 
-# Build both binaries — sweep now uses newbench_latency exclusively
-make -j$(nproc) newbench newbench_latency
+# Build — newbench is the single benchmark binary (newbench_latency was merged into it)
+make -j$(nproc) newbench
 ```
 
-Expected output: two binaries in `build/` — `newbench` and `newbench_latency`.
+Expected output: `newbench` binary in `build/`.
 
 After any change to `include/cache/btree_node.h` (node sizes), rebuild before running:
 ```bash
-make -j$(nproc) newbench_latency
+make -j$(nproc) newbench
 ```
 
 ---
@@ -94,7 +94,7 @@ cd ~/DEX-CHIME/dex/build
 # log file is created automatically: sweep_YYYYMMDD_HHMM.log
 ```
 
-The sweep runs (using `newbench_latency` for all runs):
+The sweep runs (using `newbench` for all runs):
 - **Point lookups** × 5 distributions × 3 cache sizes = 15 runs
 - **Range queries** × 5 distributions × 3 cache sizes = 15 runs
 - **Total: 30 runs** — expect ~15–20 min wall time
@@ -152,35 +152,39 @@ ls build/latency_results/
 
 ## 8. Manual single run (quick test)
 
-```bash
-# Compute node — point lookup, uniform, 128 MB cache, DEX
-./restartMemc.sh
-sudo ./newbench_latency 2 100 0 0 0 0 36 4 128 1 0.99 50 10 50 0 1 0 0 0 0.1 0 36
+Both nodes run the **same binary** (`newbench`). Node ID is assigned by memcached
+connection order — whoever connects first gets ID 0 (compute), second gets ID 1 (memory).
 
-# Memory node — must be started first
-sudo ./newbench_latency 2 100 0 0 0 0 36 4 128 1 0.99 50 10 50 0 1 0 0 0 0.1 0 36
+```bash
+# Memory node — start FIRST (waits in DSMKeeper until compute connects)
+sudo ./newbench 2 100 0 0 0 0 36 4 128 1 0.99 50 10 50 0 1 0 0 0 0.1 0 36
+
+# Compute node — start within ~60 s of memory node
+./restartMemc.sh
+sudo ./newbench 2 100 0 0 0 0 36 4 128 1 0.99 50 10 50 0 1 0 0 0 0.1 0 36
 
 # Point lookup, zipf θ=0.99, 256 MB cache
-sudo ./newbench_latency 2 100 0 0 0 0 36 4 256 0 0.99 50 10 50 0 1 0 0 0 0.1 0 36
+sudo ./newbench 2 100 0 0 0 0 36 4 256 0 0.99 50 10 50 0 1 0 0 0 0.1 0 36
 
 # Range query, uniform, 256 MB cache
-sudo ./newbench_latency 2 0 0 0 0 100 36 4 256 1 0.99 50 10 50 0 1 0 0 0 0.1 0 36
+sudo ./newbench 2 0 0 0 0 100 36 4 256 1 0.99 50 10 50 0 1 0 0 0 0.1 0 36
 ```
 
 ### Argument order reference
 ```
-./newbench_latency
+./newbench
     <nodenum>
     <read%> <insert%> <update%> <delete%> <range%>
     <total_threads> <mem_threads> <cache_mb>
     <uniform_workload>  <zipf_theta>
     <bulk_M> <warmup_M> <run_M>
-    <check_correctness> <time_based> <early_stop=0 forced>
+    <check_correctness> <time_based> <early_stop>
     <index>  <rpc_rate>  <admission_rate>  <autotune>  <max_threads>
 
 # index:            0=DEX  1=Sherman  2=SMART
 # uniform_workload: 1=uniform (theta ignored)  0=zipf (theta used)
-# early_stop:       always 0 in newbench_latency (hardcoded)
+# early_stop:       0 = all threads run to completion (good for latency);
+#                   1 = first-finisher kills all (good for throughput)
 ```
 
 ---

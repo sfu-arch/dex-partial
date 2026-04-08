@@ -2620,8 +2620,37 @@ public:
     uint64_t im = get_inner_miss();
     uint64_t lm = get_leaf_miss();
     uint64_t dw = get_write_rdma();
-    printf("[DEX] inner_miss=%lu leaf_miss=%lu dirty_wb=%lu total_remote=%lu\n",
-           im, lm, dw, im + lm + dw);
+    uint64_t total_miss = im + lm;
+    uint64_t total_remote = im + lm + dw;
+    double leaf_ratio = (total_miss > 0) ? (100.0 * lm / total_miss) : 0.0;
+
+    printf("[DEX] inner_miss=%lu  leaf_miss=%lu (%.1f%% of misses)  dirty_wb=%lu  total_remote=%lu\n",
+           im, lm, leaf_ratio, dw, total_remote);
+
+    // B-tree structure on this compute node
+    printf("[DEX] btree: leaf_nodes=%d  inner_nodes=%d  height=%d"
+           "  leaf_cap=%d keys/node  inner_fanout=%d keys/node\n",
+           leaf_num, inner_num, height,
+           (int)BTreeLeaf<Key, Value>::maxEntries,
+           (int)BTreeInner<Key>::maxEntries);
+
+    // Cache capacity vs demand
+    uint64_t cap = cache.capacity;
+    printf("[DEX] cache: capacity=%lu pages (%.1f MB)"
+           "  inner_miss_rate=%.3f  leaf_miss_rate=%.3f\n",
+           cap, cap * pageSize / (1024.0 * 1024.0),
+           cap > 0 ? (double)im / cap : 0.0,
+           cap > 0 ? (double)lm / cap : 0.0);
+
+    // Cache contention / eviction failure counters (approximate, non-atomic)
+    printf("[DEX] evict: wrong_page_state=%lu  wrong_parent=%lu"
+           "  lock_contention=%lu  wrong_check=%lu  failed_evict=%lu\n",
+           wrong_page_state, wrong_parent,
+           wrong_parent_lock, wrong_parent_check, wrong_evict);
+    printf("[DEX] evict: state_skips(1=%lu 0=%lu 3=%lu)"
+           "  sample_loops=%lu  samples=%lu\n",
+           one_state, zero_state, three_state,
+           total_sample_loop, sample_num);
   }
 };
 
